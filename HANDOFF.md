@@ -41,11 +41,15 @@
    - `reference/theme/30nen_original/` … 現行の独自テーマ一式（CSS・テンプレ・デザイン素材）＋デザインメモ（フォント「Zen Old Mincho」、色 `#333`/`#150c0c` 等）。
    - `reference/categories.json` … カテゴリ全体構造（22件・親子: 度々の旅 > 山陰編。※この階層の記事は現状0件）。
    - 本番の公開記事は **約7,790件**（全件移行はフェーズ4）。著者は WordPress の user ID で保持（表示名対応は後工程・ユーザー情報の取り扱いは要確認）。
-8. **フェーズ2に着手：記事テーブルのスキーマ設計が完了**（`docs/schema.md` に記録）。
+8. **フェーズ2：DBスキーマ設計が完成**（`docs/schema.md` に全テーブル記録）。
    - 実データ確認: 本文はHTML（タグはシンプル）、画像は絶対URL埋め込み（移行時にパス書き換えが必要）、著者は数字ID。
-   - 決定: 1記事1カテゴリ／本文はHTML保存／status は `draft`・`published` の2値。
-   - `articles` テーブル設計確定（id, title, slug, content, excerpt, status, author_id, category_id, published_at, created_at, updated_at, wp_id）。
-   - 未着手: `users`・`categories` テーブル設計、FOREIGN KEY 仕上げ、SQLiteライブラリ選定、実マイグレーション作成。
+   - 確定した4テーブル:
+     - `articles`（記事）… 1記事1カテゴリ／本文はHTML保存／status は `draft`・`published`。
+     - `users`（投稿者）… 権限2種（`admin`/`author`）、プロフィール（顔写真 `avatar_path`・自己紹介 `bio`）は任意、ログインは email＋パスワード（ハッシュ化保存）。
+     - `categories`（連載）… 親子構造（`parent_id` 自己参照）＋並び順。
+     - `category_authors`（中間テーブル）… **1連載＝複数担当**を表す担当名簿（複合主キー）。
+   - FOREIGN KEY 関係も整理済み。テーブル作成順: users → categories → category_authors → articles。
+   - 未着手: SQLiteライブラリ選定（better-sqlite3 / Drizzle / Prisma 等）、実マイグレーション作成、CRUD API、JWT認証。
 
 ### 現在のフォルダ状態
 ```
@@ -105,9 +109,8 @@
 2. ~~Next.js 雛形を作成~~ … ✅ 完了（`7036bad`）
 3. ~~GitHub に新リポジトリ作成 → push~~ … ✅ 完了（`sakipomco/30nen_next`・Private）
 4. ~~`reference/` に現行の参照物を持ち込む~~ … ✅ 完了（`6315ff3`）
-5. DBスキーマ設計 … 🔄 進行中（`articles` 完了。設計は `docs/schema.md`）
-   - **▶ 次：`users`・`categories` テーブルの設計** → FOREIGN KEY 仕上げ
-   - その後：SQLiteライブラリ選定（better-sqlite3 / Drizzle / Prisma 等）→ 実際にDBを作る
+5. DBスキーマ設計 … ✅ 完成（4テーブル確定。設計は `docs/schema.md`）
+   - **▶ 次：SQLiteライブラリ選定**（better-sqlite3 / Drizzle / Prisma 等）→ 実際にDBを作る（マイグレーション）
 6. CRUD API → JWT認証
 7. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
 

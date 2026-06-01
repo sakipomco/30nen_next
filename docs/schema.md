@@ -73,9 +73,91 @@ CREATE TABLE articles (
 
 ---
 
+## ✅ 確定: ユーザー（投稿者）テーブル `users`
+
+**決定事項**
+- 権限(role)は **2種類**: `admin`（管理者＝全記事・全ユーザーを管理。店主/SAKIさん）/ `author`（投稿者＝自分の記事だけ書ける）。
+- **プロフィールを持つ**: 顔写真 `avatar_path` と自己紹介 `bio`（どちらも任意）。現行テーマに顔写真の仕組みがあったため。
+- ログインIDは **email**（メール＋パスワード）。パスワードは**ハッシュ化して保存**（元に戻せない暗号化。漏洩しても本物は分からない）。
+
+```sql
+CREATE TABLE users (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  name          TEXT    NOT NULL,                    -- 表示名（ペンネーム）
+  email         TEXT    NOT NULL UNIQUE,             -- ログインID（重複不可）
+  password_hash TEXT    NOT NULL,                    -- パスワード（ハッシュ化して保存）
+  role          TEXT    NOT NULL DEFAULT 'author',   -- 'admin' / 'author'
+  avatar_path   TEXT,                                -- 顔写真（任意）
+  bio           TEXT,                                -- 自己紹介（任意）
+  created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
+  wp_id         INTEGER                              -- 旧WordPressのユーザーID（post_author 突き合わせ用）
+);
+```
+
+---
+
+## ✅ 確定: カテゴリ（連載）テーブル `categories`
+
+**決定事項**
+- 親子構造あり（`parent_id` が同じ表の親 id を指す。トップ階層は NULL）。例: 度々の旅 > 山陰編。
+- `sort_order` で表示順を制御（任意）。
+
+```sql
+CREATE TABLE categories (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT    NOT NULL,                       -- カテゴリ名（連載名）
+  slug        TEXT    UNIQUE,                          -- URL用の名札
+  parent_id   INTEGER REFERENCES categories(id),      -- 親カテゴリ（トップはNULL）
+  sort_order  INTEGER NOT NULL DEFAULT 0,             -- 並び順
+  wp_term_id  INTEGER                                 -- 旧WordPressのterm_id（移行用）
+);
+```
+
+---
+
+## ✅ 確定: 連載×投稿者の担当テーブル `category_authors`（中間テーブル）
+
+**決定事項**
+- **主目的: 1連載＝複数担当**。1つの連載に複数の担当投稿者を正式に登録できる（例: 風早草子＝A・B・C）。逆に1人が複数連載をかけもちも同じ表で表せる。
+- 用途: 連載ページで「書き手の顔ぶれ（名簿）」を表示／将来「担当者だけ投稿可」の権限制御にも使える／まだ記事がなくても担当登録できる。
+- ※ 記事単位の著者は引き続き `articles.author_id`。この表は「連載の担当者名簿」で役割が別。
+
+```sql
+CREATE TABLE category_authors (
+  category_id INTEGER NOT NULL REFERENCES categories(id),
+  user_id     INTEGER NOT NULL REFERENCES users(id),
+  sort_order  INTEGER NOT NULL DEFAULT 0,            -- 名簿の並び順（任意）
+  PRIMARY KEY (category_id, user_id)                 -- 同じ組合せの重複登録を防ぐ
+);
+```
+
+> 💡 **複合主キー(composite primary key)** … `category_id` と `user_id` の**組み合わせ**を主キーにする作り。
+> 「同じ連載に同じ人を二重登録」できないよう、組合せ単位で重複を防ぎます。
+
+---
+
+## テーブル間の関係（FOREIGN KEY）
+
+- `articles.author_id`         → `users.id`（記事を書いた人）
+- `articles.category_id`       → `categories.id`（記事が属する連載）
+- `categories.parent_id`       → `categories.id`（自己参照・親子）
+- `category_authors.category_id` → `categories.id`（連載の担当名簿）
+- `category_authors.user_id`     → `users.id`（連載の担当名簿）
+
+> articles を実際に作るときは、末尾に次を足してFOREIGN KEYを仕上げる:
+> ```sql
+> FOREIGN KEY (author_id)   REFERENCES users(id),
+> FOREIGN KEY (category_id) REFERENCES categories(id)
+> ```
+> （作成順は users / categories を先に、articles を後に。）
+
+---
+
 ## TODO（次回以降）
-- [ ] `users` テーブル設計（投稿者 約20名。ログインはメール＋パスワード/JWT。著者IDの対応付け）
-- [ ] `categories` テーブル設計（親子構造。articles.category_id とのFOREIGN KEY）
-- [ ] articles の author_id / category_id に FOREIGN KEY 制約を仕上げる
+- [x] `articles` テーブル設計
+- [x] `users` テーブル設計（admin/author の2権限・プロフィール任意）
+- [x] `categories` テーブル設計（親子構造）
+- [x] `category_authors` テーブル設計（連載×投稿者の担当名簿・中間テーブル）
 - [ ] SQLiteを扱う仕組み（ライブラリ選定: better-sqlite3 / Drizzle / Prisma 等）を決める
-- [ ] 実際にDBを作るマイグレーション/SQLを用意
+- [ ] 実際にDBを作るマイグレーション/SQLを用意（作成順: users → categories → category_authors → articles）
+- [ ] CRUD API → JWT認証 の実装へ
