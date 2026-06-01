@@ -4,7 +4,7 @@
 > 新しい Claude Code セッションを **このフォルダ（`~/Desktop/30nen_next`）で起動** し、
 > 「HANDOFF.md を読んで」と伝えれば、ここまでの経緯を引き継げます。
 
-最終更新: 2026-06-01
+最終更新: 2026-06-01（フェーズ1：サンプル取得＋参照物の持ち込みまで完了）
 
 ---
 
@@ -29,17 +29,33 @@
    - 共有したいのは「①記事データ ②デザイン(CSS) ③画像」だけなので、参照用に選択コピーする方針。
 2. `~/Desktop/30nen_next` を作成し、`git init`（main ブランチ・履歴クリーン）。
 3. `README.md` と `.gitignore` を作成し、初回コミット済み（`8e8b29f`）。
+4. **Node.js を導入**（nvm 経由・node v24.16.0 / npm 11.13.0）。`~/.zprofile` に nvm 読み込み追記済み。
+5. **Next.js 雛形を作成**（`create-next-app` / Next 16.2.6 + React 19 + TypeScript + App Router + Tailwind + ESLint + `src/`）。dev サーバー起動・HTTP 200 を確認済み（コミット `7036bad`）。
+6. **GitHub に新リポジトリを作成して push**：`sakipomco/30nen_next`（Private）。SSH 鍵 `~/.ssh/30nen_github` で認証（`origin` 追跡済み）。
+7. **フェーズ1（サンプル取得）＋参照物の持ち込み**を実施（コミット `6315ff3`）。本番 30nen.com から **読み取りのみ** で取得：
+   - `reference/sample-posts/` … 種類を散らしたサンプル記事10件（JSON＋使用画像17枚）。詳細は同フォルダの README 参照。
+   - `reference/theme/30nen_original/` … 現行の独自テーマ一式（CSS・テンプレ・デザイン素材）＋デザインメモ（フォント「Zen Old Mincho」、色 `#333`/`#150c0c` 等）。
+   - `reference/categories.json` … カテゴリ全体構造（22件・親子: 度々の旅 > 山陰編。※この階層の記事は現状0件）。
+   - 本番の公開記事は **約7,790件**（全件移行はフェーズ4）。著者は WordPress の user ID で保持（表示名対応は後工程・ユーザー情報の取り扱いは要確認）。
 
 ### 現在のフォルダ状態
 ```
 ~/Desktop/
 ├── 30nen_pj/      ← 現行WordPress（本番稼働中・移行元・温存。触らない）
-└── 30nen_next/    ← ★このプロジェクト（新システム）
+└── 30nen_next/    ← ★このプロジェクト（新システム / GitHub: sakipomco/30nen_next・Private）
     ├── .git/
+    ├── src/app/       ← Next.js App Router（雛形）
+    ├── reference/     ← 現行WPからの参照物（sample-posts / theme / categories.json）
+    ├── public/ , package.json , tsconfig.json , next.config.ts ほか
     ├── README.md
     ├── .gitignore
     └── HANDOFF.md  ← このファイル
 ```
+
+### サーバー接続メモ（読み取りのみで使用）
+- SSH: `ssh xserver-30nen`（`~/.ssh/config` に設定済み・鍵 `~/.ssh/30nen_xserver`）
+- WordPress 本番: `/home/the30nen/30nen.com/public_html`
+- WP-CLI は `php7.4 /usr/bin/wp ...` の形で実行（既定の php は 5.4 で古く WP を解釈できない）
 
 ---
 
@@ -63,26 +79,25 @@
 
 ---
 
-## 3. ⚠️ 次にやる前の前提（重要）
+## 3. ✅ 開発環境（導入済み）
 
-**このMacに Node.js が入っていない。** Next.js・TipTap・各ツールは Node.js 上で動くため、
-フェーズ2（新システム構築）の前に **Node.js のインストールが必須**。
-
-インストール方法の候補：
-- 公式インストーラ（nodejs.org の LTS版）… 一番簡単
-- Homebrew（`brew install node`）… brew利用者向け
-- nvm … 複数バージョン切替したい場合
-
-確認コマンド: `node -v` / `npm -v`
+- **Node.js 導入済み**（nvm 経由・node v24.16.0 / npm 11.13.0）。新しいターミナルでは `~/.zprofile` で自動有効。
+  - もし `node: command not found` が出たら: `export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"; nvm use default`
+- 確認コマンド: `node -v` / `npm -v`
+- 開発サーバー起動: `npm run dev`（http://localhost:3000）
 
 ---
 
 ## 4. 次のステップ（おすすめ順）
 
-1. **Node.js をインストール**（上記参照）→ `node -v` で確認
-2. **Next.js 雛形を作成**（`create-next-app`／App Router・TypeScript構成などオプション相談）
-3. **GitHub に新リポジトリ作成 → push**（現行 `30nen_pj` とは別リポジトリ）
-4. **`reference/` に現行の参照物を持ち込む**（CSS・画像・カテゴリ構造）→ デザイン移植の準備
+ステップ1〜4（環境構築〜参照物の持ち込み）は **完了済み**。次はフェーズ2（新システム構築）へ。
+
+1. ~~Node.js をインストール~~ … ✅ 完了
+2. ~~Next.js 雛形を作成~~ … ✅ 完了（`7036bad`）
+3. ~~GitHub に新リポジトリ作成 → push~~ … ✅ 完了（`sakipomco/30nen_next`・Private）
+4. ~~`reference/` に現行の参照物を持ち込む~~ … ✅ 完了（`6315ff3`）
+5. **▶ 次：DBスキーマ設計**（記事・カテゴリ・ユーザーのテーブル設計）→ CRUD API → JWT認証
+6. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
 
 ---
 
