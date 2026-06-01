@@ -4,7 +4,7 @@
 > 新しい Claude Code セッションを **このフォルダ（`~/Desktop/30nen_next`）で起動** し、
 > 「HANDOFF.md を読んで」と伝えれば、ここまでの経緯を引き継げます。
 
-最終更新: 2026-06-01（フェーズ1：サンプル取得＋参照物の持ち込みまで完了）
+最終更新: 2026-06-02（フェーズ2：DBスキーマ→Drizzleで実DB作成まで完了）
 
 ---
 
@@ -49,7 +49,13 @@
      - `categories`（連載）… 親子構造（`parent_id` 自己参照）＋並び順。
      - `category_authors`（中間テーブル）… **1連載＝複数担当**を表す担当名簿（複合主キー）。
    - FOREIGN KEY 関係も整理済み。テーブル作成順: users → categories → category_authors → articles。
-   - 未着手: SQLiteライブラリ選定（better-sqlite3 / Drizzle / Prisma 等）、実マイグレーション作成、CRUD API、JWT認証。
+9. **フェーズ2：DBライブラリ選定〜実DB作成が完了**（コミット `（このコミット）`）。
+   - **ライブラリは Drizzle ORM を採用**（+ better-sqlite3 / drizzle-kit）。理由＝設計図をほぼそのままコード化でき、打ち間違いに強く、軽くてXサーバーにそのまま載るため。
+   - 設計図(`docs/schema.md`)を `src/db/schema.ts` にコード化。DB接続口 `src/db/index.ts`（アプリからは `import { db } from '@/db'`）。
+   - マイグレーション生成＆実行済み → **`data/30nen.db`（SQLiteファイル）に4テーブル作成完了**。列・デフォルト値・外部キー・複合主キーが設計どおりであることを確認済み。
+   - コマンド: `npm run db:generate`（差分マイグレーション生成）/ `npm run db:migrate`（適用）/ `npm run db:studio`（GUI閲覧）。
+   - DB実体(`data/*.db`)はGit管理外（`.gitignore`済み）。マイグレーション(`drizzle/`)はGit管理する。
+   - 未着手: CRUD API、JWT認証。
 
 ### 現在のフォルダ状態
 ```
@@ -110,9 +116,10 @@
 3. ~~GitHub に新リポジトリ作成 → push~~ … ✅ 完了（`sakipomco/30nen_next`・Private）
 4. ~~`reference/` に現行の参照物を持ち込む~~ … ✅ 完了（`6315ff3`）
 5. DBスキーマ設計 … ✅ 完成（4テーブル確定。設計は `docs/schema.md`）
-   - **▶ 次：SQLiteライブラリ選定**（better-sqlite3 / Drizzle / Prisma 等）→ 実際にDBを作る（マイグレーション）
-6. CRUD API → JWT認証
-7. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
+6. SQLiteライブラリ選定＋実DB作成 … ✅ 完了（**Drizzle ORM** 採用・`data/30nen.db` に4テーブル作成）
+   - **▶ 次：CRUD API**（記事の一覧取得・作成・更新・削除）を作る → そのあと JWT認証
+7. CRUD API → JWT認証
+8. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
 
 ---
 

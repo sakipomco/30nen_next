@@ -158,6 +158,24 @@ CREATE TABLE category_authors (
 - [x] `users` テーブル設計（admin/author の2権限・プロフィール任意）
 - [x] `categories` テーブル設計（親子構造）
 - [x] `category_authors` テーブル設計（連載×投稿者の担当名簿・中間テーブル）
-- [ ] SQLiteを扱う仕組み（ライブラリ選定: better-sqlite3 / Drizzle / Prisma 等）を決める
-- [ ] 実際にDBを作るマイグレーション/SQLを用意（作成順: users → categories → category_authors → articles）
+- [x] SQLiteを扱う仕組み（ライブラリ）を決める → **Drizzle ORM** を採用（+ better-sqlite3 / drizzle-kit）
+- [x] 実際にDBを作るマイグレーション/SQLを用意 → 生成・実行済み（`data/30nen.db` に4テーブル作成）
 - [ ] CRUD API → JWT認証 の実装へ
+
+---
+
+## ✅ 実装メモ（DBの作り方・2026-06-02）
+
+設計図（このファイル）を **Drizzle ORM** でコード化し、実際のSQLite DBを作成済み。
+
+- 設計図のコード版: `src/db/schema.ts`（このschema.mdと1対1で対応）
+- DB接続口: `src/db/index.ts`（アプリからは `import { db } from '@/db'` で使う）
+- DB実体: `data/30nen.db`（SQLiteファイル1個。中身が育つのでGit管理外。`.gitignore` 済み）
+- マイグレーション（組み立て手順書）: `drizzle/` フォルダ（Git管理する）
+
+### よく使うコマンド
+- `npm run db:generate` … schema.ts を変更したら、差分のマイグレーションを生成
+- `npm run db:migrate`  … 生成済みマイグレーションをDBに適用（テーブルを作る/変える）
+- `npm run db:studio`   … ブラウザでDBの中身を見るGUI（drizzle studio）
+
+> スキーマ（schema.md / schema.ts）を直したら **generate → migrate** の順で流すと、DBが設計図に追従する。

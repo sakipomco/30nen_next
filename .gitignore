@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database (SQLite本体は中身が育つファイルなので管理対象外。設計図とマイグレーションはGit管理する)
+/data/*.db
+/data/*.db-shm
+/data/*.db-wal
