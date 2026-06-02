@@ -1,0 +1,112 @@
+// 記事(articles)のデータアクセス層。
+// 「DBとのやり取り役」をここに集約する。公開ページの表示も、投稿画面の保存も、ここの関数を呼ぶ。
+// CRUD = Create(作る) / Read(読む) / Update(直す) / Delete(消す)。
+
+import { eq, desc, and, type SQL } from 'drizzle-orm';
+import { db } from './index';
+import { articles } from './schema';
+
+// schema から型を自動生成（手書きしない＝設計とズレない）
+export type Article = typeof articles.$inferSelect; // DBから読んだ1件の形
+export type NewArticleInput = {
+  title: string;
+  content?: string;
+  slug?: string | null;
+  excerpt?: string | null;
+  status?: 'draft' | 'published';
+  authorId?: number | null;
+  categoryId?: number | null;
+  publishedAt?: string | null;
+};
+export type UpdateArticleInput = Partial<NewArticleInput>;
+
+const now = () => new Date().toISOString().slice(0, 19).replace('T', ' '); // 'YYYY-MM-DD HH:MM:SS'
+
+// ── Read：一覧 ───────────────────────────────────────────
+// status を渡すと下書き/公開で絞り込み。新しい順（作成日時の降順）に返す。
+export async function listArticles(options?: {
+  status?: 'draft' | 'published';
+  limit?: number;
+  offset?: number;
+}): Promise<Article[]> {
+  const filters: SQL[] = [];
+  if (options?.status) filters.push(eq(articles.status, options.status));
+
+  return db
+    .select()
+    .from(articles)
+    .where(filters.length ? and(...filters) : undefined)
+    .orderBy(desc(articles.createdAt))
+    .limit(options?.limit ?? 50)
+    .offset(options?.offset ?? 0);
+}
+
+// ── Read：1件（id で取得）────────────────────────────────
+export async function getArticleById(id: number): Promise<Article | null> {
+  const rows = await db.select().from(articles).where(eq(articles.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
+// ── Read：1件（slug で取得。公開ページのURL用）──────────────
+export async function getArticleBySlug(slug: string): Promise<Article | null> {
+  const rows = await db.select().from(articles).where(eq(articles.slug, slug)).limit(1);
+  return rows[0] ?? null;
+}
+
+// ── Create：新規作成 ─────────────────────────────────────
+// status が 'published' のときは公開日時を自動で入れる（未指定なら今）。
+export async function createArticle(input: NewArticleInput): Promise<Article> {
+  const status = input.status ?? 'draft';
+  const [row] = await db
+    .insert(articles)
+    .values({
+      title: input.title,
+      content: input.content ?? '',
+      slug: input.slug ?? null,
+      excerpt: input.excerpt ?? null,
+      status,
+      authorId: input.authorId ?? null,
+      categoryId: input.categoryId ?? null,
+      publishedAt:
+        input.publishedAt ?? (status === 'published' ? now() : null),
+    })
+    .returning();
+  return row;
+}
+
+// ── Update：更新（渡した項目だけ書き換え）────────────────────
+// updated_at は常に今に更新。下書き→公開へ変えたとき、公開日時が空なら今を入れる。
+export async function updateArticle(
+  id: number,
+  input: UpdateArticleInput,
+): Promise<Article | null> {
+  const patch: Partial<typeof articles.$inferInsert> = { updatedAt: now() };
+
+  if (input.title !== undefined) patch.title = input.title;
+  if (input.content !== undefined) patch.content = input.content;
+  if (input.slug !== undefined) patch.slug = input.slug;
+  if (input.excerpt !== undefined) patch.excerpt = input.excerpt;
+  if (input.authorId !== undefined) patch.authorId = input.authorId;
+  if (input.categoryId !== undefined) patch.categoryId = input.categoryId;
+  if (input.publishedAt !== undefined) patch.publishedAt = input.publishedAt;
+  if (input.status !== undefined) {
+    patch.status = input.status;
+    if (input.status === 'published' && input.publishedAt === undefined) {
+      const current = await getArticleById(id);
+      if (current && !current.publishedAt) patch.publishedAt = now();
+    }
+  }
+
+  const [row] = await db
+    .update(articles)
+    .set(patch)
+    .where(eq(articles.id, id))
+    .returning();
+  return row ?? null;
+}
+
+// ── Delete：削除（消せたら true）──────────────────────────
+export async function deleteArticle(id: number): Promise<boolean> {
+  const rows = await db.delete(articles).where(eq(articles.id, id)).returning({ id: articles.id });
+  return rows.length > 0;
+}

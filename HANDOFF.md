@@ -55,7 +55,16 @@
    - マイグレーション生成＆実行済み → **`data/30nen.db`（SQLiteファイル）に4テーブル作成完了**。列・デフォルト値・外部キー・複合主キーが設計どおりであることを確認済み。
    - コマンド: `npm run db:generate`（差分マイグレーション生成）/ `npm run db:migrate`（適用）/ `npm run db:studio`（GUI閲覧）。
    - DB実体(`data/*.db`)はGit管理外（`.gitignore`済み）。マイグレーション(`drizzle/`)はGit管理する。
-   - 未着手: CRUD API、JWT認証。
+10. **フェーズ2：記事(articles)のCRUD APIが完成**（コミット `（このコミット）`）。
+    - データアクセス層 `src/db/articles.ts` … 記事の読み書き窓口を1か所に集約。
+      - Create: `createArticle`（公開なら公開日時を自動セット）
+      - Read: `listArticles`（status絞り込み・新しい順）/ `getArticleById` / `getArticleBySlug`
+      - Update: `updateArticle`（渡した項目だけ更新・updated_at自動更新・下書き→公開で公開日時を補完）
+      - Delete: `deleteArticle`
+    - 型は schema から自動生成（`$inferSelect`）。設計を変えても型がズレない。
+    - 動作確認: `scripts/smoke-articles.ts`（`npx tsx scripts/smoke-articles.ts`）で C/R/U/D 全通過を確認。型チェック(tsc)・Lint(eslint)もクリーン。
+    - メモ: 日時はUTC保存（DB既定の `datetime('now')` と揃えた）。日本時間への変換は表示を作るときに行う。
+    - 未着手: JWT認証、users/categories のCRUD、Server Actions、投稿UI・公開ページ。
 
 ### 現在のフォルダ状態
 ```
@@ -117,9 +126,11 @@
 4. ~~`reference/` に現行の参照物を持ち込む~~ … ✅ 完了（`6315ff3`）
 5. DBスキーマ設計 … ✅ 完成（4テーブル確定。設計は `docs/schema.md`）
 6. SQLiteライブラリ選定＋実DB作成 … ✅ 完了（**Drizzle ORM** 採用・`data/30nen.db` に4テーブル作成）
-   - **▶ 次：CRUD API**（記事の一覧取得・作成・更新・削除）を作る → そのあと JWT認証
-7. CRUD API → JWT認証
-8. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
+7. 記事(articles)のCRUD API … ✅ 完了（`src/db/articles.ts`・動作確認済み）
+   - **▶ 次：JWT認証（ログイン）**。メール＋パスワードでログイン→「ログイン中の人だけ保存できる」をServer Actionで実装する土台。
+   - その後: users/categories のCRUD → 投稿UI・公開ページ。
+8. JWT認証（ログイン）
+9. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
 
 ---
 
