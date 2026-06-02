@@ -84,7 +84,17 @@
     - ユーザー作成ツール: `scripts/create-user.ts`（管理画面でのユーザー管理ができるまでの暫定）。実行例:
       `NAME="名前" EMAIL="me@example.com" PASSWORD="ひみつ" ROLE=admin node --env-file=.env.local --import tsx scripts/create-user.ts`
     - 動作確認用のテスト管理者を1件登録済み（`test@example.com` / `Test1234!`・role=admin）。※ローカルDBのみ（`data/*.db`はGit管理外）。本番運用前に削除し、本物のアカウントを作る想定。
-    - 未着手: users/categories のCRUD、投稿UI（タイトル・本文・画像・下書き/公開）、公開ページ、Xサーバーへのデプロイ設定。
+13. **フェーズ2：投稿UI（記事の作成・編集・削除）が完成（ブラウザで動作確認済み）**（コミット `（このコミット）`）。
+    - 作成ファイル:
+      - `src/app/actions/articles.ts` … 記事の Server Action（`createArticleAction`/`updateArticleAction`/`deleteArticleAction`）。全て先頭で `requireUser()` を呼びログイン必須。「下書き保存」=draft・「投稿する」=published（ボタンの `intent` 値で判定）。
+      - `src/app/admin/article-form.tsx` … 記事入力フォーム（新規・編集で共用）。タイトル＋本文（今は textarea）＋2ボタン。`useActionState` でエラー表示。
+      - `src/app/admin/page.tsx` … 記事一覧（新しい順）。状態バッジ（公開/下書き）・更新日時（日本時間表示）・編集リンク・削除ボタン・「新規作成」リンク。
+      - `src/app/admin/new/page.tsx` … 新規作成ページ。
+      - `src/app/admin/articles/[id]/edit/page.tsx` … 編集ページ（`params` は Next 16 では非同期＝`await params`）。
+    - 認証ヘルパー追加: `src/auth/session.ts` に `requireUser()`（未ログインなら `/login` へ）。管理ページ・記事Actionの保護に使用。
+    - ブラウザ確認済み: 新規作成（公開）→一覧反映→編集（タイトル変更＋下書き化）→削除、を全通過。未ログインでは `/admin`・`/admin/new`・編集ページすべて `/login` へ転送。
+    - メモ: 本文は今プレーンな textarea（HTMLをそのまま保存）。**次の工程で TipTap（リッチエディタ）と画像アップロードに差し替える**（差し替えは本文欄まわりのみ）。
+    - 未着手: 本文エディタ(TipTap)・画像アップロード、users/categories のCRUD（カテゴリ選択UI）、公開ページ、Xサーバーへのデプロイ設定。
 
 ### 現在のフォルダ状態
 ```
@@ -150,10 +160,10 @@
 7. 記事(articles)のCRUD API … ✅ 完了（`src/db/articles.ts`・動作確認済み）
 8. JWT認証（ログイン）の土台 … ✅ 完了（`src/auth/*`・`src/db/users.ts`・`src/app/actions/auth.ts`・動作確認済み）
 9. ログイン画面・投稿管理画面のUI … ✅ 完了（`/login`・`/admin`・ルート保護・ブラウザ動作確認済み）
-   - **▶ 次：users / categories のCRUD**、そして**投稿UI**（タイトル・本文・画像・下書き/公開）。
-   - 投稿UIは `/admin` の中に組み込んでいく（記事一覧→新規作成→編集）。本文エディタは TipTap を予定。
-   - その後: 公開ページ（reference/theme を手本に Tailwind でデザイン移植）→ Xサーバーへのデプロイ設定。
-10. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
+10. 投稿UI（記事の作成・編集・削除） … ✅ 完了（`/admin/new`・`/admin/articles/[id]/edit`・ブラウザ動作確認済み）
+    - **▶ 次：本文エディタを TipTap に差し替え＋画像アップロード**（投稿者が使う一番大事な部分）。
+    - あわせて **カテゴリ（連載）選択UI** と users/categories のCRUD。
+    - その後: 公開ページ（reference/theme を手本に Tailwind でデザイン移植）→ Xサーバーへのデプロイ設定。
 
 ---
 

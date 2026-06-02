@@ -6,6 +6,7 @@
 //    読み出し(get)は Server Component からでも可。
 
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { signSession, verifySession, type SessionPayload } from './jwt';
 import { getUserById, toPublicUser, type PublicUser } from '@/db/users';
@@ -47,3 +48,11 @@ export const getCurrentUser = cache(async (): Promise<PublicUser | null> => {
   const user = await getUserById(session.userId);
   return user ? toPublicUser(user) : null;
 });
+
+// 「ログイン必須」の関所。ログインしていなければ /login へ送り返す。
+// 管理ページや、データを書き換えるServer Actionの先頭で呼ぶ（UIだけに頼らない保護）。
+export async function requireUser(): Promise<PublicUser> {
+  const user = await getCurrentUser();
+  if (!user) redirect('/login');
+  return user;
+}
