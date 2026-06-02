@@ -44,3 +44,6 @@ next-env.d.ts
 /data/*.db
 /data/*.db-shm
 /data/*.db-wal
+
+# ローカル専用ツール設定（プレビュー起動設定など。絶対パスを含むため各自の環境固有）
+/.claude/

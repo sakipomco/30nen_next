@@ -75,8 +75,16 @@
       - `src/app/actions/auth.ts` … Server Action の `login`（成功で `/admin` へ）/`logout`（`/login` へ）。
     - 環境変数: `.env.local`（Git管理外）に `SESSION_SECRET` を生成済み。見本は `.env.example`（Git管理）。秘密鍵は `openssl rand -base64 32` で生成。
     - 動作確認: `node --env-file=.env.local --import tsx scripts/smoke-auth.ts` で 登録→照合→JWT→改ざん検知→削除 まで全通過。型チェック(tsc)・Lint(eslint)もクリーン。
-    - メモ: `login`/`logout` のリダイレクト先 `/admin`・`/login` の **ページはまだ未作成**（次のUI工程で作る）。今は土台（サーバー側の仕組み）まで。
-    - 未着手: ログイン画面・投稿管理画面(`/login`・`/admin`)のUI、ルート保護、users/categories のCRUD、投稿UI・公開ページ。
+12. **フェーズ2：ログイン画面・投稿管理画面のUIが完成（ブラウザで動作確認済み）**（コミット `（このコミット）`）。
+    - 作成ファイル:
+      - `src/app/login/page.tsx` … ログインページ（`/login`）。ログイン済みなら `/admin` へ自動転送。
+      - `src/app/login/login-form.tsx` … 入力フォーム（Client Component・`useActionState` で「処理中…」表示やエラー表示）。
+      - `src/app/admin/page.tsx` … 投稿管理画面（`/admin`）。`getCurrentUser` でログイン確認し、未ログインなら `/login` へ転送（ルート保護）。ログアウトボタン付き。
+    - ブラウザ確認済み（プレビュー機能）: ①ログイン画面表示 → ②誤パスワードでエラー表示 → ③正パスワードでログイン成功→`/admin`へ → ④未ログインで`/admin`は`/login`へ転送 → ⑤ログアウトでCookie削除→`/login`へ、を全通過。
+    - ユーザー作成ツール: `scripts/create-user.ts`（管理画面でのユーザー管理ができるまでの暫定）。実行例:
+      `NAME="名前" EMAIL="me@example.com" PASSWORD="ひみつ" ROLE=admin node --env-file=.env.local --import tsx scripts/create-user.ts`
+    - 動作確認用のテスト管理者を1件登録済み（`test@example.com` / `Test1234!`・role=admin）。※ローカルDBのみ（`data/*.db`はGit管理外）。本番運用前に削除し、本物のアカウントを作る想定。
+    - 未着手: users/categories のCRUD、投稿UI（タイトル・本文・画像・下書き/公開）、公開ページ、Xサーバーへのデプロイ設定。
 
 ### 現在のフォルダ状態
 ```
@@ -125,6 +133,7 @@
   - もし `node: command not found` が出たら: `export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"; nvm use default`
 - 確認コマンド: `node -v` / `npm -v`
 - 開発サーバー起動: `npm run dev`（http://localhost:3000）
+  - ※ 起動前に必ず nvm 経由の node を有効化しておく（上記コマンド）。Tailwind/PostCSS が内部で `node` を呼ぶため、PATH に node が無いと起動時にエラーになる。
 
 ---
 
@@ -140,10 +149,11 @@
 6. SQLiteライブラリ選定＋実DB作成 … ✅ 完了（**Drizzle ORM** 採用・`data/30nen.db` に4テーブル作成）
 7. 記事(articles)のCRUD API … ✅ 完了（`src/db/articles.ts`・動作確認済み）
 8. JWT認証（ログイン）の土台 … ✅ 完了（`src/auth/*`・`src/db/users.ts`・`src/app/actions/auth.ts`・動作確認済み）
-   - **▶ 次：ログイン画面と投稿管理画面のUI**（`/login`・`/admin`）。`login`/`logout` のServer Actionは出来ているので、フォームを置いて繋ぐだけ。
-   - あわせて「ログインしていない人を `/admin` から弾く」ルート保護（`getCurrentUser` を使う）。
-   - その後: users/categories のCRUD → 投稿UI（タイトル・本文・画像・下書き/公開）→ 公開ページ。
-9. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
+9. ログイン画面・投稿管理画面のUI … ✅ 完了（`/login`・`/admin`・ルート保護・ブラウザ動作確認済み）
+   - **▶ 次：users / categories のCRUD**、そして**投稿UI**（タイトル・本文・画像・下書き/公開）。
+   - 投稿UIは `/admin` の中に組み込んでいく（記事一覧→新規作成→編集）。本文エディタは TipTap を予定。
+   - その後: 公開ページ（reference/theme を手本に Tailwind でデザイン移植）→ Xサーバーへのデプロイ設定。
+10. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
 
 ---
 
@@ -191,3 +201,4 @@
 - Xサーバーには Claude Code が SSH 接続済み（フェーズ1で利用）。
 - サーバー構成は Nginx + PM2。SaaS は使わない（コストゼロ方針）。
 - 現行サイトの参考: `~/Desktop/30nen_pj`（WordPressテーマ。カテゴリー構造「度々の旅」親子対応済み）。
+- **【将来の検討事項】プロジェクトの置き場所**：現在は `~/Desktop/30nen_next`（デスクトップ内）。macOS はデスクトップ/書類/ダウンロードを保護対象とするため、開発時に `node` から「デスクトップ内のファイルにアクセスしてよいか」の確認ダイアログが出る（「許可」でOK・安全）。煩わしくなったら、保護対象外の場所（例 `~/30nen_next`）へ移すと確認が出なくなる。**今すぐ移す必要はない**が、適切なタイミング（例：デプロイ準備の前など）で移動するか検討する。

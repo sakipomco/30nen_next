@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // ローカル専用ツール（プレビュー起動設定など・Git管理外）
+    ".claude/**",
   ]),
 ]);
 
