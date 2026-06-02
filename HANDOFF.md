@@ -4,7 +4,7 @@
 > 新しい Claude Code セッションを **このフォルダ（`~/Desktop/30nen_next`）で起動** し、
 > 「HANDOFF.md を読んで」と伝えれば、ここまでの経緯を引き継げます。
 
-最終更新: 2026-06-02（フェーズ2：DBスキーマ→Drizzleで実DB作成まで完了）
+最終更新: 2026-06-02（フェーズ2：記事CRUD→JWT認証（ログイン）の土台まで完了）
 
 ---
 
@@ -64,7 +64,19 @@
     - 型は schema から自動生成（`$inferSelect`）。設計を変えても型がズレない。
     - 動作確認: `scripts/smoke-articles.ts`（`npx tsx scripts/smoke-articles.ts`）で C/R/U/D 全通過を確認。型チェック(tsc)・Lint(eslint)もクリーン。
     - メモ: 日時はUTC保存（DB既定の `datetime('now')` と揃えた）。日本時間への変換は表示を作るときに行う。
-    - 未着手: JWT認証、users/categories のCRUD、Server Actions、投稿UI・公開ページ。
+11. **フェーズ2：JWT認証（ログイン）の土台が完成**（コミット `（このコミット）`）。
+    - **JWT＝署名付きの「会員証」トークン**。中身（userId・role）＋サーバーだけが作れる署名のセット。Cookieに保存し、毎回サーバーで本物か検証する。
+    - 技術選定: 署名は **`jose`**（Next.js公式推奨・純JS・Xサーバーにそのまま載る）。パスワードのハッシュ化は **Node標準の `crypto.scrypt`**（追加ライブラリ不要・OWASP推奨方式）。`jose` を `npm install` 済み。
+    - 作成ファイル:
+      - `src/auth/password.ts` … パスワードのハッシュ化(`hashPassword`)と照合(`verifyPassword`)。生パスワードはDBに保存しない。
+      - `src/auth/jwt.ts` … JWTの発行(`signSession`)と検証(`verifySession`)。有効期限7日。秘密鍵は環境変数 `SESSION_SECRET`。
+      - `src/auth/session.ts` … 会員証をCookieに保存/削除(`createSession`/`deleteSession`)・読み出し(`getSession`)・今ログイン中のユーザー取得(`getCurrentUser`)。
+      - `src/db/users.ts` … 投稿者のデータ層（`createUser`/`getUserByEmail`/`getUserById`/`verifyCredentials`/`deleteUser`）。`passwordHash` を除いた公開用 `PublicUser` を返す。
+      - `src/app/actions/auth.ts` … Server Action の `login`（成功で `/admin` へ）/`logout`（`/login` へ）。
+    - 環境変数: `.env.local`（Git管理外）に `SESSION_SECRET` を生成済み。見本は `.env.example`（Git管理）。秘密鍵は `openssl rand -base64 32` で生成。
+    - 動作確認: `node --env-file=.env.local --import tsx scripts/smoke-auth.ts` で 登録→照合→JWT→改ざん検知→削除 まで全通過。型チェック(tsc)・Lint(eslint)もクリーン。
+    - メモ: `login`/`logout` のリダイレクト先 `/admin`・`/login` の **ページはまだ未作成**（次のUI工程で作る）。今は土台（サーバー側の仕組み）まで。
+    - 未着手: ログイン画面・投稿管理画面(`/login`・`/admin`)のUI、ルート保護、users/categories のCRUD、投稿UI・公開ページ。
 
 ### 現在のフォルダ状態
 ```
@@ -127,9 +139,10 @@
 5. DBスキーマ設計 … ✅ 完成（4テーブル確定。設計は `docs/schema.md`）
 6. SQLiteライブラリ選定＋実DB作成 … ✅ 完了（**Drizzle ORM** 採用・`data/30nen.db` に4テーブル作成）
 7. 記事(articles)のCRUD API … ✅ 完了（`src/db/articles.ts`・動作確認済み）
-   - **▶ 次：JWT認証（ログイン）**。メール＋パスワードでログイン→「ログイン中の人だけ保存できる」をServer Actionで実装する土台。
-   - その後: users/categories のCRUD → 投稿UI・公開ページ。
-8. JWT認証（ログイン）
+8. JWT認証（ログイン）の土台 … ✅ 完了（`src/auth/*`・`src/db/users.ts`・`src/app/actions/auth.ts`・動作確認済み）
+   - **▶ 次：ログイン画面と投稿管理画面のUI**（`/login`・`/admin`）。`login`/`logout` のServer Actionは出来ているので、フォームを置いて繋ぐだけ。
+   - あわせて「ログインしていない人を `/admin` から弾く」ルート保護（`getCurrentUser` を使う）。
+   - その後: users/categories のCRUD → 投稿UI（タイトル・本文・画像・下書き/公開）→ 公開ページ。
 9. 投稿UI（タイトル・本文・画像・下書き/公開）と公開サイトのデザイン移植（reference/theme を手本に Tailwind で再現）
 
 ---
