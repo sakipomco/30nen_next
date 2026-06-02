@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { requireUser } from '@/auth/session';
 import { updateArticleAction } from '@/app/actions/articles';
 import { getArticleById } from '@/db/articles';
+import { utcToJstInput } from '@/lib/datetime';
 import { ArticleForm } from '../../../article-form';
 
 export const metadata = {
@@ -41,6 +42,10 @@ export default async function EditArticlePage({
               id: article.id,
               title: article.title,
               content: article.content,
+              // 公開日時があれば日本時間の入力欄の形にして初期表示
+              publishedAtInput: article.publishedAt
+                ? utcToJstInput(article.publishedAt)
+                : '',
             }}
           />
         </div>

@@ -6,24 +6,11 @@ import { requireUser } from '@/auth/session';
 import { logout } from '@/app/actions/auth';
 import { deleteArticleAction } from '@/app/actions/articles';
 import { listArticles } from '@/db/articles';
+import { formatJst } from '@/lib/datetime';
 
 export const metadata = {
   title: '投稿管理｜30nen',
 };
-
-// DBはUTCで日時を保存している。表示は日本時間（JST）に直す。
-function formatJst(value: string): string {
-  // 'YYYY-MM-DD HH:MM:SS'(UTC) → 末尾Zを付けてUTCとして解釈
-  const d = new Date(value.replace(' ', 'T') + 'Z');
-  return d.toLocaleString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 export default async function AdminPage() {
   const user = await requireUser();
@@ -86,7 +73,9 @@ export default async function AdminPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-zinc-400">
-                    更新: {formatJst(article.updatedAt)}
+                    {article.status === 'published' && article.publishedAt
+                      ? `公開: ${formatJst(article.publishedAt)}`
+                      : `更新: ${formatJst(article.updatedAt)}`}
                   </p>
                 </div>
 

@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/auth/session';
 import { createArticle, updateArticle, deleteArticle } from '@/db/articles';
+import { jstInputToUtc } from '@/lib/datetime';
 
 // useActionState に渡すための状態の形（エラー文言を画面に返す）。
 export type ArticleFormState = { error?: string } | undefined;
@@ -14,6 +15,14 @@ export type ArticleFormState = { error?: string } | undefined;
 // 「下書き保存」= draft、「投稿する」= published。
 function statusFromIntent(formData: FormData): 'draft' | 'published' {
   return formData.get('intent') === 'publish' ? 'published' : 'draft';
+}
+
+// フォームの「公開日時」欄を読む。
+//  - 空欄          → undefined（＝即時投稿。公開時はサーバー側で「今」を補う）
+//  - 日時を指定済み → その日時（日本時間）をUTCに直して返す（さかのぼり等）
+function publishedAtFromForm(formData: FormData): string | undefined {
+  const input = String(formData.get('publishedAt') ?? '').trim();
+  return input ? jstInputToUtc(input) : undefined;
 }
 
 // ── 新規作成 ─────────────────────────────────────────────
@@ -33,6 +42,7 @@ export async function createArticleAction(
     title,
     content,
     status: statusFromIntent(formData),
+    publishedAt: publishedAtFromForm(formData), // 未指定なら公開時に「今」を自動補完
     authorId: user.id, // 書いた人＝今ログイン中の人
   });
 
@@ -61,6 +71,7 @@ export async function updateArticleAction(
     title,
     content,
     status: statusFromIntent(formData),
+    publishedAt: publishedAtFromForm(formData), // 未指定なら既存の公開日時を維持
   });
   if (!updated) {
     return { error: '記事が見つかりませんでした。' };
