@@ -6,6 +6,7 @@
 import { useActionState } from 'react';
 import type { ArticleFormState } from '@/app/actions/articles';
 import { RichEditor } from './rich-editor';
+import { FeaturedImage } from './featured-image';
 
 type ArticleAction = (
   prevState: ArticleFormState,
@@ -19,6 +20,7 @@ type Props = {
     id: number;
     title: string;
     content: string;
+    featuredImagePath?: string | null; // アイキャッチ画像の初期値（保存済みのパス）
     publishedAtInput?: string; // 公開日時の初期値（'YYYY-MM-DDTHH:MM'・日本時間）。未公開なら空。
   };
 };
@@ -49,6 +51,8 @@ export function ArticleForm({ action, initial }: Props) {
         本文
         <RichEditor name="content" initialHTML={initial?.content} />
       </div>
+
+      <FeaturedImage name="featuredImage" initialPath={initial?.featuredImagePath} />
 
       <label className="flex flex-col gap-1 text-sm">
         公開日時

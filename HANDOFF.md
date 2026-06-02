@@ -4,7 +4,7 @@
 > 新しい Claude Code セッションを **このフォルダ（`~/Desktop/30nen_next`）で起動** し、
 > 「HANDOFF.md を読んで」と伝えれば、ここまでの経緯を引き継げます。
 
-最終更新: 2026-06-02（フェーズ2：記事CRUD→JWT認証（ログイン）の土台まで完了）
+最終更新: 2026-06-02（フェーズ2：投稿日時設定→画像アップロードまで完了）
 
 ---
 
@@ -109,7 +109,27 @@
     - `src/app/admin/page.tsx` … 一覧は公開済みなら「公開: <日時>」、それ以外は「更新: <日時>」を日本時間で表示。日時整形は datetime.ts に集約。
     - ブラウザ確認済み: ①空欄→即時公開（今のJSTが入る）②過去日時(2020-01-15 09:30)指定→その日時で公開③編集ページで公開日時が正しく復元、まで全通過。
     - メモ（将来）: 「未来の日時」を指定して**自動で時が来たら公開する“予約投稿”**は未対応（status=published になり即一覧に出る）。本当の予約投稿にするには、公開ページ側で「未来日時の記事は隠す」処理が必要。公開ページ作成時に対応を検討。
-    - 未着手: **画像アップロード**（本文への画像挿入・アイキャッチ画像）、users/categories のCRUD（カテゴリ選択UI）、公開ページ、Xサーバーへのデプロイ設定。
+16. **フェーズ2：画像アップロード（本文への画像挿入＋アイキャッチ画像）が完成（ブラウザで動作確認済み）**（コミット `（このコミット）`）。
+    - 導入ライブラリ: `@tiptap/extension-image`（v3）。本文エディタに画像を差し込めるようにする部品。
+    - DB変更: `articles` に `featured_image_path`（アイキャッチ画像のパス・任意）列を追加。マイグレーション `drizzle/0001_brave_anthem.sql` を生成・適用済み。
+    - 作成ファイル:
+      - `src/app/api/upload/route.ts` … 画像の受け取り口（POST `/api/upload`）。ログイン必須・種類（JPEG/PNG/GIF/WebP）とサイズ（10MBまで）を検査し、`public/uploads/年/月/ランダム名.拡張子` に保存して公開URL(`/uploads/...`)を返す。本文用とアイキャッチ用の両方がこの1か所を使う。
+      - `src/app/admin/upload-image.ts` … 画像を `/api/upload` に送ってURLを受け取る共通関数（クライアント側）。
+      - `src/app/admin/featured-image.tsx` … アイキャッチ画像の設定欄（選ぶ→プレビュー→変更／削除）。選んだパスを hidden input `featuredImage` に乗せて送信。
+    - 変更ファイル:
+      - `src/app/admin/rich-editor.tsx` … ツールバーに「画像」ボタンを追加。押すとファイル選択→アップロード→カーソル位置に画像を挿入。`StarterKit` に `Image` 拡張を追加。
+      - `src/app/admin/article-form.tsx` … 本文の下に `<FeaturedImage>` を配置。編集時は初期値 `featuredImagePath` を渡す。
+      - `src/app/actions/articles.ts` … create/update が `featuredImage` 欄を読み、空欄は null として保存。
+      - `src/db/articles.ts` … 入力型と create/update に `featuredImagePath` を追加。
+      - `src/app/admin/articles/[id]/edit/page.tsx` … 編集フォームに保存済みのアイキャッチを渡す。
+      - `src/app/globals.css` … 本文に挿入した画像が編集枠に収まるよう見た目を追加。
+      - `.gitignore` … `/public/uploads/*` を除外（投稿された画像はGit管理しない。フォルダ保持用に `public/uploads/.gitkeep`）。
+    - ブラウザ確認済み: ①本文に画像挿入→`<img>`が入る ②アイキャッチを選ぶ→プレビュー表示 ③「投稿する」でDB保存（`featured_image_path`＋本文の`<img>`両方）④編集ページで両方が正しく復元 ⑤未ログインは401・画像以外は400で拒否 ⑥保存画像はURLで配信OK(200)。型チェック(tsc)・Lint(eslint)もクリーン。確認に使ったテスト記事・画像は削除済み。
+    - メモ（将来・本番運用前に検討）:
+      - **保存場所**: 現在は `public/uploads/` に直接保存（`next start`＝PM2運用なら実行時に書いたファイルもそのURLで配信される）。デプロイ時、`public/uploads` は**デプロイで上書きされない永続フォルダ**として扱う（git管理外なので、デプロイ手順で残す or シンボリックリンクを検討）。
+      - **画像の最適化・リサイズ**: 現状は原寸保存（リサイズ・圧縮・サムネ生成なし）。スマホ写真など重い画像対策は将来検討（sharp等）。
+      - **不要画像の掃除**: 記事から外した画像のファイルは消さずに残る（孤児ファイル）。当面は放置で可。気になれば後で掃除する仕組みを検討。
+    - 未着手: users/categories のCRUD（カテゴリ選択UI）、公開ページ、Xサーバーへのデプロイ設定。
 
 ### 現在のフォルダ状態
 ```
@@ -178,9 +198,10 @@
 10. 投稿UI（記事の作成・編集・削除） … ✅ 完了（`/admin/new`・`/admin/articles/[id]/edit`・ブラウザ動作確認済み）
 11. 本文エディタ TipTap（リッチエディタ） … ✅ 完了（`src/app/admin/rich-editor.tsx`・ブラウザ動作確認済み）
 12. 投稿日時の設定（即時投稿／日時指定・さかのぼり可） … ✅ 完了（`src/lib/datetime.ts`・ブラウザ動作確認済み）
-    - **▶ 次：画像アップロード**（本文への画像挿入＋**アイキャッチ画像**。アイキャッチは記事テーブルへの列追加も必要）。
-    - あわせて **カテゴリ（連載）選択UI** と users/categories のCRUD。
+13. 画像アップロード（本文への画像挿入＋アイキャッチ画像） … ✅ 完了（`src/app/api/upload/route.ts`・`featured-image.tsx`・DBに`featured_image_path`列追加・ブラウザ動作確認済み）
+    - **▶ 次：カテゴリ（連載）選択UI と users/categories のCRUD**（投稿フォームで連載を選べるように。管理者がユーザー・連載を追加/編集できるように）。
     - その後: 公開ページ（reference/theme を手本に Tailwind でデザイン移植）→ Xサーバーへのデプロイ設定。
+    - デプロイ時の注意（画像）: `public/uploads/` はGit管理外の**永続フォルダ**。デプロイで消えない/上書きされないように扱う。
 
 ---
 

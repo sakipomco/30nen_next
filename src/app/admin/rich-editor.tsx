@@ -4,9 +4,11 @@
 // ※ App Router では最初の描画がサーバー側でも行われるため、immediatelyRender:false で
 //    「画面に出てから編集機能を組み立てる」ようにする（ズレ＝hydrationエラー防止）。
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import { uploadImage } from './upload-image';
 
 type Props = {
   name: string; // フォーム送信時の項目名（例: "content"）
@@ -39,7 +41,15 @@ function ToolbarButton({
   );
 }
 
-function Toolbar({ editor }: { editor: Editor }) {
+function Toolbar({
+  editor,
+  onPickImage,
+  uploading,
+}: {
+  editor: Editor;
+  onPickImage: () => void;
+  uploading: boolean;
+}) {
   return (
     <div className="mb-2 flex flex-wrap gap-1">
       <ToolbarButton
@@ -72,15 +82,25 @@ function Toolbar({ editor }: { editor: Editor }) {
         active={editor.isActive('blockquote')}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
       />
+      {/* 本文に画像を挿入。押すとファイル選択 → アップロード → カーソル位置に差し込む。 */}
+      <ToolbarButton
+        label={uploading ? 'アップロード中…' : '画像'}
+        active={false}
+        onClick={onPickImage}
+      />
     </div>
   );
 }
 
 export function RichEditor({ name, initialHTML }: Props) {
   const [html, setHtml] = useState(initialHTML ?? '');
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // 画像挿入用の隠しファイル選択欄。ボタンを押すとこれをクリックさせる。
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, Image],
     content: initialHTML ?? '',
     immediatelyRender: false,
     onUpdate: ({ editor }) => setHtml(editor.getHTML()),
@@ -93,10 +113,49 @@ export function RichEditor({ name, initialHTML }: Props) {
     },
   });
 
+  // ファイルが選ばれたら：アップロード → 返ってきたURLをカーソル位置に画像として差し込む。
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // 同じ画像を続けて選べるようにリセット
+    if (!file || !editor) return;
+
+    setError(null);
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      editor.chain().focus().setImage({ src: url }).run();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'アップロードに失敗しました。');
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <div>
-      {editor && <Toolbar editor={editor} />}
+      {editor && (
+        <Toolbar
+          editor={editor}
+          uploading={uploading}
+          onPickImage={() => {
+            if (!uploading) fileInputRef.current?.click();
+          }}
+        />
+      )}
       <EditorContent editor={editor} />
+      {error && (
+        <p className="mt-1 text-sm text-red-600" role="alert">
+          {error}
+        </p>
+      )}
+      {/* 画像選択用の隠し入力（ボタンから間接的にクリックさせる） */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        className="hidden"
+        onChange={handleFileChange}
+      />
       {/* 本文HTMLをフォーム送信に乗せる見えない欄 */}
       <input type="hidden" name={name} value={html} />
     </div>

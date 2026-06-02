@@ -17,6 +17,7 @@ export type NewArticleInput = {
   authorId?: number | null;
   categoryId?: number | null;
   publishedAt?: string | null;
+  featuredImagePath?: string | null;
 };
 export type UpdateArticleInput = Partial<NewArticleInput>;
 
@@ -64,6 +65,7 @@ export async function createArticle(input: NewArticleInput): Promise<Article> {
       content: input.content ?? '',
       slug: input.slug ?? null,
       excerpt: input.excerpt ?? null,
+      featuredImagePath: input.featuredImagePath ?? null,
       status,
       authorId: input.authorId ?? null,
       categoryId: input.categoryId ?? null,
@@ -86,6 +88,8 @@ export async function updateArticle(
   if (input.content !== undefined) patch.content = input.content;
   if (input.slug !== undefined) patch.slug = input.slug;
   if (input.excerpt !== undefined) patch.excerpt = input.excerpt;
+  if (input.featuredImagePath !== undefined)
+    patch.featuredImagePath = input.featuredImagePath;
   if (input.authorId !== undefined) patch.authorId = input.authorId;
   if (input.categoryId !== undefined) patch.categoryId = input.categoryId;
   if (input.publishedAt !== undefined) patch.publishedAt = input.publishedAt;

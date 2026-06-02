@@ -40,6 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# アップロードされた画像（投稿者が上げたファイル。中身が育つのでGit管理しない。フォルダだけ .gitkeep で保持）
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # database (SQLite本体は中身が育つファイルなので管理対象外。設計図とマイグレーションはGit管理する)
 /data/*.db
 /data/*.db-shm

@@ -42,6 +42,7 @@ export default async function EditArticlePage({
               id: article.id,
               title: article.title,
               content: article.content,
+              featuredImagePath: article.featuredImagePath,
               // 公開日時があれば日本時間の入力欄の形にして初期表示
               publishedAtInput: article.publishedAt
                 ? utcToJstInput(article.publishedAt)

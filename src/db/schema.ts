@@ -44,6 +44,7 @@ export const articles = sqliteTable('articles', {
   slug: text('slug').unique(), // URL用の名札
   content: text('content').notNull().default(''), // 本文（HTML）
   excerpt: text('excerpt'), // 抜粋（任意）
+  featuredImagePath: text('featured_image_path'), // アイキャッチ画像のパス（任意・例: /uploads/2026/06/xxx.jpg）
   status: text('status', { enum: ['draft', 'published'] }).notNull().default('draft'),
   authorId: integer('author_id').references(() => users.id), // 著者 → users.id
   categoryId: integer('category_id').references(() => categories.id), // カテゴリ → categories.id

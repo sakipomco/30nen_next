@@ -49,3 +49,13 @@ body {
 .tiptap-editor :where(p) {
   margin: 0.4em 0;
 }
+/* 本文に挿入した画像。大きすぎる画像も編集枠に収める。選択中は枠線で分かるように。 */
+.tiptap-editor :where(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 0.5em 0;
+}
+.tiptap-editor :where(img.ProseMirror-selectednode) {
+  outline: 2px solid #6366f1;
+}

@@ -25,6 +25,12 @@ function publishedAtFromForm(formData: FormData): string | undefined {
   return input ? jstInputToUtc(input) : undefined;
 }
 
+// アイキャッチ画像のパスを読む。空欄（未設定・削除）は null として保存する。
+function featuredImageFromForm(formData: FormData): string | null {
+  const input = String(formData.get('featuredImage') ?? '').trim();
+  return input ? input : null;
+}
+
 // ── 新規作成 ─────────────────────────────────────────────
 export async function createArticleAction(
   _prevState: ArticleFormState,
@@ -41,6 +47,7 @@ export async function createArticleAction(
   await createArticle({
     title,
     content,
+    featuredImagePath: featuredImageFromForm(formData),
     status: statusFromIntent(formData),
     publishedAt: publishedAtFromForm(formData), // 未指定なら公開時に「今」を自動補完
     authorId: user.id, // 書いた人＝今ログイン中の人
@@ -70,6 +77,7 @@ export async function updateArticleAction(
   const updated = await updateArticle(id, {
     title,
     content,
+    featuredImagePath: featuredImageFromForm(formData),
     status: statusFromIntent(formData),
     publishedAt: publishedAtFromForm(formData), // 未指定なら既存の公開日時を維持
   });
