@@ -31,6 +31,22 @@ export function ArticleForm({ action, initial }: Props) {
     FormData
   >(action, undefined);
 
+  // 「投稿する」(公開)を押したとき、アイキャッチ画像が未設定なら確認する（A案：必須にはしない）。
+  // hidden input(name="featuredImage")の値が空＝未設定。キャンセルなら送信を止める。
+  // 下書き保存のときは呼ばない。
+  function handlePublishClick(e: React.MouseEvent<HTMLButtonElement>) {
+    const form = e.currentTarget.form;
+    const featured = form?.elements.namedItem('featuredImage');
+    const isSet =
+      featured instanceof HTMLInputElement && featured.value.trim() !== '';
+    if (!isSet) {
+      const ok = window.confirm(
+        'アイキャッチ画像が未設定です。このまま公開しますか？',
+      );
+      if (!ok) e.preventDefault(); // キャンセル → 送信中止
+    }
+  }
+
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {/* 編集のときは対象の記事idを一緒に送る（見えない欄） */}
@@ -90,6 +106,7 @@ export function ArticleForm({ action, initial }: Props) {
           name="intent"
           value="publish"
           disabled={pending}
+          onClick={handlePublishClick}
           className="rounded-md bg-zinc-900 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60"
         >
           {pending ? '送信中…' : '投稿する'}
