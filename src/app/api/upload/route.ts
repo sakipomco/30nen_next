@@ -1,7 +1,8 @@
 // 画像アップロードの窓口（POST /api/upload）。
 // 本文エディタの「画像」ボタンと、アイキャッチ画像の設定欄の両方がここを使う。
 //
-// 流れ：ブラウザが画像ファイルを送る → ログイン確認 → 種類・サイズを検査
+// 流れ：ブラウザが画像ファイルを送る → ログイン確認 → 種類を検査
+//   → 大きい写真は自動で「軽く」する（長辺を縮小＋圧縮。スマホの向きも補正）
 //   → public/uploads/YYYY/MM/ にユニークな名前で保存 → 公開URL（/uploads/...）を返す。
 //
 // ※ public/ に置いたファイルは、そのURL（先頭が "/"）でそのまま配信される（Next.jsの仕様）。
@@ -10,6 +11,7 @@
 import { randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import sharp from 'sharp';
 import { getCurrentUser } from '@/auth/session';
 
 // 受け付ける画像の種類（MIMEタイプ → 保存時の拡張子）。
@@ -20,7 +22,28 @@ const ALLOWED: Record<string, string> = {
   'image/webp': 'webp',
 };
 
-const MAX_BYTES = 10 * 1024 * 1024; // 1枚あたり最大10MB
+// 安全弁：自動で軽くするので普段は引っかからないが、極端に巨大なファイルだけ防ぐ上限。
+const MAX_BYTES = 40 * 1024 * 1024; // 40MB
+// 写真をこの長さ（px）まで縮める。ブログ表示にはこれで十分で、ファイルが大幅に軽くなる。
+const MAX_DIMENSION = 1600;
+
+// 写真を「軽く」する：向き補正（EXIF）→ 長辺1600pxまで縮小（元が小さければそのまま）→ 圧縮。
+// GIFはアニメーション（パラパラ動く）を壊さないよう、加工せずそのまま保存する。
+async function shrinkImage(input: Buffer, mime: string): Promise<Buffer> {
+  if (mime === 'image/gif') return input;
+
+  const pipeline = sharp(input)
+    .rotate() // スマホ写真の「横向き」などをEXIF情報どおりに正す
+    .resize(MAX_DIMENSION, MAX_DIMENSION, {
+      fit: 'inside', // 縦横比はそのまま、枠に収まるように縮める
+      withoutEnlargement: true, // 元が小さい画像は引き伸ばさない
+    });
+
+  if (mime === 'image/png') return pipeline.png({ compressionLevel: 9 }).toBuffer();
+  if (mime === 'image/webp') return pipeline.webp({ quality: 80 }).toBuffer();
+  // それ以外（JPEG）
+  return pipeline.jpeg({ quality: 80, mozjpeg: true }).toBuffer();
+}
 
 export async function POST(request: Request) {
   // ① ログイン必須（未ログインは弾く）
@@ -36,7 +59,7 @@ export async function POST(request: Request) {
     return Response.json({ error: '画像が選ばれていません。' }, { status: 400 });
   }
 
-  // ③ 種類とサイズを検査
+  // ③ 種類とサイズ（安全弁）を検査
   const ext = ALLOWED[file.type];
   if (!ext) {
     return Response.json(
@@ -46,12 +69,23 @@ export async function POST(request: Request) {
   }
   if (file.size > MAX_BYTES) {
     return Response.json(
-      { error: '画像が大きすぎます（10MBまで）。' },
+      { error: '画像が大きすぎます（40MBまで）。' },
       { status: 400 },
     );
   }
 
-  // ④ 保存先を決める：/uploads/年/月/ ランダム名.拡張子
+  // ④ 大きい写真は自動で軽くする（縮小＋圧縮）。壊れた画像などはここで失敗する。
+  let bytes: Buffer;
+  try {
+    bytes = await shrinkImage(Buffer.from(await file.arrayBuffer()), file.type);
+  } catch {
+    return Response.json(
+      { error: '画像を読み込めませんでした。別の画像でお試しください。' },
+      { status: 400 },
+    );
+  }
+
+  // ⑤ 保存先を決める：/uploads/年/月/ ランダム名.拡張子
   //    年月フォルダで分けると、枚数が増えても1フォルダに集中しない（旧WordPressと同じ考え方）。
   const now = new Date();
   const yyyy = String(now.getFullYear());
@@ -61,12 +95,11 @@ export async function POST(request: Request) {
   const relDir = path.posix.join('uploads', yyyy, mm); // URL用（/区切り）
   const publicDir = path.join(process.cwd(), 'public', 'uploads', yyyy, mm);
 
-  // ⑤ ファイルとして書き出す
-  const bytes = Buffer.from(await file.arrayBuffer());
+  // ⑥ ファイルとして書き出す
   await mkdir(publicDir, { recursive: true });
   await writeFile(path.join(publicDir, filename), bytes);
 
-  // ⑥ 表示に使う公開URLを返す
+  // ⑦ 表示に使う公開URLを返す
   const url = '/' + path.posix.join(relDir, filename);
   return Response.json({ url });
 }
