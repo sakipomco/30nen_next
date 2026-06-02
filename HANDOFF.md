@@ -93,8 +93,15 @@
       - `src/app/admin/articles/[id]/edit/page.tsx` … 編集ページ（`params` は Next 16 では非同期＝`await params`）。
     - 認証ヘルパー追加: `src/auth/session.ts` に `requireUser()`（未ログインなら `/login` へ）。管理ページ・記事Actionの保護に使用。
     - ブラウザ確認済み: 新規作成（公開）→一覧反映→編集（タイトル変更＋下書き化）→削除、を全通過。未ログインでは `/admin`・`/admin/new`・編集ページすべて `/login` へ転送。
-    - メモ: 本文は今プレーンな textarea（HTMLをそのまま保存）。**次の工程で TipTap（リッチエディタ）と画像アップロードに差し替える**（差し替えは本文欄まわりのみ）。
-    - 未着手: 本文エディタ(TipTap)・画像アップロード、users/categories のCRUD（カテゴリ選択UI）、公開ページ、Xサーバーへのデプロイ設定。
+14. **フェーズ2：本文エディタを TipTap（リッチエディタ）に差し替え（ブラウザで動作確認済み）**（コミット `（このコミット）`）。
+    - 導入ライブラリ: `@tiptap/react` `@tiptap/starter-kit` `@tiptap/pm`（いずれも v3）。React 19 と相性OK・追加のnativeビルド不要。
+    - 作成ファイル: `src/app/admin/rich-editor.tsx` … TipTapエディタ部品。簡単なツールバー（太字・斜体・見出し・箇条書き・番号付き・引用）。本文HTMLを見えない入力欄(hidden input)に同期させ、既存の `content` 項目としてフォーム送信に乗せる。
+    - `src/app/admin/article-form.tsx` の本文欄を textarea → `<RichEditor>` に差し替え。
+    - `src/app/globals.css` にエディタ内の見た目（見出し・箇条書き等。Tailwindのリセットを編集エリア内だけ復活）を追加。
+    - App Router 対策: `useEditor({ immediatelyRender: false })`（サーバー描画とのズレ＝hydrationエラー防止）。
+    - ブラウザ確認済み: 文章入力→見出し書式→「投稿する」で保存→一覧反映→編集ページで本文HTML(`<h2>…`)が正しく復元、までの往復を確認。
+    - メモ: StarterKit v3 には Placeholder は含まれない（空欄の案内文は未実装）。本文は引き続き HTML で保存。
+    - 未着手: **画像アップロード**（本文への画像挿入）、users/categories のCRUD（カテゴリ選択UI）、公開ページ、Xサーバーへのデプロイ設定。
 
 ### 現在のフォルダ状態
 ```
@@ -161,7 +168,8 @@
 8. JWT認証（ログイン）の土台 … ✅ 完了（`src/auth/*`・`src/db/users.ts`・`src/app/actions/auth.ts`・動作確認済み）
 9. ログイン画面・投稿管理画面のUI … ✅ 完了（`/login`・`/admin`・ルート保護・ブラウザ動作確認済み）
 10. 投稿UI（記事の作成・編集・削除） … ✅ 完了（`/admin/new`・`/admin/articles/[id]/edit`・ブラウザ動作確認済み）
-    - **▶ 次：本文エディタを TipTap に差し替え＋画像アップロード**（投稿者が使う一番大事な部分）。
+11. 本文エディタ TipTap（リッチエディタ） … ✅ 完了（`src/app/admin/rich-editor.tsx`・ブラウザ動作確認済み）
+    - **▶ 次：画像アップロード**（本文への画像挿入。投稿UIの3点目）。
     - あわせて **カテゴリ（連載）選択UI** と users/categories のCRUD。
     - その後: 公開ページ（reference/theme を手本に Tailwind でデザイン移植）→ Xサーバーへのデプロイ設定。
 

@@ -5,6 +5,7 @@
 
 import { useActionState } from 'react';
 import type { ArticleFormState } from '@/app/actions/articles';
+import { RichEditor } from './rich-editor';
 
 type ArticleAction = (
   prevState: ArticleFormState,
@@ -43,15 +44,10 @@ export function ArticleForm({ action, initial }: Props) {
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
+      <div className="flex flex-col gap-1 text-sm">
         本文
-        <textarea
-          name="content"
-          rows={12}
-          defaultValue={initial?.content ?? ''}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-base leading-7 outline-none focus:border-zinc-500"
-        />
-      </label>
+        <RichEditor name="content" initialHTML={initial?.content} />
+      </div>
 
       {state?.error && (
         <p className="text-sm text-red-600" role="alert">

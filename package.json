@@ -12,6 +12,9 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@tiptap/pm": "^3.24.0",
+    "@tiptap/react": "^3.24.0",
+    "@tiptap/starter-kit": "^3.24.0",
     "better-sqlite3": "^12.10.0",
     "drizzle-orm": "^0.45.2",
     "jose": "^6.2.3",
