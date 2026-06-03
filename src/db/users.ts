@@ -4,7 +4,7 @@
 
 import { eq, asc, sql } from 'drizzle-orm';
 import { db } from './index';
-import { users, articles } from './schema';
+import { users, articles, categoryAuthors } from './schema';
 import { hashPassword, verifyPassword } from '@/auth/password';
 
 // schema から型を自動生成（手書きしない＝設計とズレない）
@@ -129,9 +129,20 @@ export async function deleteUser(
       reason: `この投稿者には記事が${articleCount}件あります。先に記事を移すか削除してください。`,
     };
   }
+  // 担当名簿(category_authors)はこの人を参照しているので、先に外してから本体を削除する。
+  await db.delete(categoryAuthors).where(eq(categoryAuthors.userId, id));
   const deleted = await db
     .delete(users)
     .where(eq(users.id, id))
     .returning({ id: users.id });
   return { ok: deleted.length > 0 };
+}
+
+// 管理者(admin)の人数を数える（最後の管理者を消す・降格するのを防ぐのに使う）。
+export async function countAdmins(): Promise<number> {
+  const rows = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(users)
+    .where(eq(users.role, 'admin'));
+  return rows[0]?.n ?? 0;
 }

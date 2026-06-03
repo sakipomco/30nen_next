@@ -225,6 +225,24 @@ export async function setUserCategory(
   }
 }
 
+// 全員ぶんの「担当連載」を一度にまとめて取得する（ユーザー一覧の表示用）。
+// 戻り値は { 投稿者id: { id, name } }。1人1連載の前提（複数あれば最後の1件）。
+export async function getAssignmentsMap(): Promise<
+  Record<number, { id: number; name: string }>
+> {
+  const rows = await db
+    .select({
+      userId: categoryAuthors.userId,
+      id: categories.id,
+      name: categories.name,
+    })
+    .from(categoryAuthors)
+    .innerJoin(categories, eq(categoryAuthors.categoryId, categories.id));
+  const map: Record<number, { id: number; name: string }> = {};
+  for (const r of rows) map[r.userId] = { id: r.id, name: r.name };
+  return map;
+}
+
 // その連載の担当者一覧（連載の編集画面で「担当者」を表示するのに使う）。
 export async function getAuthorsForCategory(
   categoryId: number,
