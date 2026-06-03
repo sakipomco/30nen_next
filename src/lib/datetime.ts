@@ -36,3 +36,14 @@ export function jstInputToUtc(input: string): string {
   const d = new Date(withSeconds + '+09:00'); // 日本時間として明示的に解釈
   return d.toISOString().slice(0, 19).replace('T', ' ');
 }
+
+// DBのUTC文字列 → 公開ページ向け日付表示（日本時間・時刻なし。例: "2026年6月3日"）
+export function formatJstDate(utc: string): string {
+  const d = new Date(utc.replace(' ', 'T') + 'Z');
+  return d.toLocaleDateString('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}

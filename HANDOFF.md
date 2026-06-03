@@ -4,7 +4,7 @@
 > 新しい Claude Code セッションを **このフォルダ（`~/Desktop/30nen_next`）で起動** し、
 > 「HANDOFF.md を読んで」と伝えれば、ここまでの経緯を引き継げます。
 
-最終更新: 2026-06-03（フェーズ2：アイキャッチ確認アラート＋連載/投稿者の管理＋書き手と連載の自動ひもづけまで完了）
+最終更新: 2026-06-03（公開ページの要件定義完了・実装の事前準備まで完了）
 
 ---
 
@@ -135,7 +135,20 @@
     - 「投稿する」(公開)を押したとき、アイキャッチ画像が未設定なら `window.confirm` で「アイキャッチ画像が未設定です。このまま公開しますか？」と確認。OKで公開・キャンセルで送信中止。**画像なしでも公開できる（必須にはしない）**。下書き保存では確認しない。
     - 仕組み: `src/app/admin/article-form.tsx` の「投稿する」ボタンに `onClick` を付け、hidden input `featuredImage` の値が空かどうかで判定（状態を持ち回さずシンプル）。
     - ブラウザ確認: 投稿+キャンセル→送信中止／投稿+OK→公開／投稿(画像あり)→確認なし／下書き保存→確認なし、の4パターン通過。
-18. **フェーズ2：連載(カテゴリ)・投稿者の管理＋書き手と連載の“自動ひもづけ”が完成（ブラウザで動作確認済み）**。
+19. **フェーズ2：公開ページの要件定義完了 + 実装の事前準備完了**（コミット未実施・要確認）。
+    - 要件定義書を `docs/public-page-spec.md` に作成（現行サイトほぼ忠実再現・トップページ優先）。
+    - 事前準備として以下を実施済み（ページファイル本体は未作成・Claude Design と共同作業予定）:
+      - `src/db/articles.ts` … 公開ページ用のクエリ関数（`listPublishedArticles` / `countPublishedArticles` / `getPublishedArticleBySlug` / `getPublishedArticleById` / `PublicArticle` 型）を追加。著者・連載を JOIN して取得。`status=published` かつ `publishedAt <= 今` のみ（予約投稿対応）。
+      - `src/lib/datetime.ts` … `formatJstDate`（”2026年6月3日” 形式の日付表示）を追加。
+      - `src/app/layout.tsx` … フォント（Zen Old Mincho・Noto Serif JP）・メタデータ・`lang=”ja”` を設定。
+      - `public/` … ロゴ画像（`30nen_logo_noren_plus.jpg` / `30nen_logo.png`）をコピー。
+      - 旧 `src/app/page.tsx` を削除（新しい `(public)/page.tsx` との衝突を防ぐため）。
+      - `src/app/(public)/posts/[slug]/` と `src/app/(public)/series/[slug]/` のフォルダを作成。
+    - **次の作業（Claude Design と共同）**: `docs/public-page-spec.md` の仕様に従ってトップページを実装。
+      - まず DB に連載の `image_path` 列を追加するマイグレーションが必要（仕様書 §3-1 参照）。
+      - `public/` にダミー画像・line-up.png・sp_menu01.png をコピー（仕様書 §8 参照）。
+      - `src/app/(public)/layout.tsx`・`page.tsx` と共通コンポーネント群を作成。
+18. **フェーズ2：連載(カテゴリ)・投稿者の管理＋書き手と連載の”自動ひもづけ”が完成（ブラウザで動作確認済み）**。
     - **狙い（SAKIさんの要望）**: 「書き手が連載を選び忘れて“未分類”になる」を構造的に防ぐ。**1人＝1連載**を前提に、管理者が「この人はこの連載の担当」を名簿に登録 → 投稿画面で**担当連載が自動セット**される。
     - **連載データ層＋担当名簿の窓口**（コミット `9ae420c`）: `src/db/categories.ts` を新設（CRUD・親子ツリー `buildCategoryTree`・記事件数集計・担当名簿 `category_authors` の窓口 `getCategoriesForUser`/`setUserCategory`/`getAuthorsForCategory`）。削除は子連載や記事があれば拒否。`src/db/users.ts` に `listUsers`/`updateUser`/`countAdmins` を追加し、`deleteUser` は記事を持つ人を守るガード付き(`{ok,reason}`)に変更。スモークテスト `scripts/smoke-categories.ts` 通過。
     - **連載の管理画面**（コミット `e9e3e05`・管理者専用）: `/admin/categories`（一覧は親子を字下げ表示＋新規作成フォーム／記事・子連載があれば削除ボタンを無効化）、`/admin/categories/[id]/edit`（親候補から自分自身と子孫を除いて循環を防ぐ）。`src/app/actions/categories.ts`。認証ヘルパーに `requireAdmin()` を追加。
@@ -216,9 +229,11 @@
 15. カテゴリ（連載）選択UI と users/categories のCRUD … ✅ 完了
     - 連載データ層＋担当名簿（`9ae420c`）／連載管理画面（`e9e3e05`）／投稿フォームの連載選択＋自動ひもづけ（`f954926`）／投稿者管理画面（`2b6fdcd`）。すべてブラウザ動作確認済み。
     - **書き手と連載の自動ひもづけ**で「未分類になる選び忘れ」を構造的に解消（1人1連載）。
-    - **▶ 次：公開ページ（読者向けサイト）**。`reference/theme/30nen_original` を手本に Tailwind でデザイン移植。記事一覧／連載別一覧／記事詳細（slugベース）／著者表示。
-      - 予約投稿の注意: 公開ページでは「未来日時(`published_at`)の記事は隠す」処理を入れる（status=publishedでも公開時刻前は表示しない）。
-    - その後: Xサーバーへのデプロイ設定（Nginx + PM2）。
+    - **▶ 次：公開ページ（読者向けサイト）のトップページ実装**（仕様書: `docs/public-page-spec.md`）。
+      - 現行 30nen.com をほぼ忠実に再現。Claude Design と共同作業。
+      - 着手前にまず: ①DB に連載の `image_path` 列を追加（`npm run db:generate` → `migrate`）②ダミー画像などを `public/` にコピー。
+      - その後: 記事詳細ページ・連載別一覧ページ・著者ページ。
+    - 最後: Xサーバーへのデプロイ設定（Nginx + PM2）。
     - デプロイ時の注意（画像）: `public/uploads/` はGit管理外の**永続フォルダ**。デプロイで消えない/上書きされないように扱う。
 
 ---

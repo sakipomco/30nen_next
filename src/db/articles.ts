@@ -2,9 +2,9 @@
 // 「DBとのやり取り役」をここに集約する。公開ページの表示も、投稿画面の保存も、ここの関数を呼ぶ。
 // CRUD = Create(作る) / Read(読む) / Update(直す) / Delete(消す)。
 
-import { eq, desc, and, type SQL } from 'drizzle-orm';
+import { eq, desc, and, lte, sql, type SQL } from 'drizzle-orm';
 import { db } from './index';
-import { articles } from './schema';
+import { articles, users, categories } from './schema';
 
 // schema から型を自動生成（手書きしない＝設計とズレない）
 export type Article = typeof articles.$inferSelect; // DBから読んだ1件の形
@@ -113,4 +113,104 @@ export async function updateArticle(
 export async function deleteArticle(id: number): Promise<boolean> {
   const rows = await db.delete(articles).where(eq(articles.id, id)).returning({ id: articles.id });
   return rows.length > 0;
+}
+
+// ────────────────────────────────────────────────────────
+// 公開ページ用（著者・連載情報を JOIN して取得）
+// 「公開済み」＋「公開日時が今以前」の記事だけを対象にする（予約投稿対応）。
+// ────────────────────────────────────────────────────────
+
+export type PublicArticle = {
+  id: number;
+  title: string;
+  slug: string | null;
+  content: string;
+  excerpt: string | null;
+  featuredImagePath: string | null;
+  publishedAt: string | null;
+  authorId: number | null;
+  authorName: string | null;
+  authorAvatarPath: string | null;
+  categoryId: number | null;
+  categoryName: string | null;
+  categorySlug: string | null;
+};
+
+// 公開記事を絞り込むフィルター（status=published かつ publishedAt が今以前）
+function publicFilters(categoryId?: number): SQL[] {
+  const filters: SQL[] = [
+    eq(articles.status, 'published'),
+    lte(articles.publishedAt, now()),
+  ];
+  if (categoryId != null) filters.push(eq(articles.categoryId, categoryId));
+  return filters;
+}
+
+// JOIN して取得するときの select 項目
+const publicColumns = {
+  id: articles.id,
+  title: articles.title,
+  slug: articles.slug,
+  content: articles.content,
+  excerpt: articles.excerpt,
+  featuredImagePath: articles.featuredImagePath,
+  publishedAt: articles.publishedAt,
+  authorId: articles.authorId,
+  authorName: users.name,
+  authorAvatarPath: users.avatarPath,
+  categoryId: articles.categoryId,
+  categoryName: categories.name,
+  categorySlug: categories.slug,
+};
+
+// ── 公開記事一覧 ────────────────────────────────────────
+export async function listPublishedArticles(options?: {
+  limit?: number;
+  offset?: number;
+  categoryId?: number;
+}): Promise<PublicArticle[]> {
+  const filters = publicFilters(options?.categoryId);
+  return db
+    .select(publicColumns)
+    .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .where(and(...filters))
+    .orderBy(desc(articles.publishedAt))
+    .limit(options?.limit ?? 20)
+    .offset(options?.offset ?? 0);
+}
+
+// ── 公開記事の件数（ページ数の計算用）──────────────────
+export async function countPublishedArticles(categoryId?: number): Promise<number> {
+  const filters = publicFilters(categoryId);
+  const rows = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(articles)
+    .where(and(...filters));
+  return rows[0]?.n ?? 0;
+}
+
+// ── 公開記事を slug で取得（記事詳細ページ用）────────────
+export async function getPublishedArticleBySlug(slug: string): Promise<PublicArticle | null> {
+  const rows = await db
+    .select(publicColumns)
+    .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .where(and(eq(articles.slug, slug), eq(articles.status, 'published'), lte(articles.publishedAt, now())))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+// ── 公開記事を id で取得（slug がない記事のフォールバック用）──
+export async function getPublishedArticleById(id: number): Promise<PublicArticle | null> {
+  const rows = await db
+    .select(publicColumns)
+    .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .where(and(eq(articles.id, id), eq(articles.status, 'published'), lte(articles.publishedAt, now())))
+    .limit(1);
+  return rows[0] ?? null;
 }
