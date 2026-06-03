@@ -1,13 +1,13 @@
 // セクション見出し（オビ）。例: 「最新」「記事一覧」「小商店」。
-// ラベル（明朝・字間広め）＋細い横線。仕様書 §14 のデザイン画像に合わせた見た目。
+// obi-pattern.png を薄く敷いた「帯（おび）」の上にラベルを置く。
+// 現行 30nen.com の common_title01 の見た目を再現。仕様書 §14。
 
 export function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-5 flex items-center gap-4">
+    <div className="obi-band mb-5 px-3 py-1.5">
       <h2 className="serif whitespace-nowrap text-[1.05rem] tracking-[0.4em] text-[#150c0c]">
         {children}
       </h2>
-      <span className="h-px flex-1 bg-[#150c0c]/30" />
     </div>
   );
 }

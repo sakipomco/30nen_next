@@ -39,6 +39,15 @@ body {
   letter-spacing: -0.03em;
 }
 
+/* セクション見出しの「帯（オビ）」。obi-pattern.png を小さく敷き詰め、
+   白を重ねて薄いテクスチャにする（現行 30nen.com の common_title01 を再現）。 */
+.obi-band {
+  background-image: url('/obi-pattern.png');
+  background-size: 4px 4px;
+  background-color: rgba(255, 255, 255, 0.8);
+  background-blend-mode: lighten;
+}
+
 /* リッチエディタ(TipTap)の中身の見た目。
    Tailwind は見出し・箇条書きの装飾をリセットするので、編集エリア内だけ復活させる。 */
 .tiptap-editor :where(h2) {
