@@ -35,7 +35,7 @@ async function main() {
 
   console.log('6) 後片付け（テストユーザー削除）');
   const removed = await deleteUser(created.id);
-  console.log('   → 削除成功:', removed);
+  console.log('   → 削除成功:', removed.ok);
 
   console.log('\n✅ ログイン土台 全部通りました');
 }
