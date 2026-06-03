@@ -69,6 +69,43 @@ export function buildCategoryTree(cats: Category[]): CategoryWithDepth[] {
   return result;
 }
 
+// ── 連載ごとの記事件数（連載一覧で「記事◯件」を出す・削除可否の判定にも使う）──
+// 戻り値は { 連載id: 件数 } の対応表。記事0件の連載はキーに現れない。
+export async function getArticleCountByCategory(): Promise<
+  Record<number, number>
+> {
+  const rows = await db
+    .select({ categoryId: articles.categoryId, n: sql<number>`count(*)` })
+    .from(articles)
+    .groupBy(articles.categoryId);
+  const map: Record<number, number> = {};
+  for (const r of rows) {
+    if (r.categoryId != null) map[r.categoryId] = r.n;
+  }
+  return map;
+}
+
+// ある連載の「子孫」(子・孫…)の id を集める純粋関数。
+// 編集画面の「親連載」選択肢から、自分自身と子孫を除いて循環(親子のループ)を防ぐのに使う。
+export function getDescendantIds(cats: Category[], id: number): number[] {
+  const childrenOf = new Map<number | null, Category[]>();
+  for (const c of cats) {
+    const key = c.parentId ?? null;
+    const list = childrenOf.get(key) ?? [];
+    list.push(c);
+    childrenOf.set(key, list);
+  }
+  const result: number[] = [];
+  const walk = (parentId: number) => {
+    for (const c of childrenOf.get(parentId) ?? []) {
+      result.push(c.id);
+      walk(c.id);
+    }
+  };
+  walk(id);
+  return result;
+}
+
 // ── Create：新規作成 ─────────────────────────────────────────
 export async function createCategory(
   input: NewCategoryInput,

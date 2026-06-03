@@ -56,3 +56,11 @@ export async function requireUser(): Promise<PublicUser> {
   if (!user) redirect('/login');
   return user;
 }
+
+// 「管理者(admin)専用」の関所。投稿者(author)や未ログインは /admin へ送り返す。
+// 連載やユーザーの管理ページ・Server Action の先頭で呼ぶ。
+export async function requireAdmin(): Promise<PublicUser> {
+  const user = await requireUser(); // まずログイン必須
+  if (user.role !== 'admin') redirect('/admin');
+  return user;
+}
