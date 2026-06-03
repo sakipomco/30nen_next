@@ -47,3 +47,14 @@ export function formatJstDate(utc: string): string {
     day: 'numeric',
   });
 }
+
+// DBのUTC文字列 → 公開トップ「最新」用の日時表示（日本時間。例: "6月3日 15時26分"）
+export function formatJstDatetime(utc: string): string {
+  const d = new Date(utc.replace(' ', 'T') + 'Z');
+  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000); // 日本時間の「壁掛け時計」にする
+  const month = jst.getUTCMonth() + 1;
+  const day = jst.getUTCDate();
+  const hour = jst.getUTCHours();
+  const minute = jst.getUTCMinutes();
+  return `${month}月${day}日 ${hour}時${pad(minute)}分`;
+}

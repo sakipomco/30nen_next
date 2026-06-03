@@ -96,6 +96,7 @@ export async function createArticleAction(
   });
 
   revalidatePath('/admin'); // 一覧の表示を最新に
+  revalidatePath('/'); // 公開トップページの表示も更新
   redirect('/admin');
 }
 
@@ -132,6 +133,7 @@ export async function updateArticleAction(
   }
 
   revalidatePath('/admin');
+  revalidatePath('/'); // 公開トップページの表示も更新
   redirect('/admin');
 }
 
@@ -144,5 +146,6 @@ export async function deleteArticleAction(formData: FormData): Promise<void> {
   if (Number.isInteger(id) && id > 0) {
     await deleteArticle(id);
     revalidatePath('/admin');
+  revalidatePath('/'); // 公開トップページの表示も更新
   }
 }

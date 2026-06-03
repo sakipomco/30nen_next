@@ -38,6 +38,12 @@ export default async function AdminPage() {
                 >
                   投稿者の管理
                 </Link>
+                <Link
+                  href="/admin/settings"
+                  className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+                >
+                  サイト設定
+                </Link>
               </>
             )}
             <Link

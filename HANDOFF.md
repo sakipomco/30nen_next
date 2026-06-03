@@ -4,7 +4,7 @@
 > 新しい Claude Code セッションを **このフォルダ（`~/Desktop/30nen_next`）で起動** し、
 > 「HANDOFF.md を読んで」と伝えれば、ここまでの経緯を引き継げます。
 
-最終更新: 2026-06-03（トップページのデザイン要件を PC=A〜J・スマホ=K〜N まで全確定・§14に記録）
+最終更新: 2026-06-03（公開トップページを実装・ブラウザ動作確認済み。デザイン微調整は次回・SAKIさんが修正箇所をまとめる予定）
 
 ---
 
@@ -175,6 +175,25 @@
     - M メニュー中身（上から）=「三十年商店とは？」ボタン（→/about・現状「初めての方はこちら」から文言統一）／小商店（3列）／検索（枠のみ）／アーカイブ（枠のみ）／左端5リンク。
     - N 開き方=**全画面の白いオーバーレイ**（現状どおり）＋開いている間は背景スクロール固定（小改善）。実装は Client Component で開閉管理。現状の `.en` 自動ラップJSは不要（§5の font-kerning で代替）。
     - **▶ これでトップページのデザイン要件は PC・スマホとも全確定**。次は §14 に沿って実装に着手できる状態。
+22. **フェーズ2：公開トップページを実装（ブラウザ動作確認済み）**（コミット `（このコミット）`）。仕様書 §14 に沿って実装。型チェック(tsc)・Lint(eslint)クリーン。
+    - **追加した仕組み（E項目）**: サイト設定。`site_settings` テーブル（key/value）をschema追加＋マイグレーション `drizzle/0003_slimy_firedrake.sql` 適用済み。`src/db/settings.ts`（getSetting/setSetting/getLeadText・初期値=確定リード文）。管理画面 `/admin/settings`（管理者専用・`settings-form.tsx`）＋アクション `src/app/actions/settings.ts`。/admin トップに「サイト設定」リンク追加。
+    - **公開ページ本体**:
+      - `src/app/(public)/layout.tsx` … 3カラム＋左端縦メニュー＋右端アイコン＋ハンバーガー。連載一覧・リードテキストをDBから取得して各パーツへ。`public-root` クラスで明朝＋font-kerning（§5）。
+      - `src/app/(public)/page.tsx` … 最新エリア＋記事一覧（2列・12件）＋ページネーション。`export const dynamic='force-dynamic'`（常に最新DBを表示）。
+      - 共通部品 `src/components/public/`: section-heading / article-card / latest-article / pagination / series-list / sidebar-right(SidebarContent) / sidebar-left / edge-nav / edge-icons / hamburger-menu(client) / nav-links / search-form。
+      - `src/db/articles.ts` の PublicArticle に `categoryImagePath` 追加（最新カードの白窓に連載画像を出すため）。
+      - `src/lib/datetime.ts` に `formatJstDatetime`（"6月3日 15時26分"）追加。
+      - 記事アクション（create/update/delete）に `revalidatePath('/')` 追加。
+      - アセットを `public/` へコピー: dammy.jpg / line-up.png / 30nen_sanmaru.png / Icon_insta.svg / Icon_x.svg / Icon_mail.svg / obi-pattern.png。
+    - **動作確認**: デスクトップはデザイン画像にほぼ一致。スマホは縦1列＋右下ハンバーガー（全画面メニュー）。コンソールエラー無し。`npm run dev` → `http://localhost:3000`。窓幅1024px以上でPC版・未満でスマホ版に自動切替。
+    - **⚠ 確認用のサンプルデータ**: ローカルDBに公開記事15件＋連載数件（もしもし五島列島/ご機嫌な毎日/島縞/のちの野良）を投入済み（表示確認用）。本番前に削除する。※DB実体(`data/*.db`)はGit管理外なのでコミットには含まれない。
+    - **🔧 次回の調整待ち（実装で私が決めた点・SAKIさんが修正箇所をまとめる予定）**:
+      1. **3カラムの幅**: 現在 左:中央:右 ≒ 1:1.6:1.3（中央広め）。メモは「等分」。→要確認。
+      2. **オビ（見出し）**: 「文字＋細い横線」で実装。メモにあった帯模様画像(`obi-pattern.png`・public済)への切替は未実施。→要確認。
+      3. **代替画像(dammy)**: アイキャッチ未設定時は現行の `dammy.jpg`（暖簾ロゴ画像）。別画像にするか要検討。
+      4. **最新エリア**: PC・スマホ共通で「最新を大きく出し、一覧から1件省く」に統一（現行WPはスマホで一覧にも最新を含めていた）。
+      5. リードテキスト初期値は改行なし1段落（デザイン画像は改行入り）。`/admin/settings` で編集可。
+      6. dev環境ではハンバーガー内「小商店」サムネイル(line-up.png)の画像最適化が遅く一瞬空白に見えることがある（本番ビルドで解消・実装上の問題ではない）。
 
 ### 現在のフォルダ状態
 ```

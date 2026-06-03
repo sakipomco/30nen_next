@@ -134,6 +134,7 @@ export type PublicArticle = {
   categoryId: number | null;
   categoryName: string | null;
   categorySlug: string | null;
+  categoryImagePath: string | null;
 };
 
 // 公開記事を絞り込むフィルター（status=published かつ publishedAt が今以前）
@@ -161,6 +162,7 @@ const publicColumns = {
   categoryId: articles.categoryId,
   categoryName: categories.name,
   categorySlug: categories.slug,
+  categoryImagePath: categories.imagePath,
 };
 
 // ── 公開記事一覧 ────────────────────────────────────────

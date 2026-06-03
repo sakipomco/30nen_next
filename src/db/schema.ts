@@ -55,6 +55,15 @@ export const articles = sqliteTable('articles', {
   wpId: integer('wp_id'), // 旧WordPressの記事ID（移行用の保険）
 });
 
+// ── サイト設定（キーと値の組）─────────────────────────────────
+// トップページのリードテキストなど、管理画面から編集できる「自由テキスト」を保存する場所。
+// 1行＝1設定（key が名札・value が中身）。将来ほかの編集可能テキストもここに足せる。
+export const siteSettings = sqliteTable('site_settings', {
+  key: text('key').primaryKey(), // 設定の名札（例: 'lead_text'）
+  value: text('value').notNull().default(''), // 設定の中身（テキスト）
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+});
+
 // ── 連載×投稿者の担当名簿（中間テーブル）─────────────────────
 // 1連載＝複数担当を表す。複合主キー（category_id, user_id）で同じ組合せの二重登録を防ぐ。
 export const categoryAuthors = sqliteTable(
