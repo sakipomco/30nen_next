@@ -59,6 +59,7 @@ export default async function EditCategoryPage({
               slug: category.slug,
               parentId: category.parentId,
               sortOrder: category.sortOrder,
+              imagePath: category.imagePath,
             }}
             submitLabel="保存する"
           />

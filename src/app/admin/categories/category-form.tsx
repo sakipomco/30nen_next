@@ -1,9 +1,10 @@
 'use client';
 // 連載(カテゴリ)の入力フォーム（新規作成・編集で使い回す）。
-// 欄：連載名（必須）／親連載（任意・トップ階層なら「なし」）／並び順／URL名札(slug・任意)。
+// 欄：連載名（必須）／親連載（任意・トップ階層なら「なし」）／並び順／URL名札(slug・任意）／連載画像（任意）。
 
 import { useActionState } from 'react';
 import type { CategoryFormState } from '@/app/actions/categories';
+import { FeaturedImage } from '@/app/admin/featured-image';
 
 type CategoryAction = (
   prevState: CategoryFormState,
@@ -23,6 +24,7 @@ type Props = {
     slug: string | null;
     parentId: number | null;
     sortOrder: number;
+    imagePath: string | null;
   };
   submitLabel?: string; // ボタンの文言（既定: 保存）
 };
@@ -92,6 +94,18 @@ export function CategoryForm({
           公開ページのURLに使う名札です。空欄でもかまいません（あとで設定できます）。
         </span>
       </label>
+
+      {/* 連載画像：右サイドバーの「小商店」に表示するイメージ画像 */}
+      <div className="flex flex-col gap-1 text-sm">
+        <span>連載のイメージ画像（任意・右サイドバーの「小商店」に表示）</span>
+        <FeaturedImage
+          name="imagePath"
+          initialPath={initial?.imagePath ?? null}
+        />
+        <span className="text-xs text-zinc-500">
+          設定しない場合は代替画像が表示されます。
+        </span>
+      </div>
 
       {state?.error && (
         <p className="text-sm text-red-600" role="alert">

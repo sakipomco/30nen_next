@@ -15,6 +15,13 @@
       "when": 1780375794772,
       "tag": "0001_brave_anthem",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1780449611049,
+      "tag": "0002_nebulous_ultron",
+      "breakpoints": true
     }
   ]
 }
