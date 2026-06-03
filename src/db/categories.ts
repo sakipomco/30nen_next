@@ -170,6 +170,28 @@ export async function deleteCategory(
   return { ok: rows.length > 0 };
 }
 
+// 投稿フォームで「その人が選べる連載」を返す（字下げ用の depth つき）。
+//  - 投稿者(author)で担当連載が登録済み → その担当連載だけ（範囲内だけで選べる）
+//  - 管理者(admin)、または担当未設定の投稿者 → 全連載（親子を字下げ表示）
+export async function listSelectableCategories(user: {
+  id: number;
+  role: 'admin' | 'author';
+}): Promise<{ id: number; name: string; depth: number }[]> {
+  if (user.role === 'author') {
+    const assigned = await getCategoriesForUser(user.id);
+    if (assigned.length > 0) {
+      // 担当連載だけ（1人1連載なら1件。字下げは不要なので depth=0）
+      return assigned.map((c) => ({ id: c.id, name: c.name, depth: 0 }));
+    }
+  }
+  const all = await listCategories();
+  return buildCategoryTree(all).map((c) => ({
+    id: c.id,
+    name: c.name,
+    depth: c.depth,
+  }));
+}
+
 // ── 担当名簿（category_authors）──────────────────────────────
 
 // その書き手が担当している連載の一覧（並び順つき）。

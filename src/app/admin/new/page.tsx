@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { requireUser } from '@/auth/session';
 import { createArticleAction } from '@/app/actions/articles';
+import { listSelectableCategories } from '@/db/categories';
 import { ArticleForm } from '../article-form';
 
 export const metadata = {
@@ -9,7 +10,8 @@ export const metadata = {
 };
 
 export default async function NewArticlePage() {
-  await requireUser();
+  const user = await requireUser();
+  const categories = await listSelectableCategories(user);
 
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 px-4 py-12">
@@ -21,7 +23,7 @@ export default async function NewArticlePage() {
           </Link>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-6">
-          <ArticleForm action={createArticleAction} />
+          <ArticleForm action={createArticleAction} categories={categories} />
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { requireUser } from '@/auth/session';
 import { updateArticleAction } from '@/app/actions/articles';
 import { getArticleById } from '@/db/articles';
+import { listSelectableCategories, getCategoryById } from '@/db/categories';
 import { utcToJstInput } from '@/lib/datetime';
 import { ArticleForm } from '../../../article-form';
 
@@ -17,7 +18,7 @@ export default async function EditArticlePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
 
   const { id } = await params;
   const articleId = Number(id);
@@ -25,6 +26,16 @@ export default async function EditArticlePage({
 
   const article = await getArticleById(articleId);
   if (!article) notFound();
+
+  // この人が選べる連載。編集中の記事の連載が一覧に無ければ、保存値を保てるよう先頭に足す。
+  const categories = await listSelectableCategories(user);
+  if (
+    article.categoryId != null &&
+    !categories.some((c) => c.id === article.categoryId)
+  ) {
+    const own = await getCategoryById(article.categoryId);
+    if (own) categories.unshift({ id: own.id, name: own.name, depth: 0 });
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 px-4 py-12">
@@ -38,11 +49,13 @@ export default async function EditArticlePage({
         <div className="rounded-lg border border-zinc-200 bg-white p-6">
           <ArticleForm
             action={updateArticleAction}
+            categories={categories}
             initial={{
               id: article.id,
               title: article.title,
               content: article.content,
               featuredImagePath: article.featuredImagePath,
+              categoryId: article.categoryId,
               // 公開日時があれば日本時間の入力欄の形にして初期表示
               publishedAtInput: article.publishedAt
                 ? utcToJstInput(article.publishedAt)

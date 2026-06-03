@@ -5,7 +5,13 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/auth/session';
+import type { PublicUser } from '@/db/users';
 import { createArticle, updateArticle, deleteArticle } from '@/db/articles';
+import {
+  getCategoryById,
+  getCategoriesForUser,
+  setUserCategory,
+} from '@/db/categories';
 import { jstInputToUtc } from '@/lib/datetime';
 
 // useActionState に渡すための状態の形（エラー文言を画面に返す）。
@@ -31,6 +37,38 @@ function featuredImageFromForm(formData: FormData): string | null {
   return input ? input : null;
 }
 
+// 連載(カテゴリ)を読み、検証し、担当ルールを適用する。
+//  - 連載は必須（未分類を作らない）。
+//  - 投稿者(author)で担当が未登録なら、選んだ連載を担当として記録（次回から自動）。
+//  - 投稿者で担当が登録済みなら、その範囲内からしか選べない。
+//  - 管理者(admin)は全連載から自由に選べる（担当としては記録しない）。
+// 成功なら { categoryId }、失敗なら { error } を返す。
+async function resolveCategory(
+  user: PublicUser,
+  formData: FormData,
+): Promise<{ categoryId: number } | { error: string }> {
+  const categoryId = Number(formData.get('categoryId'));
+  if (!Number.isInteger(categoryId) || categoryId <= 0) {
+    return { error: '連載を選んでください。' };
+  }
+  const category = await getCategoryById(categoryId);
+  if (!category) {
+    return { error: '選んだ連載が見つかりませんでした。' };
+  }
+
+  if (user.role === 'author') {
+    const assigned = await getCategoriesForUser(user.id);
+    if (assigned.length === 0) {
+      // 担当未登録 → 選んだ連載を担当として記録（A案：選んでからだけ投稿可）
+      await setUserCategory(user.id, categoryId);
+    } else if (!assigned.some((c) => c.id === categoryId)) {
+      return { error: '担当の連載の中から選んでください。' };
+    }
+  }
+
+  return { categoryId };
+}
+
 // ── 新規作成 ─────────────────────────────────────────────
 export async function createArticleAction(
   _prevState: ArticleFormState,
@@ -44,9 +82,13 @@ export async function createArticleAction(
     return { error: 'タイトルを入力してください。' };
   }
 
+  const category = await resolveCategory(user, formData);
+  if ('error' in category) return { error: category.error };
+
   await createArticle({
     title,
     content,
+    categoryId: category.categoryId,
     featuredImagePath: featuredImageFromForm(formData),
     status: statusFromIntent(formData),
     publishedAt: publishedAtFromForm(formData), // 未指定なら公開時に「今」を自動補完
@@ -62,7 +104,7 @@ export async function updateArticleAction(
   _prevState: ArticleFormState,
   formData: FormData,
 ): Promise<ArticleFormState> {
-  await requireUser();
+  const user = await requireUser();
 
   const id = Number(formData.get('id'));
   const title = String(formData.get('title') ?? '').trim();
@@ -74,9 +116,13 @@ export async function updateArticleAction(
     return { error: 'タイトルを入力してください。' };
   }
 
+  const category = await resolveCategory(user, formData);
+  if ('error' in category) return { error: category.error };
+
   const updated = await updateArticle(id, {
     title,
     content,
+    categoryId: category.categoryId,
     featuredImagePath: featuredImageFromForm(formData),
     status: statusFromIntent(formData),
     publishedAt: publishedAtFromForm(formData), // 未指定なら既存の公開日時を維持

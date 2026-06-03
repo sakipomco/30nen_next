@@ -15,21 +15,32 @@ type ArticleAction = (
 
 type Props = {
   action: ArticleAction;
+  // この人が選べる連載（サーバー側でログイン中の人に合わせて用意して渡す）。
+  categories: { id: number; name: string; depth: number }[];
   // 編集のときだけ渡す初期値（新規作成のときは undefined）
   initial?: {
     id: number;
     title: string;
     content: string;
     featuredImagePath?: string | null; // アイキャッチ画像の初期値（保存済みのパス）
+    categoryId?: number | null; // 連載の初期値（保存済み）
     publishedAtInput?: string; // 公開日時の初期値（'YYYY-MM-DDTHH:MM'・日本時間）。未公開なら空。
   };
 };
 
-export function ArticleForm({ action, initial }: Props) {
+export function ArticleForm({ action, categories, initial }: Props) {
   const [state, formAction, pending] = useActionState<
     ArticleFormState,
     FormData
   >(action, undefined);
+
+  // 連載の初期選択：編集なら保存済みの連載／選択肢が1つだけなら自動でそれ／それ以外は未選択。
+  const defaultCategoryId =
+    initial?.categoryId != null
+      ? String(initial.categoryId)
+      : categories.length === 1
+        ? String(categories[0].id)
+        : '';
 
   // 「投稿する」(公開)を押したとき、アイキャッチ画像が未設定なら確認する（A案：必須にはしない）。
   // hidden input(name="featuredImage")の値が空＝未設定。キャンセルなら送信を止める。
@@ -61,6 +72,31 @@ export function ArticleForm({ action, initial }: Props) {
           defaultValue={initial?.title ?? ''}
           className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
         />
+      </label>
+
+      {/* 連載（カテゴリ）。未分類を作らないため必須。担当が1つだけなら自動で選ばれる。 */}
+      <label className="flex flex-col gap-1 text-sm">
+        連載
+        {categories.length === 0 ? (
+          <span className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700">
+            連載がまだ登録されていません。管理者に連載の作成を依頼してください。
+          </span>
+        ) : (
+          <select
+            name="categoryId"
+            required
+            defaultValue={defaultCategoryId}
+            className="w-fit rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
+          >
+            {/* 選択肢が1つに定まらないときだけ「選んでください」を出す */}
+            {!defaultCategoryId && <option value="">連載を選んでください</option>}
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {'　'.repeat(c.depth) + c.name}
+              </option>
+            ))}
+          </select>
+        )}
       </label>
 
       <div className="flex flex-col gap-1 text-sm">
