@@ -14,7 +14,7 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
 
   return (
     <Link href={href} className="group block">
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100">
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-100 lg:aspect-[2/1]">
         <Image
           src={imageSrc}
           alt={article.title}

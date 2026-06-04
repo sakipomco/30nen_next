@@ -1,6 +1,9 @@
 // 公開トップページ（記事一覧）。仕様書 §14-H / §14-I。
-//  - 「最新」エリア: 最新1件を大きく表示（1ページ目のみ）
-//  - 「記事一覧」: 新しい順・2列・12件/ページ。最新1件は一覧から省く（二重表示防止）
+//  - 「最新」エリア: 最新1件を大きく表示（1ページ目のみ・PC専用）。
+//    スマホ（lg未満）では「最新」帯も大画像も出さず、いきなり「記事一覧」が最新から並ぶ。
+//  - 「記事一覧」: 新しい順・2列・12件/ページ。1ページ目も最新を含めて12件取得し、
+//    PCでは先頭カード（＝最新。大画像と重複）だけCSSで隠す。スマホは先頭カードとして表示。
+//    → PC・スマホとも1ページ12件で、ページ送りが一致する。
 //  - ページ送りは ?page=2 のクエリで制御
 //
 // 記事は日々増えるので、常に最新のDB内容を表示する（force-dynamic）。
@@ -27,29 +30,23 @@ export default async function TopPage({
   const page = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1);
 
   const total = await countPublishedArticles();
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
-  // 最新1件（1ページ目だけ大きく表示）
-  const latest =
-    page === 1
-      ? (await listPublishedArticles({ limit: 1, offset: 0 }))[0] ?? null
-      : null;
-
-  // 記事一覧（最新1件を飛ばして新しい順・12件）
-  const listOffset = 1 + (page - 1) * PER_PAGE;
+  // 記事一覧（新しい順・12件/ページ）。1ページ目も先頭(最新)を含めて取得する。
+  const offset = (page - 1) * PER_PAGE;
   const articles = await listPublishedArticles({
     limit: PER_PAGE,
-    offset: listOffset,
+    offset,
   });
 
-  // ページ数（一覧の対象は「最新1件を除いた件数」）
-  const listTotal = Math.max(0, total - 1);
-  const totalPages = Math.max(1, Math.ceil(listTotal / PER_PAGE));
+  // 最新エリアに大きく出す記事（1ページ目の先頭）。PC専用。
+  const latest = page === 1 ? articles[0] ?? null : null;
 
   return (
     <div>
-      {/* 最新エリア（1ページ目のみ） */}
+      {/* 最新エリア（1ページ目のみ・PC専用。スマホは一覧の先頭カードで表示） */}
       {latest && (
-        <section className="mb-12">
+        <section className="mb-12 hidden lg:block">
           <SectionHeading>最新</SectionHeading>
           <LatestArticle article={latest} />
         </section>
@@ -61,9 +58,14 @@ export default async function TopPage({
         {articles.length === 0 ? (
           <p className="text-sm text-[#808080]">記事がありません。</p>
         ) : (
-          <ul className="grid grid-cols-2 gap-x-5 gap-y-8">
-            {articles.map((article) => (
-              <li key={article.id}>
+          <ul className="grid grid-cols-1 gap-x-1 gap-y-8 lg:grid-cols-2">
+            {articles.map((article, i) => (
+              <li
+                key={article.id}
+                // 1ページ目の先頭(=最新)はPCでは大画像と重複するので隠す。
+                // スマホは大画像が無いので、一覧の先頭カードとして表示する。
+                className={page === 1 && i === 0 ? 'lg:hidden' : undefined}
+              >
                 <ArticleCard article={article} />
               </li>
             ))}
