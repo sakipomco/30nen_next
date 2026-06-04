@@ -39,6 +39,12 @@ body {
   letter-spacing: -0.03em;
 }
 
+/* ひらがなの連なりだけ字間を詰める（リード文の字詰め・現行サイト風）。
+   数値を小さくすると詰まり、大きく（0 に近く）すると緩む。要調整。 */
+.hira-tight {
+  letter-spacing: -0.09em;
+}
+
 /* セクション見出しの「帯（オビ）」。obi-pattern.png を小さく敷き詰め、
    白を重ねて薄いテクスチャにする（現行 30nen.com の common_title01 を再現）。 */
 .obi-band {

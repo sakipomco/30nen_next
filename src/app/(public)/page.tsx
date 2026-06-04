@@ -47,11 +47,6 @@ export default async function TopPage({
 
   return (
     <div>
-      {/* パンくず */}
-      <p className="serif mb-8 text-center text-sm tracking-wider text-[#333]">
-        三十年商店
-      </p>
-
       {/* 最新エリア（1ページ目のみ） */}
       {latest && (
         <section className="mb-12">
