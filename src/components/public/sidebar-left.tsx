@@ -58,7 +58,7 @@ export function SidebarLeft({ leadText }: { leadText: string }) {
       </p>
 
       {/* SNSリンク（instagram ｜ x） */}
-      <div className="serif mt-5 flex items-center gap-3 text-sm">
+      <div className="serif mt-3 flex items-center gap-3 text-sm">
         <a
           href={SOCIAL_LINKS.instagram}
           target="_blank"

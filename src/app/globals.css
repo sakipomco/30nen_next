@@ -49,7 +49,7 @@ body {
    白を重ねて薄いテクスチャにする（現行 30nen.com の common_title01 を再現）。 */
 .obi-band {
   background-image: url('/obi-pattern.png');
-  background-size: 4px 4px;
+  background-size: 2px 2px;
   background-color: rgba(255, 255, 255, 0.8);
   background-blend-mode: lighten;
 }

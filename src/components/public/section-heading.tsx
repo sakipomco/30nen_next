@@ -4,8 +4,8 @@
 
 export function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="obi-band mb-5 px-3 py-1.5">
-      <h2 className="serif whitespace-nowrap text-[1.05rem] tracking-[0.4em] text-[#150c0c]">
+    <div className="obi-band mb-5 px-1 py-[2px]">
+      <h2 className="serif whitespace-nowrap text-[0.95rem] leading-tight tracking-normal text-[#150c0c]">
         {children}
       </h2>
     </div>
