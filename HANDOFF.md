@@ -234,6 +234,7 @@
     - **画像のホバーをズーム→フェードに変更**（`article-card.tsx`・`latest-article.tsx`・`series-list.tsx`）: `group-hover:scale-*` をやめ `transition-opacity ... group-hover:opacity-80` に統一（マウスオーバーで少し薄くなる）。
     - **⚠ ローカル確認用サンプル**: アーカイブ目次の長さ確認のため、2024年6月〜2026年4月の各月に公開記事を計132件投入済み（タイトル先頭「サンプル」・著者ID2・連載6〜9）。DB実体はGit管理外＝コミットに含まれない。本番前に既存サンプルと一緒に削除する。
     - **のれんロゴを上端ぴったりに**（`src/components/public/sidebar-left.tsx`・コミット `（このコミット）`）: ロゴ画像の上の余白を打ち消し、ウィンドウ上端に密着（`-mt-10 lg:-mt-12`）。横位置は中央のまま（左端には寄せない）。PC・スマホ両方に適用。
+    - **「三十年商店とは？」ボタンを薄く＋文字小さく**（`sidebar-left.tsx`＝PC・`hamburger-menu.tsx`＝スマホ両方／コミット `（このコミット）`）: 帯の上下アキ `py-1.5(PC)`・`py-2(スマホ)` → `py-0.5`＋`leading-tight`、文字 `text-sm`→`text-xs`。記事一覧カードのタイトルも少し小さく（`text-[0.95rem]`→`text-[0.9rem]`／`article-card.tsx`）。
     - **▶ 次回**: 月別アーカイブページ（クリック先）、または記事詳細・連載別一覧・著者・about等の実装へ。
 
 ### 現在のフォルダ状態

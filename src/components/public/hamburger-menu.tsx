@@ -65,7 +65,7 @@ export function HamburgerMenu({
           <Link
             href="/about"
             onClick={close}
-            className="serif mx-auto mb-10 flex w-40 items-center justify-center rounded-full bg-[#eeeeee] py-2 text-sm text-[#333] transition-colors hover:bg-[#150c0c] hover:text-white"
+            className="serif mx-auto mb-10 flex w-40 items-center justify-center rounded-full bg-[#eeeeee] py-0.5 text-xs leading-tight text-[#333] transition-colors hover:bg-[#150c0c] hover:text-white"
           >
             三十年商店とは？
           </Link>

@@ -65,7 +65,7 @@ export function SidebarLeft({ leadText }: { leadText: string }) {
       {/* 「三十年商店とは？」ボタン */}
       <Link
         href="/about"
-        className="serif mt-6 hidden w-36 items-center justify-center rounded-full bg-[#eeeeee] py-1.5 text-sm text-[#333] transition-colors hover:bg-[#150c0c] hover:text-white lg:flex"
+        className="serif mt-6 hidden w-36 items-center justify-center rounded-full bg-[#eeeeee] py-0.5 text-xs leading-tight text-[#333] transition-colors hover:bg-[#150c0c] hover:text-white lg:flex"
       >
         三十年商店とは？
       </Link>

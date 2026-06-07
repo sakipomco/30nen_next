@@ -32,7 +32,7 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
         {article.categoryName ? `【${article.categoryName}】` : ''}
         {date}
       </p>
-      <h3 className="serif mt-0.5 line-clamp-2 pr-5 text-[0.95rem] font-medium leading-snug text-[#333]">
+      <h3 className="serif mt-0.5 line-clamp-2 pr-5 text-[0.9rem] font-medium leading-snug text-[#333]">
         {article.title}
       </h3>
     </Link>
