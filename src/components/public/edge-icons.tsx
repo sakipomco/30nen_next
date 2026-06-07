@@ -5,11 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { SOCIAL_LINKS } from './nav-links';
 
-const ICON_SIZE = 22;
+const ICON_SIZE = 18; // 元22pxの約80%
 
 export function EdgeIcons() {
   return (
-    <div className="fixed bottom-6 right-4 top-0 z-30 hidden flex-col items-center justify-end gap-5 border-l border-[#150c0c]/50 pl-4 lg:flex">
+    <div className="fixed bottom-0 right-4 top-0 z-30 hidden flex-col items-center justify-end gap-5 border-l border-[#150c0c]/50 pb-[29px] pl-4 lg:flex">
       <a
         href={SOCIAL_LINKS.instagram}
         target="_blank"

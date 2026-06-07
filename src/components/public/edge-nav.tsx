@@ -7,7 +7,7 @@ import { renderHiraTight } from './hira-tight';
 
 export function EdgeNav() {
   return (
-    <nav className="fixed bottom-6 left-4 top-0 z-30 hidden flex-col justify-end border-r border-[#150c0c]/50 pr-4 lg:flex">
+    <nav className="fixed bottom-0 left-4 top-0 z-30 hidden flex-col justify-end border-r border-[#150c0c]/50 pb-6 pr-4 lg:flex">
       <ul className="flex flex-col gap-6">
         {PAGE_LINKS.map((link) => (
           <li key={link.href}>
