@@ -9,9 +9,14 @@ import { uploadImage } from './upload-image';
 type Props = {
   name: string; // フォーム送信時の項目名（例: "featuredImage"）
   initialPath?: string | null; // 編集時の初期値（保存済みのパス）
+  label?: string; // 見出し（既定はアイキャッチ用。顔写真などに流用するとき指定）
 };
 
-export function FeaturedImage({ name, initialPath }: Props) {
+export function FeaturedImage({
+  name,
+  initialPath,
+  label = 'アイキャッチ画像（記事の代表画像・任意）',
+}: Props) {
   const [path, setPath] = useState<string>(initialPath ?? '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +40,7 @@ export function FeaturedImage({ name, initialPath }: Props) {
 
   return (
     <div className="flex flex-col gap-2 text-sm">
-      アイキャッチ画像（記事の代表画像・任意）
+      {label}
       {path ? (
         // 設定済み：プレビューと「変更」「削除」
         <div className="flex flex-col gap-2">

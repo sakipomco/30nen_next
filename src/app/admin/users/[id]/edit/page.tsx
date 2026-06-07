@@ -63,6 +63,13 @@ export default async function EditUserPage({
               role: publicUser.role,
               bio: publicUser.bio,
               categoryId: currentCategoryId,
+              avatarPath: publicUser.avatarPath,
+              location: publicUser.location,
+              age: publicUser.age,
+              instagramUrl: publicUser.instagramUrl,
+              xUrl: publicUser.xUrl,
+              youtubeUrl: publicUser.youtubeUrl,
+              websiteUrl: publicUser.websiteUrl,
             }}
             submitLabel="保存する"
           />

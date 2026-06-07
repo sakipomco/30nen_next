@@ -20,6 +20,12 @@ export type NewUserInput = {
   role?: 'admin' | 'author';
   avatarPath?: string | null;
   bio?: string | null;
+  location?: string | null;
+  age?: number | null;
+  instagramUrl?: string | null;
+  xUrl?: string | null;
+  youtubeUrl?: string | null;
+  websiteUrl?: string | null;
 };
 
 // 更新で渡せる項目。password は「変更したいときだけ」渡す（空なら据え置き）。
@@ -30,6 +36,12 @@ export type UpdateUserInput = {
   role?: 'admin' | 'author';
   avatarPath?: string | null;
   bio?: string | null;
+  location?: string | null;
+  age?: number | null;
+  instagramUrl?: string | null;
+  xUrl?: string | null;
+  youtubeUrl?: string | null;
+  websiteUrl?: string | null;
 };
 
 // passwordHash を取り除いて返す（うっかり画面へ漏らさないための関所）。
@@ -73,6 +85,12 @@ export async function createUser(input: NewUserInput): Promise<PublicUser> {
       role: input.role ?? 'author',
       avatarPath: input.avatarPath ?? null,
       bio: input.bio ?? null,
+      location: input.location ?? null,
+      age: input.age ?? null,
+      instagramUrl: input.instagramUrl ?? null,
+      xUrl: input.xUrl ?? null,
+      youtubeUrl: input.youtubeUrl ?? null,
+      websiteUrl: input.websiteUrl ?? null,
     })
     .returning();
   return toPublicUser(row);
@@ -102,6 +120,12 @@ export async function updateUser(
   if (input.role !== undefined) patch.role = input.role;
   if (input.avatarPath !== undefined) patch.avatarPath = input.avatarPath;
   if (input.bio !== undefined) patch.bio = input.bio;
+  if (input.location !== undefined) patch.location = input.location;
+  if (input.age !== undefined) patch.age = input.age;
+  if (input.instagramUrl !== undefined) patch.instagramUrl = input.instagramUrl;
+  if (input.xUrl !== undefined) patch.xUrl = input.xUrl;
+  if (input.youtubeUrl !== undefined) patch.youtubeUrl = input.youtubeUrl;
+  if (input.websiteUrl !== undefined) patch.websiteUrl = input.websiteUrl;
   // password は「中身がある」ときだけハッシュ化して上書き（空欄＝据え置き）。
   if (input.password) patch.passwordHash = await hashPassword(input.password);
 

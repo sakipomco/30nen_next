@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { SOCIAL_LINKS } from './nav-links';
 import { renderHiraTight } from './hira-tight';
+import { ContactFormSlot } from './contact-form-slot';
 
 export function SidebarLeft({ leadText }: { leadText: string }) {
   return (
@@ -69,6 +70,10 @@ export function SidebarLeft({ leadText }: { leadText: string }) {
       >
         三十年商店とは？
       </Link>
+
+      {/* お便りフォーム（左コラム・見た目だけ。送信機能は後で繋ぐ）。
+          トップページ以外でのみ表示（ContactFormSlot が出し分け）。 */}
+      <ContactFormSlot />
     </div>
   );
 }

@@ -21,6 +21,12 @@ export const users = sqliteTable('users', {
   role: text('role', { enum: ['admin', 'author'] }).notNull().default('author'),
   avatarPath: text('avatar_path'), // 顔写真（任意）
   bio: text('bio'), // 自己紹介（任意）
+  location: text('location'), // 居住地（例: 神奈川県藤沢市・任意）
+  age: integer('age'), // 年齢（任意・手入力）
+  instagramUrl: text('instagram_url'), // Instagram URL（任意）
+  xUrl: text('x_url'), // X(旧Twitter) URL（任意）
+  youtubeUrl: text('youtube_url'), // YouTube URL（任意）
+  websiteUrl: text('website_url'), // Webサイト URL（任意）
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
   wpId: integer('wp_id'), // 旧WordPressのユーザーID（移行時の突き合わせ用）
 });

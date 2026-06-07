@@ -4,7 +4,7 @@
 > 新しい Claude Code セッションを **このフォルダ（`~/Desktop/30nen_next`）で起動** し、
 > 「HANDOFF.md を読んで」と伝えれば、ここまでの経緯を引き継げます。
 
-最終更新: 2026-06-07（右コラム調整＋アーカイブ目次を新設＝項目27・ブラウザ動作確認済み。次回もSAKIさんと対話しながら継続）
+最終更新: 2026-06-07（記事詳細ページ＋書き手プロフィール＋お便りフォームを新設＝項目28・ブラウザ動作確認済み。次回もSAKIさんと対話しながら継続）
 
 ---
 
@@ -236,6 +236,15 @@
     - **のれんロゴを上端ぴったりに**（`src/components/public/sidebar-left.tsx`・コミット `（このコミット）`）: ロゴ画像の上の余白を打ち消し、ウィンドウ上端に密着（`-mt-10 lg:-mt-12`）。横位置は中央のまま（左端には寄せない）。PC・スマホ両方に適用。
     - **「三十年商店とは？」ボタンを薄く＋文字小さく**（`sidebar-left.tsx`＝PC・`hamburger-menu.tsx`＝スマホ両方／コミット `（このコミット）`）: 帯の上下アキ `py-1.5(PC)`・`py-2(スマホ)` → `py-0.5`＋`leading-tight`、文字 `text-sm`→`text-xs`。記事一覧カードのタイトルも少し小さく（`text-[0.95rem]`→`text-[0.9rem]`／`article-card.tsx`）。
     - **▶ 次回**: 月別アーカイブページ（クリック先）、または記事詳細・連載別一覧・著者・about等の実装へ。
+28. **フェーズ2：記事詳細ページ＋書き手プロフィール＋お便りフォームを新設（SAKIさんと対話しながら実施・ブラウザ動作確認済み）**（コミット `（このコミット）`）。型チェック(tsc)・Lint(eslint)クリーン。
+    - **記事詳細ページ**（新規 `src/app/(public)/posts/[slug]/page.tsx`）: 一覧/最新カードのリンク先。`[slug]` は slug または id（数字）両対応（`findArticle` が slug→id の順で解決）。構成＝足跡（三十年商店＞連載＞タイトル）→連載名＋日付→タイトル→アイキャッチ→本文→書き手。`generateMetadata`・`force-dynamic`。本文HTMLは `.article-body`（globals.css に追加・line-height 2 等）で表示。
+    - **アイキャッチはトリミングしない**: 16:9固定をやめ、原寸比率のまま全幅表示（`<Image width={0} height={0} style={{width:'100%',height:'auto'}}>`）。正方形・縦長もそのまま。
+    - **書き手プロフィール欄**（新規 `src/components/public/writer-profile.tsx`）: 帯「書き手」＋丸トリミング顔写真＋名前／居住地・年齢／SNSアイコン（Instagram・X・YouTube・Webサイト）。無い項目は省略。記事末尾に表示。
+    - **投稿者データに項目追加**（`src/db/schema.ts`＋マイグレーション `0004`・`0005`）: `location`/`age`/`instagramUrl`/`xUrl`/`youtubeUrl`/`websiteUrl`。`src/db/users.ts` の入力型・create/update に反映。アイコン `public/Icon_youtube.svg`・`Icon_website.svg` を追加。
+    - **管理画面の投稿者編集を拡張**（`src/app/admin/users/user-form.tsx`・`actions/users.ts`・`[id]/edit/page.tsx`）: 「書き手プロフィール（記事ページに表示）」枠＝顔写真アップロード（`featured-image.tsx` に `label` プロパティを足して流用）＋居住地・年齢・SNS4種。**自己紹介欄は削除**。
+    - **お便りフォーム**（新規 `src/components/public/contact-form.tsx`＋`contact-form-slot.tsx`）: 左コラムに帯「お便りフォーム」＋お名前/Eメール/宛先(店主)/メッセージ/同意チェック/送信ボタン。**トップページ(/)では非表示・それ以外で表示**（`ContactFormSlot` が `usePathname` で出し分け）。**送信機能は未実装（枠だけ・送信ボタンは type="button"）**＝後フェーズでバックエンド接続。
+    - **⚠ ローカル確認用テストデータ**: 書き手「saico34」（id6・神奈川県藤沢市/49歳/SNS仮）を作成し記事9に割り当て・記事9の本文を実サンプルに差し替え（顔写真は `public/uploads/sample/...`）。すべてローカルDBのみ＝コミットに含まれない。本番前に整理。
+    - **▶ 次回**: お便りフォームの送信機能（メール送信）、連載別一覧・著者ページ・about、月別アーカイブページなど。
 
 ### 現在のフォルダ状態
 ```
