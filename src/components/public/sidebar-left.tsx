@@ -9,8 +9,10 @@ import { renderHiraTight } from './hira-tight';
 export function SidebarLeft({ leadText }: { leadText: string }) {
   return (
     <div className="flex flex-col items-center text-center">
-      {/* ロゴ（暖簾ロゴ画像・クリックでトップへ） */}
-      <Link href="/" className="block w-full max-w-[260px]">
+      {/* ロゴ（暖簾ロゴ画像・クリックでトップへ）。
+          PC（lg以上）では上の余白だけ打ち消して上端ぴったりに（左右は中央のまま）。
+          スマホは中央・大きめのまま。 */}
+      <Link href="/" className="-mt-10 block w-full max-w-[260px] lg:-mt-12">
         <Image
           src="/30nen_logo_noren_plus.jpg"
           alt="三十年商店"
