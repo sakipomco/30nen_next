@@ -16,20 +16,28 @@ export function SeriesList({ items }: { items: SeriesItem[] }) {
     return <p className="text-xs text-[#808080]">連載はまだありません。</p>;
   }
   return (
-    <ul className="grid grid-cols-3 gap-3">
+    <ul className="grid grid-cols-3 gap-0">
       {items.map((cat) => {
         const href = cat.slug ? `/series/${cat.slug}` : `/series/${cat.id}`;
         const img = cat.imagePath || '/line-up.png';
         return (
           <li key={cat.id}>
-            <Link href={href} className="group block" title={cat.name}>
+            {/* セル＝四隅のL字トンボ＋内側に余白をとった小さめの画像。
+                セル同士はすき間0で角を共有し、隣のLと重なって十字に見える。 */}
+            <Link href={href} className="group relative block p-2.5" title={cat.name}>
+              {/* 四隅のL字（トンボ風装飾）。線をセルの境界線の真上に来るよう
+                  外向きに半分(0.75px)ずらし、隣セルのLと1本に重ねる（ダブり防止）。 */}
+              <span className="pointer-events-none absolute left-0 top-0 h-2 w-2 -translate-x-[0.75px] -translate-y-[0.75px] border-l-[1.5px] border-t-[1.5px] border-[#c0c0c0]" />
+              <span className="pointer-events-none absolute right-0 top-0 h-2 w-2 translate-x-[0.75px] -translate-y-[0.75px] border-r-[1.5px] border-t-[1.5px] border-[#c0c0c0]" />
+              <span className="pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[0.75px] translate-y-[0.75px] border-b-[1.5px] border-l-[1.5px] border-[#c0c0c0]" />
+              <span className="pointer-events-none absolute bottom-0 right-0 h-2 w-2 translate-x-[0.75px] translate-y-[0.75px] border-b-[1.5px] border-r-[1.5px] border-[#c0c0c0]" />
               <span className="relative block aspect-square w-full overflow-hidden">
                 <Image
                   src={img}
                   alt={cat.name}
                   fill
                   sizes="(max-width: 1024px) 30vw, 8vw"
-                  className="object-contain transition-transform duration-300 group-hover:scale-[1.05]"
+                  className="object-contain transition-opacity duration-300 group-hover:opacity-80"
                 />
               </span>
             </Link>

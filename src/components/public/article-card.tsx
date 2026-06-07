@@ -20,7 +20,7 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
           alt={article.title}
           fill
           sizes="(max-width: 1024px) 50vw, 22vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          className="object-cover transition-opacity duration-300 group-hover:opacity-80"
         />
       </div>
       <p

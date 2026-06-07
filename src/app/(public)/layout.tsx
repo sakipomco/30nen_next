@@ -6,6 +6,7 @@
 //  - 左端: 縦書きメニュー（PCのみ）／右端: SNS・メールアイコン（PCのみ）
 
 import { listCategories } from '@/db/categories';
+import { listArchiveMonths } from '@/db/articles';
 import { getLeadText } from '@/db/settings';
 import { SidebarLeft } from '@/components/public/sidebar-left';
 import { SidebarContent } from '@/components/public/sidebar-right';
@@ -26,6 +27,7 @@ export default async function PublicLayout({
     .map((c) => ({ id: c.id, name: c.name, slug: c.slug, imagePath: c.imagePath }));
 
   const leadText = await getLeadText();
+  const archive = await listArchiveMonths();
 
   return (
     <div className="public-root flex-1 bg-white text-[#333]">
@@ -34,7 +36,7 @@ export default async function PublicLayout({
       <EdgeIcons />
 
       {/* スマホ: ハンバーガーメニュー（lg未満のみ表示） */}
-      <HamburgerMenu series={series} />
+      <HamburgerMenu series={series} archive={archive} />
 
       {/* 3カラム本体 */}
       <div className="mx-auto grid max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:grid-cols-[1fr_1.8fr_1fr] lg:gap-12 lg:px-20">
@@ -49,7 +51,7 @@ export default async function PublicLayout({
         {/* 右コラム（PCのみ・スマホはハンバーガー内に同じ内容） */}
         {/* lg:pt-2 は左コラム（ロゴ）と上ラインをそろえるため。 */}
         <aside className="hidden lg:block lg:pt-2">
-          <SidebarContent series={series} />
+          <SidebarContent series={series} archive={archive} />
         </aside>
       </div>
 

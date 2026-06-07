@@ -9,9 +9,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { SidebarContent } from './sidebar-right';
 import type { SeriesItem } from './series-list';
+import type { ArchiveMonth } from '@/db/articles';
 import { PAGE_LINKS } from './nav-links';
 
-export function HamburgerMenu({ series }: { series: SeriesItem[] }) {
+export function HamburgerMenu({
+  series,
+  archive,
+}: {
+  series: SeriesItem[];
+  archive: ArchiveMonth[];
+}) {
   const [open, setOpen] = useState(false);
 
   // 開いている間は背景のスクロールを止める。
@@ -47,7 +54,7 @@ export function HamburgerMenu({ series }: { series: SeriesItem[] }) {
         {open ? (
           <span className="serif text-sm">閉</span>
         ) : (
-          <Image src="/30nen_sanmaru.png" alt="" width={30} height={30} unoptimized />
+          <Image src="/30nen_sanmaru.png" alt="" width={45} height={45} unoptimized />
         )}
       </button>
 
@@ -65,7 +72,7 @@ export function HamburgerMenu({ series }: { series: SeriesItem[] }) {
 
           {/* 小商店・検索・アーカイブ */}
           <div onClick={close}>
-            <SidebarContent series={series} />
+            <SidebarContent series={series} archive={archive} />
           </div>
 
           {/* 左端メニュー5項目 */}

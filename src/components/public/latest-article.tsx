@@ -24,7 +24,7 @@ export function LatestArticle({ article }: { article: PublicArticle }) {
           fill
           sizes="(max-width: 1024px) 100vw, 45vw"
           priority
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          className="object-cover transition-opacity duration-300 group-hover:opacity-80"
         />
         {/* 画像左下に重ねるカテゴリー画像（白い窓） */}
         <span className="absolute bottom-2 left-2 block w-[84px] bg-white p-1 shadow-sm">

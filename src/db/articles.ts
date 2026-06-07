@@ -193,6 +193,26 @@ export async function countPublishedArticles(categoryId?: number): Promise<numbe
   return rows[0]?.n ?? 0;
 }
 
+// ── アーカイブ用: 公開記事を「年月（日本時間JST）」ごとに件数集計 ──
+// publishedAt はUTC保存なので +9時間してJSTの年月でまとめる。新しい月が上。
+export type ArchiveMonth = { year: number; month: number; count: number };
+
+export async function listArchiveMonths(): Promise<ArchiveMonth[]> {
+  const jst = sql`datetime(${articles.publishedAt}, '+9 hours')`;
+  const ym = sql<string>`strftime('%Y-%m', ${jst})`;
+  const rows = await db
+    .select({
+      year: sql<number>`cast(strftime('%Y', ${jst}) as integer)`,
+      month: sql<number>`cast(strftime('%m', ${jst}) as integer)`,
+      count: sql<number>`count(*)`,
+    })
+    .from(articles)
+    .where(and(...publicFilters()))
+    .groupBy(ym)
+    .orderBy(sql`${ym} desc`);
+  return rows;
+}
+
 // ── 公開記事を slug で取得（記事詳細ページ用）────────────
 export async function getPublishedArticleBySlug(slug: string): Promise<PublicArticle | null> {
   const rows = await db

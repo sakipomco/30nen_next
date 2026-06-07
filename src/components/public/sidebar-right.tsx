@@ -5,8 +5,16 @@
 import { SectionHeading } from './section-heading';
 import { SeriesList, type SeriesItem } from './series-list';
 import { SearchForm } from './search-form';
+import { ArchiveList } from './archive-list';
+import type { ArchiveMonth } from '@/db/articles';
 
-export function SidebarContent({ series }: { series: SeriesItem[] }) {
+export function SidebarContent({
+  series,
+  archive,
+}: {
+  series: SeriesItem[];
+  archive: ArchiveMonth[];
+}) {
   return (
     <div className="space-y-10">
       {/* 小商店（連載一覧） */}
@@ -17,14 +25,14 @@ export function SidebarContent({ series }: { series: SeriesItem[] }) {
 
       {/* 検索（枠のみ） */}
       <section>
-        <SectionHeading>検索</SectionHeading>
+        <SectionHeading gapClass="mb-2">ワード検索</SectionHeading>
         <SearchForm />
       </section>
 
-      {/* アーカイブ（枠のみ・中身は後回し） */}
+      {/* アーカイブ（年月の目次・表示のみ） */}
       <section>
-        <SectionHeading>アーカイブ</SectionHeading>
-        <p className="text-xs text-[#808080]">（準備中）</p>
+        <SectionHeading gapClass="mb-2">アーカイブ</SectionHeading>
+        <ArchiveList months={archive} />
       </section>
     </div>
   );
