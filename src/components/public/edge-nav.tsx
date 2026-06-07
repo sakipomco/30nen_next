@@ -3,18 +3,19 @@
 
 import Link from 'next/link';
 import { PAGE_LINKS } from './nav-links';
+import { renderHiraTight } from './hira-tight';
 
 export function EdgeNav() {
   return (
-    <nav className="fixed left-0 top-1/2 z-30 hidden -translate-y-1/2 pl-3 lg:block">
+    <nav className="fixed bottom-6 left-4 top-0 z-30 hidden flex-col justify-end border-r border-[#150c0c]/50 pr-4 lg:flex">
       <ul className="flex flex-col gap-6">
         {PAGE_LINKS.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="serif [writing-mode:vertical-rl] text-sm tracking-[0.15em] text-[#333] transition-opacity hover:opacity-60"
+              className="serif [writing-mode:vertical-rl] text-sm text-[#333] transition-opacity hover:opacity-60"
             >
-              {link.label}
+              {renderHiraTight(link.label)}
             </Link>
           </li>
         ))}

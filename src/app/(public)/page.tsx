@@ -16,6 +16,7 @@ import { SectionHeading } from '@/components/public/section-heading';
 import { LatestArticle } from '@/components/public/latest-article';
 import { ArticleCard } from '@/components/public/article-card';
 import { Pagination } from '@/components/public/pagination';
+import { Breadcrumb } from '@/components/public/breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,9 +45,12 @@ export default async function TopPage({
 
   return (
     <div>
+      {/* 足跡（現在地）。トップページなので「三十年商店」のみ。 */}
+      <Breadcrumb items={[{ label: '三十年商店' }]} />
+
       {/* 最新エリア（1ページ目のみ・PC専用。スマホは一覧の先頭カードで表示） */}
       {latest && (
-        <section className="mb-12 hidden lg:block">
+        <section className="mb-6 hidden lg:block">
           <SectionHeading>最新</SectionHeading>
           <LatestArticle article={latest} />
         </section>

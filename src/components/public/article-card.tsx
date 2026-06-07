@@ -14,7 +14,7 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
 
   return (
     <Link href={href} className="group block">
-      <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-100 lg:aspect-[2/1]">
+      <div className="relative aspect-[4/2.5] w-full overflow-hidden bg-zinc-100">
         <Image
           src={imageSrc}
           alt={article.title}
@@ -23,11 +23,16 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
           className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
         />
       </div>
-      <p className="mt-2 text-[0.7rem] text-[#808080]">
+      <p
+        className="mt-2 text-[0.7rem] text-[#333]"
+        // 全角の開きカッコ「【」は字形が右寄りで左にアキがあるため、
+        // カテゴリー名がある行だけ先頭を左へ寄せて写真の左端と縦ラインを揃える。
+        style={article.categoryName ? { textIndent: '-0.68em' } : undefined}
+      >
         {article.categoryName ? `【${article.categoryName}】` : ''}
         {date}
       </p>
-      <h3 className="serif mt-1 line-clamp-2 text-sm leading-snug text-[#333]">
+      <h3 className="serif mt-0.5 line-clamp-2 pr-5 text-sm leading-snug text-[#333]">
         {article.title}
       </h3>
     </Link>

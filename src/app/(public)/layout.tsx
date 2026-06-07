@@ -47,7 +47,8 @@ export default async function PublicLayout({
         <main className="min-w-0">{children}</main>
 
         {/* 右コラム（PCのみ・スマホはハンバーガー内に同じ内容） */}
-        <aside className="hidden lg:block">
+        {/* lg:pt-2 は左コラム（ロゴ）と上ラインをそろえるため。 */}
+        <aside className="hidden lg:block lg:pt-2">
           <SidebarContent series={series} />
         </aside>
       </div>

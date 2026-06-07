@@ -1,41 +1,10 @@
 // 左コラム（module01）の中身: ロゴ → リードテキスト → instagram｜x → 「三十年商店とは？」ボタン。
 // 仕様書 §14-D〜G。リードテキストはサイト設定（管理画面で編集）の値を受け取って表示。
 
-import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SOCIAL_LINKS } from './nav-links';
-
-// リード文のうち「ひらがなの連なり」だけを <span class="hira-tight"> で包み、
-// その部分の字間（letter-spacing）だけを詰める（現行サイト風の字詰め）。
-// 改行(\n)はそのまま残し、表示側の whitespace-pre-line で1行ずつ表示される。
-function renderLeadText(text: string): ReactNode[] {
-  const isHiragana = (ch: string) => /[ぁ-ゟ]/.test(ch);
-  const nodes: ReactNode[] = [];
-  let buf = '';
-  let bufIsHira = false;
-  const flush = (key: number) => {
-    if (!buf) return;
-    nodes.push(
-      bufIsHira ? (
-        <span key={key} className="hira-tight">
-          {buf}
-        </span>
-      ) : (
-        buf
-      ),
-    );
-    buf = '';
-  };
-  for (let i = 0; i < text.length; i++) {
-    const hira = isHiragana(text[i]);
-    if (buf && hira !== bufIsHira) flush(i);
-    bufIsHira = hira;
-    buf += text[i];
-  }
-  flush(text.length);
-  return nodes;
-}
+import { renderHiraTight } from './hira-tight';
 
 export function SidebarLeft({ leadText }: { leadText: string }) {
   return (
@@ -54,7 +23,7 @@ export function SidebarLeft({ leadText }: { leadText: string }) {
 
       {/* リードテキスト（改行を活かす・少し太め・ひらがな部分だけ字間を詰める） */}
       <p className="serif mt-6 whitespace-pre-line text-sm font-medium leading-6 text-[#333]">
-        {renderLeadText(leadText)}
+        {renderHiraTight(leadText)}
       </p>
 
       {/* SNSリンク（instagram ｜ x） */}
