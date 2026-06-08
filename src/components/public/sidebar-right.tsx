@@ -16,10 +16,11 @@ export function SidebarContent({
   archive: ArchiveMonth[];
 }) {
   return (
-    <div className="space-y-10">
-      {/* 小商店（連載一覧）。見出し下のアキ(mb-10=40px)をセクション間(space-y-10)とそろえる。 */}
+    // セクション間のアキ(space-y-5=20px)を、小商店見出し下のアキ(mb-5=20px)とそろえる。
+    <div className="space-y-5">
+      {/* 小商店（連載一覧） */}
       <section>
-        <SectionHeading gapClass="mb-10">小商店</SectionHeading>
+        <SectionHeading>小商店</SectionHeading>
         <SeriesList items={series} />
       </section>
 

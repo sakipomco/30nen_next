@@ -28,7 +28,7 @@ export function CategoryBanner({
 
       {/* 連載名（大）＋ヨミガナ（小） */}
       <div className="min-w-0">
-        <p className="serif text-base font-medium leading-tight text-[#150c0c] sm:text-lg">
+        <p className="serif text-base leading-tight text-[#150c0c]">
           {name}
         </p>
         {reading && (

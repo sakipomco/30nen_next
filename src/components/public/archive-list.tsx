@@ -12,9 +12,12 @@ export function ArchiveList({ months }: { months: ArchiveMonth[] }) {
     <ul className="space-y-0.5 text-[0.8rem] text-[#333]">
       {months.map((m) => (
         <li key={`${m.year}-${m.month}`}>
-          <span>
-            {m.year}年{m.month}月
+          <span>{m.year}年</span>
+          {/* 月の数字を固定幅・右そろえにして、1桁/2桁でも「月」が縦ラインでそろうように */}
+          <span className="inline-block w-[1.4em] text-right tabular-nums">
+            {m.month}
           </span>
+          <span>月</span>
           <span className="text-[0.7rem] text-[#808080]">（{m.count}）</span>
         </li>
       ))}
