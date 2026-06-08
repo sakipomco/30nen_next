@@ -6,8 +6,15 @@ import Link from 'next/link';
 import { SOCIAL_LINKS } from './nav-links';
 import { renderHiraTight } from './hira-tight';
 import { ContactFormSlot } from './contact-form-slot';
+import type { ContactRecipient } from './contact-form';
 
-export function SidebarLeft({ leadText }: { leadText: string }) {
+export function SidebarLeft({
+  leadText,
+  recipients,
+}: {
+  leadText: string;
+  recipients: ContactRecipient[];
+}) {
   return (
     <div className="flex flex-col items-center text-center">
       {/* ロゴ（暖簾ロゴ画像・クリックでトップへ）。
@@ -71,9 +78,9 @@ export function SidebarLeft({ leadText }: { leadText: string }) {
         三十年商店とは？
       </Link>
 
-      {/* お便りフォーム（左コラム・見た目だけ。送信機能は後で繋ぐ）。
-          トップページ以外でのみ表示（ContactFormSlot が出し分け）。 */}
-      <ContactFormSlot />
+      {/* お便りフォーム（左コラム）。トップページ以外でのみ表示（ContactFormSlot が出し分け）。
+          宛先プルダウンに並べる連載一覧を渡す。 */}
+      <ContactFormSlot recipients={recipients} />
     </div>
   );
 }

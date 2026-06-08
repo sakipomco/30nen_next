@@ -28,6 +28,8 @@ export default async function PublicLayout({
 
   const leadText = await getLeadText();
   const archive = await listArchiveMonths();
+  // お便りフォームの宛先プルダウン用＝小商店と同じ連載一覧（id と名前だけ）。
+  const recipients = series.map((s) => ({ id: s.id, name: s.name }));
 
   return (
     <div className="public-root flex-1 bg-white text-[#333]">
@@ -42,7 +44,7 @@ export default async function PublicLayout({
       <div className="mx-auto grid max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:grid-cols-[1fr_1.8fr_1fr] lg:gap-12 lg:px-20">
         {/* 左コラム */}
         <aside className="lg:pt-2">
-          <SidebarLeft leadText={leadText} />
+          <SidebarLeft leadText={leadText} recipients={recipients} />
         </aside>
 
         {/* 中央コラム（各ページの中身） */}

@@ -247,6 +247,22 @@ export async function getAssignmentsMap(): Promise<
   return map;
 }
 
+// お便りフォームの宛先解決用：その連載の担当書き手の「メールアドレス」を取り出す。
+//  - 連載名と、担当者のメール一覧を返す（メールはサーバー側だけで使う＝ブラウザに渡さない）。
+//  - 担当が未登録なら emails は空配列（呼び出し側で店主へフォールバックする）。
+export async function getCategoryAuthorEmails(
+  categoryId: number,
+): Promise<{ categoryName: string | null; emails: string[] }> {
+  const cat = await getCategoryById(categoryId);
+  if (!cat) return { categoryName: null, emails: [] };
+  const rows = await db
+    .select({ email: users.email })
+    .from(categoryAuthors)
+    .innerJoin(users, eq(categoryAuthors.userId, users.id))
+    .where(eq(categoryAuthors.categoryId, categoryId));
+  return { categoryName: cat.name, emails: rows.map((r) => r.email) };
+}
+
 // その連載の担当者一覧（連載の編集画面で「担当者」を表示するのに使う）。
 export async function getAuthorsForCategory(
   categoryId: number,

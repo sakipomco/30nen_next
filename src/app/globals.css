@@ -33,9 +33,10 @@ body {
   font-family: 'Zen Old Mincho', serif;
 }
 /* ゴシック体（足跡＝パンくずリストなど、明朝の中で部分的にゴシックにしたい所）。
-   日本語はOS標準のゴシック（Mac=ヒラギノ角ゴ等）にフォールバックする。 */
+   Noto Sans JP（CDN読み込み・くっきり角張った角ゴシック）を最優先で当てる。
+   読み込めない環境ではOS標準の角ゴ（Mac=ヒラギノ角ゴ等）にフォールバック。 */
 .gothic {
-  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP',
+  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans',
     'Yu Gothic', Meiryo, sans-serif;
 }
 .public-root {

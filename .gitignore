@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ただし「見本」(.env.example) は秘密情報なしなのでGit管理する
+!.env.example
 
 # vercel
 .vercel
