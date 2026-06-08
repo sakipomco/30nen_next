@@ -15,6 +15,7 @@ import {
 import { getUserById, toPublicUser } from '@/db/users';
 import { formatJstDate } from '@/lib/datetime';
 import { Breadcrumb } from '@/components/public/breadcrumb';
+import { CategoryBanner } from '@/components/public/category-banner';
 import { WriterProfile } from '@/components/public/writer-profile';
 
 export const dynamic = 'force-dynamic';
@@ -69,11 +70,19 @@ export default async function PostPage({
         ]}
       />
 
-      {/* 連載名＋日付 */}
-      <p className="mt-2 text-xs text-[#808080]">
-        {article.categoryName ? `【${article.categoryName}】` : ''}
-        {date}
-      </p>
+      {/* カテゴリー帯（白窓＋連載画像＋連載名＋ヨミガナ） */}
+      {article.categoryName && (
+        <div className="mt-2">
+          <CategoryBanner
+            name={article.categoryName}
+            reading={article.categoryReading}
+            imagePath={article.categoryImagePath}
+          />
+        </div>
+      )}
+
+      {/* 日付 */}
+      <p className="mt-6 text-xs text-[#333]">{date}</p>
 
       {/* タイトル */}
       <h1 className="serif mt-2 text-2xl font-medium leading-snug text-[#333]">

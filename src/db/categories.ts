@@ -14,6 +14,7 @@ export type NewCategoryInput = {
   parentId?: number | null;
   sortOrder?: number;
   imagePath?: string | null; // 連載のイメージ画像パス（右サイドバー「小商店」に表示）
+  reading?: string | null; // ヨミガナ（カタカナ・記事ページのカテゴリー帯に表示）
 };
 export type UpdateCategoryInput = Partial<NewCategoryInput>;
 
@@ -119,6 +120,7 @@ export async function createCategory(
       parentId: input.parentId ?? null,
       sortOrder: input.sortOrder ?? 0,
       imagePath: input.imagePath ?? null,
+      reading: input.reading ?? null,
     })
     .returning();
   return row;
@@ -135,6 +137,7 @@ export async function updateCategory(
   if (input.parentId !== undefined) patch.parentId = input.parentId;
   if (input.sortOrder !== undefined) patch.sortOrder = input.sortOrder;
   if (input.imagePath !== undefined) patch.imagePath = input.imagePath;
+  if (input.reading !== undefined) patch.reading = input.reading;
 
   const [row] = await db
     .update(categories)
@@ -209,6 +212,7 @@ export async function getCategoriesForUser(
       parentId: categories.parentId,
       sortOrder: categories.sortOrder,
       imagePath: categories.imagePath,
+      reading: categories.reading,
       wpTermId: categories.wpTermId,
     })
     .from(categoryAuthors)

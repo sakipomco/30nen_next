@@ -21,18 +21,21 @@ function readForm(formData: FormData): {
   parentId: number | null;
   sortOrder: number;
   imagePath: string | null;
+  reading: string | null;
 } {
   const name = String(formData.get('name') ?? '').trim();
   const slugRaw = String(formData.get('slug') ?? '').trim();
   const parentRaw = String(formData.get('parentId') ?? '').trim();
   const sortRaw = String(formData.get('sortOrder') ?? '').trim();
   const imageRaw = String(formData.get('imagePath') ?? '').trim();
+  const readingRaw = String(formData.get('reading') ?? '').trim();
   return {
     name,
     slug: slugRaw || null,        // 空欄は null（URL名札なし）
     parentId: parentRaw ? Number(parentRaw) : null, // 空欄＝トップ階層
     sortOrder: sortRaw ? Number(sortRaw) : 0,
     imagePath: imageRaw || null,  // 空欄は null（画像なし）
+    reading: readingRaw || null,  // 空欄は null（ヨミガナなし）
   };
 }
 
@@ -43,11 +46,11 @@ export async function createCategoryAction(
 ): Promise<CategoryFormState> {
   await requireAdmin();
 
-  const { name, slug, parentId, sortOrder, imagePath } = readForm(formData);
+  const { name, slug, parentId, sortOrder, imagePath, reading } = readForm(formData);
   if (!name) return { error: '連載名を入力してください。' };
 
   try {
-    await createCategory({ name, slug, parentId, sortOrder, imagePath });
+    await createCategory({ name, slug, parentId, sortOrder, imagePath, reading });
   } catch (e) {
     // slug の重複（unique制約）など
     return { error: slugErrorMessage(e) };
@@ -68,14 +71,14 @@ export async function updateCategoryAction(
   if (!Number.isInteger(id) || id <= 0) {
     return { error: '連載が見つかりませんでした。' };
   }
-  const { name, slug, parentId, sortOrder, imagePath } = readForm(formData);
+  const { name, slug, parentId, sortOrder, imagePath, reading } = readForm(formData);
   if (!name) return { error: '連載名を入力してください。' };
   if (parentId === id) {
     return { error: '自分自身を親に設定することはできません。' };
   }
 
   try {
-    const updated = await updateCategory(id, { name, slug, parentId, sortOrder, imagePath });
+    const updated = await updateCategory(id, { name, slug, parentId, sortOrder, imagePath, reading });
     if (!updated) return { error: '連載が見つかりませんでした。' };
   } catch (e) {
     return { error: slugErrorMessage(e) };

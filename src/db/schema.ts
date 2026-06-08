@@ -40,6 +40,7 @@ export const categories = sqliteTable('categories', {
   parentId: integer('parent_id').references((): AnySQLiteColumn => categories.id), // 親（トップはNULL・自己参照）
   sortOrder: integer('sort_order').notNull().default(0), // 並び順
   imagePath: text('image_path'), // 連載のイメージ画像パス（任意・右サイドバー「小商店」に表示）
+  reading: text('reading'), // ヨミガナ（カタカナ・任意・記事ページのカテゴリー帯に表示）
   wpTermId: integer('wp_term_id'), // 旧WordPressのterm_id（移行用）
 });
 

@@ -4,7 +4,7 @@
 > 新しい Claude Code セッションを **このフォルダ（`~/Desktop/30nen_next`）で起動** し、
 > 「HANDOFF.md を読んで」と伝えれば、ここまでの経緯を引き継げます。
 
-最終更新: 2026-06-08（お便りフォームの送信機能を実装＝項目29・ブラウザ動作確認済み。次回もSAKIさんと対話しながら継続）
+最終更新: 2026-06-08（お便りフォーム送信機能＝項目29／記事ページのカテゴリー帯＝項目30。いずれもブラウザ動作確認済み。次回もSAKIさんと対話しながら継続）
 
 ---
 
@@ -264,6 +264,18 @@
       1. Xサーバーでメールアドレス（例 `info@30nen.com`）を1つ作り、その接続情報を本番の `.env` に書く（`.env.example` のコメント参照）。それまではローカルでも送信は擬似（ログ出力）で動く。
       2. **Xサーバーのメール自動転送を設定**：作ったアドレス（例 `info@30nen.com`）宛のメールを **`30nensyouten@gmail.com`** へ自動転送する（サーバーパネルの「メール自動転送」設定）。これで店主宛のお便りを普段のGmailで受け取れる。← SAKIさんが後で実施予定。
     - **▶ 次回**: 連載別一覧ページ・著者ページ・about・月別アーカイブページなど。
+30. **フェーズ2：記事詳細ページの先頭に「カテゴリー帯」を新設（ブラウザ動作確認済み）**（コミット `（このコミット）`）。型チェック(tsc)・Lint(eslint)クリーン。SAKIさんの添付イメージに沿って実装。
+    - **見た目**: 足跡（パンくず）の下に**太めのテクスチャ帯**（`.obi-band`＋細い枠線）。中に〔**白い正方形窓＋カテゴリー画像**〕＋〔**連載名（大・明朝）／ヨミガナ（小・グレー）**〕。日付の上にあった `【連載名】` 表記は帯と重複するので削除（帯の下は日付→タイトルの順）。
+    - **カテゴリーに「ヨミガナ」列を追加**（`src/db/schema.ts` の `categories.reading`＋マイグレーション `drizzle/0006_overconfident_dexter_bennett.sql`）。カタカナ・任意。
+    - 作成/変更ファイル:
+      - `src/components/public/category-banner.tsx`（新規）… カテゴリー帯の部品（name・reading・imagePath を受け取る。画像なしは `line-up.png` で代替）。
+      - `src/app/(public)/posts/[slug]/page.tsx` … 足跡の下に `<CategoryBanner>` を配置。
+      - `src/db/articles.ts` … `PublicArticle` に `categoryReading` を追加（JOIN列にも `categories.reading` を追加）。
+      - `src/db/categories.ts` … create/update・入力型・`getCategoriesForUser` の select に `reading` を反映。
+      - `src/app/admin/categories/category-form.tsx`・`actions/categories.ts`・`[id]/edit/page.tsx` … 連載の管理画面に「ヨミガナ」入力欄を追加（保存・復元を確認済み）。
+    - **ブラウザ確認済み**: ①記事ページ（/posts/9・連載=もしもし五島列島）で帯が表示され、白窓に連載画像・連載名・ヨミガナが正しく出る ②連載管理画面でヨミガナの保存→復元が往復で動く。コンソールエラーなし。
+    - **⚠ ローカル確認用テストデータ**: 連載「もしもし五島列島」(id6) に reading=「モシモシゴトウレットウ」・image_path=サンプル画像を設定。DB実体はGit管理外。本番前に整理。
+    - **▶ 次回**: 連載別一覧ページ（帯やカードのリンク先）・著者ページ・about・月別アーカイブページなど。
 
 ### 現在のフォルダ状態
 ```
