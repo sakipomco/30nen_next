@@ -99,6 +99,9 @@ body {
 /* 公開ページの記事本文（投稿のHTMLを表示）。仕様書 §5-2 ②に沿った読みやすさ。
    Tailwind が見出し・箇条書きをリセットするので、本文エリア内だけ復活させる。 */
 .article-body {
+  font-size: 15px; /* 本文の文字サイズ（現行14px・新16pxの中間） */
+  font-weight: 500; /* 少し太め（現行サイトに合わせる。見出しは別途700） */
+  text-align: justify; /* 両端そろえ（現行サイトに合わせる） */
   line-height: 2;
   letter-spacing: -0.02em;
 }

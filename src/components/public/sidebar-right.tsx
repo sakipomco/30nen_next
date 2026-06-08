@@ -17,9 +17,9 @@ export function SidebarContent({
 }) {
   return (
     <div className="space-y-10">
-      {/* 小商店（連載一覧） */}
+      {/* 小商店（連載一覧）。見出し下のアキ(mb-10=40px)をセクション間(space-y-10)とそろえる。 */}
       <section>
-        <SectionHeading>小商店</SectionHeading>
+        <SectionHeading gapClass="mb-10">小商店</SectionHeading>
         <SeriesList items={series} />
       </section>
 

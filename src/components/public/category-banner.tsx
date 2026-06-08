@@ -14,9 +14,9 @@ export function CategoryBanner({
   imagePath?: string | null;
 }) {
   return (
-    <div className="obi-band flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
+    <div className="obi-band flex items-center gap-2.5 p-2 sm:gap-3 sm:p-2.5">
       {/* 白い正方形窓＋カテゴリー画像（画像が無ければ代替の line-up.png） */}
-      <div className="flex aspect-square w-16 shrink-0 items-center justify-center overflow-hidden bg-white sm:w-20">
+      <div className="flex aspect-square w-11 shrink-0 items-center justify-center overflow-hidden bg-white sm:w-14">
         <Image
           src={imagePath || '/line-up.png'}
           alt={name}
@@ -28,11 +28,11 @@ export function CategoryBanner({
 
       {/* 連載名（大）＋ヨミガナ（小） */}
       <div className="min-w-0">
-        <p className="serif text-xl font-medium leading-tight text-[#150c0c] sm:text-2xl">
+        <p className="serif text-base font-medium leading-tight text-[#150c0c] sm:text-lg">
           {name}
         </p>
         {reading && (
-          <p className="mt-1 text-[0.7rem] tracking-[-0.08em] text-[#333] sm:text-xs">
+          <p className="mt-0 text-[0.7rem] tracking-[-0.08em] text-[#333] sm:text-xs">
             {reading}
           </p>
         )}

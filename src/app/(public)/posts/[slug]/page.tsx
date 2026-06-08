@@ -84,8 +84,8 @@ export default async function PostPage({
       {/* 日付 */}
       <p className="mt-6 text-xs text-[#333]">{date}</p>
 
-      {/* タイトル */}
-      <h1 className="serif mt-2 text-2xl font-medium leading-snug text-[#333]">
+      {/* タイトル（日付に近づけるため上のアキを詰める） */}
+      <h1 className="serif mt-0.5 text-lg font-medium leading-snug text-[#333]">
         {article.title}
       </h1>
 

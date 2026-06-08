@@ -134,7 +134,7 @@ export function ContactForm({
           <button
             type="submit"
             disabled={pending}
-            className="serif mt-1 w-full bg-[#150c0c] py-3 text-sm text-white transition-opacity hover:opacity-80 disabled:opacity-60"
+            className="serif mt-1 w-full bg-[#150c0c] py-2 text-sm text-white transition-opacity hover:opacity-80 disabled:opacity-60"
           >
             {pending ? '送信中…' : '送信する'}
           </button>
