@@ -38,3 +38,13 @@ const options: sanitizeHtml.IOptions = {
 export function sanitizeArticleHtml(dirty: string): string {
   return sanitizeHtml(dirty, options);
 }
+
+// 本文HTMLから「文字だけ」を取り出し、指定の長さに切り詰める（関連記事の本文プレビュー用）。
+// タグを全部落とし、改行・連続スペースを1個にまとめ、長すぎたら末尾に「…」を付ける。
+export function textExcerpt(html: string, maxLength = 60): string {
+  const text = sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} })
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).trimEnd() + '…';
+}

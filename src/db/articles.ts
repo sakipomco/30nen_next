@@ -2,7 +2,7 @@
 // 「DBとのやり取り役」をここに集約する。公開ページの表示も、投稿画面の保存も、ここの関数を呼ぶ。
 // CRUD = Create(作る) / Read(読む) / Update(直す) / Delete(消す)。
 
-import { eq, desc, and, lte, sql, type SQL } from 'drizzle-orm';
+import { eq, ne, lt, gt, desc, asc, and, or, lte, sql, type SQL } from 'drizzle-orm';
 import { db } from './index';
 import { articles, users, categories } from './schema';
 import type { PublicUser } from './users';
@@ -253,4 +253,81 @@ export async function getPublishedArticleById(id: number): Promise<PublicArticle
     .where(and(eq(articles.id, id), eq(articles.status, 'published'), lte(articles.publishedAt, now())))
     .limit(1);
   return rows[0] ?? null;
+}
+
+// ── 同カテゴリーの「前後の日記」を取得（記事詳細ページの ← → ナビ用）──
+// 公開日時の並びで、今の記事の「1つ古い記事(prev)」と「1つ新しい記事(next)」を返す。
+// 公開日時が同じ記事があってもズレないよう、id を第2の基準にする（同時刻の取りこぼし防止）。
+export async function getAdjacentArticles(params: {
+  categoryId: number;
+  publishedAt: string;
+  articleId: number;
+}): Promise<{ prev: PublicArticle | null; next: PublicArticle | null }> {
+  const { categoryId, publishedAt, articleId } = params;
+  const base = [
+    eq(articles.status, 'published'),
+    lte(articles.publishedAt, now()),
+    eq(articles.categoryId, categoryId),
+  ];
+
+  const select = () =>
+    db
+      .select(publicColumns)
+      .from(articles)
+      .leftJoin(users, eq(articles.authorId, users.id))
+      .leftJoin(categories, eq(articles.categoryId, categories.id));
+
+  // 前の日記＝これより古い中で一番近い記事（新しい順に並べた先頭）
+  const prevRows = await select()
+    .where(
+      and(
+        ...base,
+        or(
+          lt(articles.publishedAt, publishedAt),
+          and(eq(articles.publishedAt, publishedAt), lt(articles.id, articleId)),
+        ),
+      ),
+    )
+    .orderBy(desc(articles.publishedAt), desc(articles.id))
+    .limit(1);
+
+  // 次の日記＝これより新しい中で一番近い記事（古い順に並べた先頭）
+  const nextRows = await select()
+    .where(
+      and(
+        ...base,
+        or(
+          gt(articles.publishedAt, publishedAt),
+          and(eq(articles.publishedAt, publishedAt), gt(articles.id, articleId)),
+        ),
+      ),
+    )
+    .orderBy(asc(articles.publishedAt), asc(articles.id))
+    .limit(1);
+
+  return { prev: prevRows[0] ?? null, next: nextRows[0] ?? null };
+}
+
+// ── 同カテゴリーの記事をランダムに取得（記事詳細ページの「関連記事」用）──
+// 今見ている記事(excludeId)を除き、同じ連載の公開記事から無作為に limit 件返す。
+export async function getRandomCategoryArticles(
+  categoryId: number,
+  excludeId: number,
+  limit = 3,
+): Promise<PublicArticle[]> {
+  return db
+    .select(publicColumns)
+    .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .where(
+      and(
+        eq(articles.status, 'published'),
+        lte(articles.publishedAt, now()),
+        eq(articles.categoryId, categoryId),
+        ne(articles.id, excludeId),
+      ),
+    )
+    .orderBy(sql`random()`)
+    .limit(limit);
 }

@@ -10,6 +10,8 @@ import { notFound } from 'next/navigation';
 import {
   getPublishedArticleBySlug,
   getPublishedArticleById,
+  getAdjacentArticles,
+  getRandomCategoryArticles,
   type PublicArticle,
 } from '@/db/articles';
 import { getUserById, toPublicUser } from '@/db/users';
@@ -18,6 +20,8 @@ import { sanitizeArticleHtml } from '@/lib/sanitize';
 import { Breadcrumb } from '@/components/public/breadcrumb';
 import { CategoryBanner } from '@/components/public/category-banner';
 import { WriterProfile } from '@/components/public/writer-profile';
+import { AdjacentNav } from '@/components/public/adjacent-nav';
+import { RelatedArticles } from '@/components/public/related-articles';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,6 +61,19 @@ export default async function PostPage({
   // 書き手プロフィール（記事末尾の「書き手」欄用）。
   const authorRaw = article.authorId ? await getUserById(article.authorId) : null;
   const author = authorRaw ? toPublicUser(authorRaw) : null;
+
+  // 同カテゴリーの「前後の日記」＋「関連記事（ランダム3件）」。連載が紐付く記事のみ。
+  const adjacent =
+    article.categoryId && article.publishedAt
+      ? await getAdjacentArticles({
+          categoryId: article.categoryId,
+          publishedAt: article.publishedAt,
+          articleId: article.id,
+        })
+      : { prev: null, next: null };
+  const related = article.categoryId
+    ? await getRandomCategoryArticles(article.categoryId, article.id, 3)
+    : [];
 
   const date = article.publishedAt ? formatJstDate(article.publishedAt) : '';
 
@@ -113,6 +130,12 @@ export default async function PostPage({
 
       {/* 書き手プロフィール（帯＋丸写真＋名前／居住地・年齢／SNS） */}
       {author && <WriterProfile author={author} />}
+
+      {/* 同カテゴリーの前後の日記へ移動（← →） */}
+      <AdjacentNav prev={adjacent.prev} next={adjacent.next} />
+
+      {/* 関連記事（同カテゴリーの過去記事をランダムに3点） */}
+      <RelatedArticles articles={related} />
     </article>
   );
 }
