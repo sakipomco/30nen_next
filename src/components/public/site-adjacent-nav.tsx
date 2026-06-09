@@ -68,7 +68,7 @@ export function SiteAdjacentNav({
   return (
     <nav
       aria-label="三十年商店全体の前後の日記"
-      className="mt-12 flex flex-col gap-4 border-t border-[#150c0c]/20 pt-5 sm:flex-row sm:items-stretch sm:justify-between sm:gap-3"
+      className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-stretch sm:justify-between sm:gap-3"
     >
       {/* スマホは縦積み（片側だけのときは行を作らない）。PCは左右に並べ、
           片側が無くても幅を保つよう空のプレースホルダを置く。 */}
