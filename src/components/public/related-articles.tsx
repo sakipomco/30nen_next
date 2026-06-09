@@ -16,7 +16,7 @@ function RelatedCard({ article }: { article: PublicArticle }) {
 
   return (
     <Link href={href} className="group flex items-start gap-5">
-      <div className="relative aspect-[4/2.5] w-2/5 shrink-0 overflow-hidden bg-zinc-100">
+      <div className="relative aspect-[4/2.5] w-[30%] shrink-0 overflow-hidden bg-zinc-100">
         <Image
           src={imageSrc}
           alt={article.title}
@@ -45,7 +45,7 @@ export function RelatedArticles({ articles }: { articles: PublicArticle[] }) {
   return (
     <section className="mt-12">
       <SectionHeading>関連記事</SectionHeading>
-      <div className="space-y-8">
+      <div className="space-y-4">
         {articles.map((article) => (
           <RelatedCard key={article.id} article={article} />
         ))}

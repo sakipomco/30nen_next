@@ -26,7 +26,7 @@ function NavCard({
   return (
     <Link
       href={hrefOf(article)}
-      className={`group flex w-full items-center gap-3 sm:w-1/2 ${isPrev ? '' : 'flex-row-reverse text-right'}`}
+      className={`group flex w-full items-center gap-5 sm:w-1/2 ${isPrev ? '' : 'flex-row-reverse'}`}
     >
       {/* 矢印は「く」の字画像。元画像は左向き(<)なので、次の日記(→)は左右反転して使う。 */}
       <Image
@@ -37,20 +37,22 @@ function NavCard({
         aria-hidden
         className={`h-4 w-4 shrink-0 transition-opacity group-hover:opacity-60 ${isPrev ? '' : '-scale-x-100'}`}
       />
-      <span className="relative aspect-[4/2.5] w-20 shrink-0 overflow-hidden bg-zinc-100">
-        <Image
-          src={imageSrc}
-          alt={article.title}
-          fill
-          sizes="80px"
-          className="object-cover transition-opacity duration-300 group-hover:opacity-80"
-        />
-      </span>
-      <span className="min-w-0 group-hover:opacity-70">
-        <span className="block text-[0.7rem] text-[#808080]">
-          {isPrev ? '前の日記' : '次の日記'}
+      {/* 写真＋その下に日時を2行（◎月◎日／◎時◎分）。文字ラベルは入れない。 */}
+      <span className={`flex flex-col gap-1.5 group-hover:opacity-80 ${isPrev ? '' : 'items-end'}`}>
+        <span className="relative aspect-[4/2.5] w-[120px] overflow-hidden bg-zinc-100">
+          <Image
+            src={imageSrc}
+            alt={article.title}
+            fill
+            sizes="120px"
+            className="object-cover transition-opacity duration-300 group-hover:opacity-80"
+          />
         </span>
-        <span className="block whitespace-nowrap text-[0.85rem] text-[#333]">{datetime}</span>
+        <span
+          className={`block whitespace-nowrap text-[0.8rem] leading-tight tracking-[0.05em] text-[#333] ${isPrev ? '' : 'text-right'}`}
+        >
+          {datetime}
+        </span>
       </span>
     </Link>
   );
@@ -68,7 +70,7 @@ export function SiteAdjacentNav({
   return (
     <nav
       aria-label="三十年商店全体の前後の日記"
-      className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-stretch sm:justify-between sm:gap-3"
+      className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
     >
       {/* スマホは縦積み（片側だけのときは行を作らない）。PCは左右に並べ、
           片側が無くても幅を保つよう空のプレースホルダを置く。 */}
