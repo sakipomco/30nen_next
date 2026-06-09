@@ -40,14 +40,11 @@ function NavCard({
           className="object-cover transition-opacity duration-300 group-hover:opacity-80"
         />
       </span>
-      <span className="min-w-0">
+      <span className="min-w-0 group-hover:opacity-70">
         <span className="block text-[0.7rem] text-[#808080]">
           {isPrev ? '前の日記' : '次の日記'}
         </span>
-        <span className="block whitespace-nowrap text-[0.7rem] text-[#333]">{datetime}</span>
-        <span className="serif line-clamp-1 text-[0.85rem] text-[#333] group-hover:opacity-70">
-          {article.title}
-        </span>
+        <span className="block whitespace-nowrap text-[0.85rem] text-[#333]">{datetime}</span>
       </span>
     </Link>
   );
