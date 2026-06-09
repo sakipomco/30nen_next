@@ -1,6 +1,6 @@
-// 記事詳細ページの「同カテゴリーの前後の日記」へ移動するナビ（← →）。
-// 左＝前の日記（1つ古い）／右＝次の日記（1つ新しい）。
-// どちらかが無ければ、その側は薄いプレースホルダ（リンクなし）にする。
+// 記事詳細ページの「同カテゴリーの前後の日記」へ移動するナビ（文字だけ）。
+// SAKIさんの指定: 左に「つぎの日記」／右に「まえの日記」。矢印・記事タイトルは出さない。
+// どちらかが無ければ、その側は何も置かない（プレースホルダで幅だけ確保）。
 
 import Link from 'next/link';
 import type { PublicArticle } from '@/db/articles';
@@ -19,42 +19,27 @@ export function AdjacentNav({
   // 前後どちらも無ければ何も出さない。
   if (!prev && !next) return null;
 
+  const linkClass =
+    'serif text-[0.95rem] text-[#333] transition-opacity hover:opacity-60';
+
   return (
-    <nav className="mt-12 flex items-stretch justify-between gap-3 border-t border-[#150c0c]/20 pt-5">
-      {/* 前の日記（左・←） */}
-      {prev ? (
-        <Link
-          href={hrefOf(prev)}
-          className="group flex max-w-[45%] items-center gap-2 text-left"
-        >
-          <span className="serif text-lg leading-none text-[#150c0c]">←</span>
-          <span>
-            <span className="block text-[0.7rem] text-[#808080]">前の日記</span>
-            <span className="serif line-clamp-1 text-[0.85rem] text-[#333] group-hover:opacity-70">
-              {prev.title}
-            </span>
-          </span>
+    <nav className="mt-12 flex items-center justify-between gap-3 border-t border-[#150c0c]/20 pt-5">
+      {/* 左＝つぎの日記（1つ新しい） */}
+      {next ? (
+        <Link href={hrefOf(next)} className={linkClass}>
+          つぎの日記
         </Link>
       ) : (
-        <span aria-hidden className="max-w-[45%]" />
+        <span aria-hidden />
       )}
 
-      {/* 次の日記（右・→） */}
-      {next ? (
-        <Link
-          href={hrefOf(next)}
-          className="group flex max-w-[45%] items-center gap-2 text-right"
-        >
-          <span>
-            <span className="block text-[0.7rem] text-[#808080]">次の日記</span>
-            <span className="serif line-clamp-1 text-[0.85rem] text-[#333] group-hover:opacity-70">
-              {next.title}
-            </span>
-          </span>
-          <span className="serif text-lg leading-none text-[#150c0c]">→</span>
+      {/* 右＝まえの日記（1つ古い） */}
+      {prev ? (
+        <Link href={hrefOf(prev)} className={linkClass}>
+          まえの日記
         </Link>
       ) : (
-        <span aria-hidden className="max-w-[45%]" />
+        <span aria-hidden />
       )}
     </nav>
   );
