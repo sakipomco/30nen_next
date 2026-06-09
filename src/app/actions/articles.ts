@@ -6,13 +6,20 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/auth/session';
 import type { PublicUser } from '@/db/users';
-import { createArticle, updateArticle, deleteArticle } from '@/db/articles';
+import {
+  createArticle,
+  updateArticle,
+  deleteArticle,
+  getArticleById,
+  canManageArticle,
+} from '@/db/articles';
 import {
   getCategoryById,
   getCategoriesForUser,
   setUserCategory,
 } from '@/db/categories';
 import { jstInputToUtc } from '@/lib/datetime';
+import { sanitizeArticleHtml } from '@/lib/sanitize';
 
 // useActionState に渡すための状態の形（エラー文言を画面に返す）。
 export type ArticleFormState = { error?: string } | undefined;
@@ -77,7 +84,7 @@ export async function createArticleAction(
   const user = await requireUser();
 
   const title = String(formData.get('title') ?? '').trim();
-  const content = String(formData.get('content') ?? '');
+  const content = sanitizeArticleHtml(String(formData.get('content') ?? ''));
   if (!title) {
     return { error: 'タイトルを入力してください。' };
   }
@@ -109,12 +116,18 @@ export async function updateArticleAction(
 
   const id = Number(formData.get('id'));
   const title = String(formData.get('title') ?? '').trim();
-  const content = String(formData.get('content') ?? '');
+  const content = sanitizeArticleHtml(String(formData.get('content') ?? ''));
   if (!Number.isInteger(id) || id <= 0) {
     return { error: '記事が見つかりませんでした。' };
   }
   if (!title) {
     return { error: 'タイトルを入力してください。' };
+  }
+
+  // 所有者チェック（R-01）：本人の記事か、管理者でなければ更新させない。
+  const existing = await getArticleById(id);
+  if (!existing || !canManageArticle(user, existing)) {
+    return { error: '記事が見つかりませんでした。' };
   }
 
   const category = await resolveCategory(user, formData);
@@ -140,12 +153,16 @@ export async function updateArticleAction(
 // ── 削除 ─────────────────────────────────────────────────
 // 一覧の各記事に置く小さなフォームから呼ぶ（formData の id を消す）。
 export async function deleteArticleAction(formData: FormData): Promise<void> {
-  await requireUser();
+  const user = await requireUser();
 
   const id = Number(formData.get('id'));
-  if (Number.isInteger(id) && id > 0) {
-    await deleteArticle(id);
-    revalidatePath('/admin');
+  if (!Number.isInteger(id) || id <= 0) return;
+
+  // 所有者チェック（R-01）：本人の記事か、管理者でなければ削除させない。
+  const existing = await getArticleById(id);
+  if (!existing || !canManageArticle(user, existing)) return;
+
+  await deleteArticle(id);
+  revalidatePath('/admin');
   revalidatePath('/'); // 公開トップページの表示も更新
-  }
 }

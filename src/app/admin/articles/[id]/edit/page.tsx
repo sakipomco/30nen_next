@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/auth/session';
 import { updateArticleAction } from '@/app/actions/articles';
-import { getArticleById } from '@/db/articles';
+import { getArticleById, canManageArticle } from '@/db/articles';
 import { listSelectableCategories, getCategoryById } from '@/db/categories';
 import { utcToJstInput } from '@/lib/datetime';
 import { ArticleForm } from '../../../article-form';
@@ -26,6 +26,8 @@ export default async function EditArticlePage({
 
   const article = await getArticleById(articleId);
   if (!article) notFound();
+  // 本人の記事か管理者でなければ編集画面を見せない（R-01）。
+  if (!canManageArticle(user, article)) notFound();
 
   // この人が選べる連載。編集中の記事の連載が一覧に無ければ、保存値を保てるよう先頭に足す。
   const categories = await listSelectableCategories(user);

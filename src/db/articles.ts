@@ -5,9 +5,22 @@
 import { eq, desc, and, lte, sql, type SQL } from 'drizzle-orm';
 import { db } from './index';
 import { articles, users, categories } from './schema';
+import type { PublicUser } from './users';
 
 // schema から型を自動生成（手書きしない＝設計とズレない）
 export type Article = typeof articles.$inferSelect; // DBから読んだ1件の形
+
+// この記事を編集・削除してよい人か？
+//  - admin（管理者）は全記事OK。
+//  - author（投稿者）は自分が書いた記事だけOK（authorId が本人）。
+// ※ 画面のボタン非表示だけでは Server Action への直接送信を防げないため、
+//   更新・削除・編集画面の入口で必ずこの判定を通す（R-01 対策）。
+export function canManageArticle(
+  user: PublicUser,
+  article: Pick<Article, 'authorId'>,
+): boolean {
+  return user.role === 'admin' || article.authorId === user.id;
+}
 export type NewArticleInput = {
   title: string;
   content?: string;
@@ -27,11 +40,14 @@ const now = () => new Date().toISOString().slice(0, 19).replace('T', ' '); // 'Y
 // status を渡すと下書き/公開で絞り込み。新しい順（作成日時の降順）に返す。
 export async function listArticles(options?: {
   status?: 'draft' | 'published';
+  authorId?: number; // 指定すると、その投稿者の記事だけに絞る（投稿者の管理一覧用）
   limit?: number;
   offset?: number;
 }): Promise<Article[]> {
   const filters: SQL[] = [];
   if (options?.status) filters.push(eq(articles.status, options.status));
+  if (options?.authorId != null)
+    filters.push(eq(articles.authorId, options.authorId));
 
   return db
     .select()

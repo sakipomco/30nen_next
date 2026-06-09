@@ -14,6 +14,7 @@ import {
 } from '@/db/articles';
 import { getUserById, toPublicUser } from '@/db/users';
 import { formatJstDate } from '@/lib/datetime';
+import { sanitizeArticleHtml } from '@/lib/sanitize';
 import { Breadcrumb } from '@/components/public/breadcrumb';
 import { CategoryBanner } from '@/components/public/category-banner';
 import { WriterProfile } from '@/components/public/writer-profile';
@@ -104,10 +105,10 @@ export default async function PostPage({
         />
       )}
 
-      {/* 本文（投稿のHTML） */}
+      {/* 本文（投稿のHTML）。表示直前にも無害化し、既存データもカバーする（R-02） */}
       <div
         className="article-body mt-8 text-[#333]"
-        dangerouslySetInnerHTML={{ __html: article.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(article.content) }}
       />
 
       {/* 書き手プロフィール（帯＋丸写真＋名前／居住地・年齢／SNS） */}

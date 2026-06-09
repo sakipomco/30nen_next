@@ -14,7 +14,10 @@ export const metadata = {
 
 export default async function AdminPage() {
   const user = await requireUser();
-  const articles = await listArticles(); // 新しい順・最大50件
+  // 管理者は全記事、投稿者は本人の記事だけ（R-01）。新しい順・最大50件。
+  const articles = await listArticles(
+    user.role === 'admin' ? undefined : { authorId: user.id },
+  );
 
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 px-4 py-12">
