@@ -255,19 +255,20 @@ export async function getPublishedArticleById(id: number): Promise<PublicArticle
   return rows[0] ?? null;
 }
 
-// ── 同カテゴリーの「前後の日記」を取得（記事詳細ページの ← → ナビ用）──
+// ── 「前後の日記」を取得（記事詳細ページの ← → ナビ用）──
 // 公開日時の並びで、今の記事の「1つ古い記事(prev)」と「1つ新しい記事(next)」を返す。
 // 公開日時が同じ記事があってもズレないよう、id を第2の基準にする（同時刻の取りこぼし防止）。
+// categoryId を渡すとその連載内だけ／省くと三十年商店“全体”の前後になる。
 export async function getAdjacentArticles(params: {
-  categoryId: number;
   publishedAt: string;
   articleId: number;
+  categoryId?: number;
 }): Promise<{ prev: PublicArticle | null; next: PublicArticle | null }> {
   const { categoryId, publishedAt, articleId } = params;
   const base = [
     eq(articles.status, 'published'),
     lte(articles.publishedAt, now()),
-    eq(articles.categoryId, categoryId),
+    ...(categoryId != null ? [eq(articles.categoryId, categoryId)] : []),
   ];
 
   const select = () =>

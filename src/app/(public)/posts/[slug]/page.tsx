@@ -22,6 +22,7 @@ import { CategoryBanner } from '@/components/public/category-banner';
 import { WriterProfile } from '@/components/public/writer-profile';
 import { AdjacentNav } from '@/components/public/adjacent-nav';
 import { RelatedArticles } from '@/components/public/related-articles';
+import { SiteAdjacentNav } from '@/components/public/site-adjacent-nav';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,14 @@ export default async function PostPage({
   const related = article.categoryId
     ? await getRandomCategoryArticles(article.categoryId, article.id, 3)
     : [];
+
+  // 三十年商店“全体”の前後の日記（連載をまたいで全記事の前後）。
+  const siteAdjacent = article.publishedAt
+    ? await getAdjacentArticles({
+        publishedAt: article.publishedAt,
+        articleId: article.id,
+      })
+    : { prev: null, next: null };
 
   const date = article.publishedAt ? formatJstDate(article.publishedAt) : '';
 
@@ -136,6 +145,9 @@ export default async function PostPage({
 
       {/* 関連記事（同カテゴリーの過去記事をランダムに3点） */}
       <RelatedArticles articles={related} />
+
+      {/* 三十年商店“全体”の前後の日記へ移動（カバー画像＋投稿日時つき） */}
+      <SiteAdjacentNav prev={siteAdjacent.prev} next={siteAdjacent.next} />
     </article>
   );
 }
