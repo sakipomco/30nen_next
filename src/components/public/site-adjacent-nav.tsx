@@ -28,9 +28,15 @@ function NavCard({
       href={hrefOf(article)}
       className={`group flex w-full items-center gap-3 sm:w-1/2 ${isPrev ? '' : 'flex-row-reverse text-right'}`}
     >
-      <span className="serif shrink-0 text-xl leading-none text-[#150c0c]">
-        {isPrev ? '←' : '→'}
-      </span>
+      {/* 矢印は「く」の字画像。元画像は左向き(<)なので、次の日記(→)は左右反転して使う。 */}
+      <Image
+        src="/30nen_kunoji.png"
+        alt=""
+        width={88}
+        height={90}
+        aria-hidden
+        className={`h-4 w-4 shrink-0 transition-opacity group-hover:opacity-60 ${isPrev ? '' : '-scale-x-100'}`}
+      />
       <span className="relative aspect-[4/2.5] w-20 shrink-0 overflow-hidden bg-zinc-100">
         <Image
           src={imageSrc}
