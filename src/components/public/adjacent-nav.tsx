@@ -36,7 +36,7 @@ export function AdjacentNav({
   if (!prev && !next) return null;
 
   const linkClass =
-    'group flex items-center gap-2 serif text-[0.95rem] text-[#333] transition-opacity hover:opacity-60';
+    'group flex items-center gap-2 serif text-[0.85rem] text-[#333] transition-opacity hover:opacity-60';
 
   return (
     <nav className="mt-10 flex items-center justify-between gap-3">
