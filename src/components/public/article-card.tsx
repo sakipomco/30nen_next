@@ -24,7 +24,7 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
         />
       </div>
       <p
-        className="mt-2 text-[0.7rem] text-[#333]"
+        className="mt-2 text-[0.65rem] text-[#333]"
         // 全角の開きカッコ「【」は字形が右寄りで左にアキがあるため、
         // カテゴリー名がある行だけ先頭を左へ寄せて写真の左端と縦ラインを揃える。
         style={article.categoryName ? { textIndent: '-0.68em' } : undefined}
@@ -32,7 +32,7 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
         {article.categoryName ? `【${article.categoryName}】` : ''}
         {date}
       </p>
-      <h3 className="serif mt-0.5 line-clamp-2 pr-5 text-[0.9rem] font-medium leading-snug text-[#333]">
+      <h3 className="serif mt-0 line-clamp-2 pr-5 text-[0.8rem] font-medium leading-snug text-[#333]">
         {article.title}
       </h3>
     </Link>

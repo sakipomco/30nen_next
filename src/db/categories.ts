@@ -48,6 +48,16 @@ export async function getCategoryById(id: number): Promise<Category | null> {
   return rows[0] ?? null;
 }
 
+// ── Read：1件（slug で取得。連載別一覧ページのURL用）──────────────
+export async function getCategoryBySlug(slug: string): Promise<Category | null> {
+  const rows = await db
+    .select()
+    .from(categories)
+    .where(eq(categories.slug, slug))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 // ── 親子を「親→子」の順に並べ、各行に深さ(depth)を付けて返す ──────
 // プルダウンや一覧で、子連載を字下げ表示するのに使う（depth=0 が親、1 が子…）。
 export type CategoryWithDepth = Category & { depth: number };

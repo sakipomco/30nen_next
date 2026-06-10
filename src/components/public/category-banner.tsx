@@ -1,19 +1,24 @@
-// カテゴリー帯（記事詳細ページの一番上）。
+// カテゴリー帯（記事詳細ページの一番上／連載別一覧ページの見出し）。
 // 構成: テクスチャ帯（.obi-band）の上に〔白い正方形窓＋カテゴリー画像〕＋〔連載名(大)／ヨミガナ(小)〕。
-// 現行 30nen.com の連載見出しの雰囲気を再現。連載別一覧ページができたら href でリンクにできる。
+// 現行 30nen.com の連載見出しの雰囲気を再現。
+//  - href を渡すと帯ぜんぶがその連載ページへのリンクになる（記事ページから連載へ飛べる）。
+//    連載ページ自身では href を渡さず、ただの見出しとして使う。
 
 import Image from 'next/image';
+import Link from 'next/link';
 
 export function CategoryBanner({
   name,
   reading,
   imagePath,
+  href,
 }: {
   name: string;
   reading?: string | null;
   imagePath?: string | null;
+  href?: string;
 }) {
-  return (
+  const inner = (
     <div className="obi-band flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
       {/* 白い正方形窓＋カテゴリー画像（画像が無ければ代替の line-up.png） */}
       <div className="flex aspect-square w-16 shrink-0 items-center justify-center overflow-hidden bg-white sm:w-20">
@@ -28,7 +33,7 @@ export function CategoryBanner({
 
       {/* 連載名（大）＋ヨミガナ（小） */}
       <div className="min-w-0">
-        <p className="serif text-sm leading-tight text-[#150c0c]">
+        <p className="serif text-base leading-tight text-[#150c0c]">
           {name}
         </p>
         {reading && (
@@ -39,4 +44,14 @@ export function CategoryBanner({
       </div>
     </div>
   );
+
+  // href があれば帯ぜんぶをリンクに（マウスオーバーで少し薄く）。
+  if (href) {
+    return (
+      <Link href={href} className="block transition-opacity hover:opacity-80" title={name}>
+        {inner}
+      </Link>
+    );
+  }
+  return inner;
 }

@@ -40,7 +40,7 @@ export function LatestArticle({ article }: { article: PublicArticle }) {
         </span>
       </div>
       <p className="mt-2 text-xs text-[#333]">{datetime}</p>
-      <h3 className="serif mt-1 text-lg leading-snug text-[#333]">
+      <h3 className="serif mt-0 text-lg leading-snug text-[#333]">
         {article.title}
       </h3>
     </Link>

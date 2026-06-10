@@ -86,24 +86,32 @@ export default async function PostPage({
 
   const date = article.publishedAt ? formatJstDate(article.publishedAt) : '';
 
+  // 連載ページへのリンク先（slug があれば slug・無ければ id）。
+  const seriesHref = article.categoryId
+    ? `/series/${article.categorySlug ?? article.categoryId}`
+    : undefined;
+
   return (
     <article className="mx-auto max-w-[720px]">
-      {/* 足跡（現在地）。連載名は連載ページが未実装なので今はリンクなし。 */}
+      {/* 足跡（現在地）。連載名はその連載の一覧ページへリンク。 */}
       <Breadcrumb
         items={[
           { label: '三十年商店', href: '/' },
-          ...(article.categoryName ? [{ label: article.categoryName }] : []),
+          ...(article.categoryName
+            ? [{ label: article.categoryName, href: seriesHref }]
+            : []),
           { label: article.title },
         ]}
       />
 
-      {/* カテゴリー帯（白窓＋連載画像＋連載名＋ヨミガナ） */}
+      {/* カテゴリー帯（白窓＋連載画像＋連載名＋ヨミガナ）。連載ページへのリンク。 */}
       {article.categoryName && (
         <div className="mt-2">
           <CategoryBanner
             name={article.categoryName}
             reading={article.categoryReading}
             imagePath={article.categoryImagePath}
+            href={seriesHref}
           />
         </div>
       )}
