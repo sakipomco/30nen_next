@@ -231,6 +231,40 @@ export async function listArchiveMonths(): Promise<ArchiveMonth[]> {
   return rows;
 }
 
+// ── 月別アーカイブ: 指定した年月（日本時間JST）の公開記事 ──
+// listArchiveMonths と同じ基準（publishedAt を+9時間してJSTの年月で判定）。
+function monthFilter(year: number, month: number): SQL {
+  const ym = `${year}-${String(month).padStart(2, '0')}`;
+  return sql`strftime('%Y-%m', datetime(${articles.publishedAt}, '+9 hours')) = ${ym}`;
+}
+
+export async function listPublishedArticlesByMonth(
+  year: number,
+  month: number,
+  options?: { limit?: number; offset?: number },
+): Promise<PublicArticle[]> {
+  return db
+    .select(publicColumns)
+    .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .where(and(...publicFilters(), monthFilter(year, month)))
+    .orderBy(desc(articles.publishedAt))
+    .limit(options?.limit ?? 20)
+    .offset(options?.offset ?? 0);
+}
+
+export async function countPublishedArticlesByMonth(
+  year: number,
+  month: number,
+): Promise<number> {
+  const rows = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(articles)
+    .where(and(...publicFilters(), monthFilter(year, month)));
+  return rows[0]?.n ?? 0;
+}
+
 // ── 公開記事を slug で取得（記事詳細ページ用）────────────
 export async function getPublishedArticleBySlug(slug: string): Promise<PublicArticle | null> {
   const rows = await db
