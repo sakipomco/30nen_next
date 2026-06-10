@@ -3,8 +3,10 @@
 
 import Link from 'next/link';
 
+// basePath にすでに ?q=… などのクエリが付いていれば & でつなぐ（検索結果ページ用）。
 function pageHref(basePath: string, page: number): string {
-  return page <= 1 ? basePath : `${basePath}?page=${page}`;
+  const sep = basePath.includes('?') ? '&' : '?';
+  return page <= 1 ? basePath : `${basePath}${sep}page=${page}`;
 }
 
 // 表示するページ番号の並びを作る（現在ページの前後＋最初/最後、間は「…」）。

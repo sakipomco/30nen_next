@@ -24,9 +24,9 @@ export function SidebarContent({
         <SeriesList items={series} />
       </section>
 
-      {/* 検索（枠のみ） */}
+      {/* ワード検索 */}
       <section>
-        <SectionHeading gapClass="mb-2">ワード検索</SectionHeading>
+        <SectionHeading>ワード検索</SectionHeading>
         <SearchForm />
       </section>
 

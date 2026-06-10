@@ -309,6 +309,52 @@ export async function getAdjacentArticles(params: {
   return { prev: prevRows[0] ?? null, next: nextRows[0] ?? null };
 }
 
+// ── ワード検索（検索結果ページ用）─────────────────────────
+// 公開記事のタイトル・本文・抜粋から部分一致で探す。
+// キーワードが空白（全角・半角）区切りで複数あるときは「すべて含む」記事だけ（AND検索）。
+// LIKE の特殊文字（% _）はエスケープして、ただの文字として扱う。
+// ※ 本文はHTMLのまま照合する（日本語キーワードがタグ名に偶然当たることはまず無い）。
+
+function likePattern(word: string): string {
+  return '%' + word.replace(/[\\%_]/g, (c) => '\\' + c) + '%';
+}
+
+function searchFilters(query: string): SQL[] {
+  const filters = publicFilters();
+  const words = query.split(/\s+/).filter(Boolean);
+  for (const word of words) {
+    const p = likePattern(word);
+    filters.push(
+      sql`(${articles.title} LIKE ${p} ESCAPE '\\' OR ${articles.content} LIKE ${p} ESCAPE '\\' OR ${articles.excerpt} LIKE ${p} ESCAPE '\\')`,
+    );
+  }
+  return filters;
+}
+
+export async function searchPublishedArticles(
+  query: string,
+  options?: { limit?: number; offset?: number },
+): Promise<PublicArticle[]> {
+  return db
+    .select(publicColumns)
+    .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .where(and(...searchFilters(query)))
+    .orderBy(desc(articles.publishedAt))
+    .limit(options?.limit ?? 20)
+    .offset(options?.offset ?? 0);
+}
+
+// 検索に当てはまる件数（ページ数の計算用）
+export async function countSearchedArticles(query: string): Promise<number> {
+  const rows = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(articles)
+    .where(and(...searchFilters(query)));
+  return rows[0]?.n ?? 0;
+}
+
 // ── 同カテゴリーの記事をランダムに取得（記事詳細ページの「関連記事」用）──
 // 今見ている記事(excludeId)を除き、同じ連載の公開記事から無作為に limit 件返す。
 export async function getRandomCategoryArticles(

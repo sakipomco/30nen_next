@@ -43,9 +43,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const article = await findArticle(slug);
-  if (!article) return { title: '記事が見つかりません｜三十年商店' };
+  // 末尾の「｜三十年商店」は src/app/layout.tsx の template が自動で付ける
+  if (!article) return { title: '記事が見つかりません' };
   return {
-    title: `${article.title}｜三十年商店`,
+    title: article.title,
     description: article.excerpt ?? undefined,
   };
 }

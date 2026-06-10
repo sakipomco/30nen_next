@@ -1,18 +1,18 @@
-// 検索フォーム（枠だけ・機能はこのフェーズでは未実装）。仕様書 §14-J。
-// action="/search" のテキスト入力を置いておくだけ（検索ページは後回し）。
+// 検索フォーム。キーワードを入れて送信すると検索結果ページ（/search?q=…）へ飛ぶ。
+// 入力欄・「検索」ボタンとも、お便りフォームの入力欄と同じケイ（枠線）囲み。
 
 export function SearchForm() {
   return (
-    <form action="/search" className="flex items-center gap-2">
+    <form action="/search" className="flex items-stretch">
       <input
         type="search"
         name="q"
-        placeholder="キーワードで探す"
-        className="serif w-full border-b border-[#150c0c]/30 bg-transparent px-1 py-1 text-sm text-[#333] placeholder:text-[#808080] focus:border-[#150c0c] focus:outline-none"
+        className="serif w-full border border-[#150c0c]/25 bg-white px-2 py-1.5 text-sm text-[#333] outline-none focus:border-[#150c0c]"
       />
+      {/* 入力欄と密着させる（境目の線は1本に＝ボタン側の左線を消す） */}
       <button
         type="submit"
-        className="serif shrink-0 text-sm text-[#333] hover:opacity-60"
+        className="serif shrink-0 border border-l-0 border-[#150c0c]/25 px-3 py-1.5 text-sm text-[#333] transition-opacity hover:opacity-60"
       >
         検索
       </button>

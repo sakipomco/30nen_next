@@ -37,8 +37,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const category = await findCategory(slug);
-  if (!category) return { title: '連載が見つかりません｜三十年商店' };
-  return { title: `${category.name}｜三十年商店` };
+  // 末尾の「｜三十年商店」は src/app/layout.tsx の template が自動で付ける
+  if (!category) return { title: '連載が見つかりません' };
+  return { title: category.name };
 }
 
 export default async function SeriesPage({

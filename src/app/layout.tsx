@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: {
     default: "三十年商店",
-    template: "%s | 三十年商店",
+    template: "%s｜三十年商店",
   },
   description: "20名以上の書き手が日々投稿する日記サイト「三十年商店」",
 };
