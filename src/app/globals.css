@@ -36,11 +36,11 @@ body {
   font-family: 'Zen Old Mincho', serif;
 }
 /* ゴシック体（足跡＝パンくずリストなど、明朝の中で部分的にゴシックにしたい所）。
-   Noto Sans JP（CDN読み込み・くっきり角張った角ゴシック）を最優先で当てる。
-   読み込めない環境ではOS標準の角ゴ（Mac=ヒラギノ角ゴ等）にフォールバック。 */
+   Zen Kaku Gothic New（CDN読み込み・カクっとした角ゴシック。本文の Zen Old Mincho と同じZenファミリー）
+   を最優先で当てる。読み込めない環境ではOS標準の角ゴ（Mac=ヒラギノ角ゴ等）にフォールバック。 */
 .gothic {
-  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans',
-    'Yu Gothic', Meiryo, sans-serif;
+  font-family: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN',
+    'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif;
 }
 .public-root {
   font-family: 'Zen Old Mincho', serif;

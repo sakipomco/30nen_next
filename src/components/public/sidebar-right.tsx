@@ -24,10 +24,12 @@ export function SidebarContent({
         <SeriesList items={series} />
       </section>
 
-      {/* ワード検索 */}
+      {/* ワード検索（ボックスは帯の95%幅・左右センター揃え） */}
       <section>
         <SectionHeading>ワード検索</SectionHeading>
-        <SearchForm />
+        <div className="mx-auto w-[95%]">
+          <SearchForm />
+        </div>
       </section>
 
       {/* アーカイブ（年月の目次・表示のみ） */}

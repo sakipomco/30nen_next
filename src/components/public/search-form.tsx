@@ -7,12 +7,12 @@ export function SearchForm() {
       <input
         type="search"
         name="q"
-        className="serif w-full border border-[#150c0c]/25 bg-white px-2 py-1.5 text-sm text-[#333] outline-none focus:border-[#150c0c]"
+        className="serif w-full border border-[#150c0c]/25 bg-white px-2 py-[2.6px] text-sm text-[#333] outline-none focus:border-[#150c0c]"
       />
       {/* 入力欄と密着させる（境目の線は1本に＝ボタン側の左線を消す） */}
       <button
         type="submit"
-        className="serif shrink-0 border border-l-0 border-[#150c0c]/25 px-3 py-1.5 text-sm text-[#333] transition-opacity hover:opacity-60"
+        className="serif shrink-0 border border-l-0 border-[#150c0c]/25 px-3 py-[2.6px] text-sm text-[#333] transition-opacity hover:opacity-60"
       >
         検索
       </button>
