@@ -92,7 +92,7 @@ body {
 .tiptap-editor :where(img) {
   max-width: 100%;
   height: auto;
-  border-radius: 4px;
+  /* 角丸はつけない（公開ページの見た目と揃える） */
   margin: 0.5em 0;
 }
 .tiptap-editor :where(img.ProseMirror-selectednode) {
@@ -149,7 +149,7 @@ body {
 .article-body :where(img) {
   max-width: 100%;
   height: auto;
-  border-radius: 4px;
+  /* 角丸はつけない（現行サイトに合わせる・SAKIさん指定 2026-06-12） */
   margin: 1.2em 0;
 }
 .article-body :where(strong) {
