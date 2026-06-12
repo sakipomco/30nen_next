@@ -59,7 +59,7 @@ export function SidebarLeft({
 
       {/* 書き手募集（スマホ版のみ・SNSリンクの下）。スミケイ（黒い罫線）で囲んだリンク。 */}
       <a
-        href="https://30nen.com/about/#wanted"
+        href="/about#wanted"
         className="serif mt-5 inline-block scale-[0.8] border-[0.5px] border-[#150c0c] py-0.5 pl-1.5 pr-1 text-xs text-[#333] transition-colors hover:bg-[#150c0c] hover:text-white lg:hidden"
       >
         書き手さん
