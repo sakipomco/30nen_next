@@ -18,9 +18,13 @@ export function SidebarLeft({
   return (
     <div className="flex flex-col items-center text-center">
       {/* ロゴ（暖簾ロゴ画像・クリックでトップへ）。
-          PC（lg以上）では上の余白だけ打ち消して上端ぴったりに（左右は中央のまま）。
-          スマホは中央・大きめのまま。 */}
-      <Link href="/" className="-mt-10 block w-full max-w-[260px] lg:-mt-12">
+          PC（lg以上）では約80%（208px）に縮小。上の余白の打ち消し（-mt-12＝48px）は
+          ページ上部の余白ぶんなのでロゴの幅とは無関係＝縮小しても変えない。
+          左右は中央のまま。スマホは中央・大きめのまま。 */}
+      <Link
+        href="/"
+        className="-mt-10 block w-full max-w-[260px] lg:-mt-12 lg:max-w-[208px]"
+      >
         <Image
           src="/30nen_logo_noren_plus.jpg"
           alt="三十年商店"

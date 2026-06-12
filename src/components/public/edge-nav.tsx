@@ -13,7 +13,7 @@ export function EdgeNav() {
           <li key={link.href}>
             <Link
               href={link.href}
-              className="serif [writing-mode:vertical-rl] text-sm text-[#333] transition-opacity hover:opacity-60"
+              className="serif [writing-mode:vertical-rl] text-xs text-[#333] transition-opacity hover:opacity-60"
             >
               {renderHiraTight(link.label)}
             </Link>
