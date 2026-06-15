@@ -40,7 +40,7 @@ export function WriterProfile({ author }: { author: PublicUser }) {
         {/* 名前／居住地・年齢／SNS */}
         <div className="min-w-0">
           <p className="serif text-lg text-[#333]">{author.name}</p>
-          {meta && <p className="mt-1 text-sm text-[#555]">{meta}</p>}
+          {meta && <p className="mt-0 text-sm text-[#333]">{meta}</p>}
           {socials.length > 0 && (
             <div className="mt-2 flex items-center gap-3">
               {socials.map((s) => (
@@ -52,7 +52,7 @@ export function WriterProfile({ author }: { author: PublicUser }) {
                   aria-label={s.label}
                   className="transition-opacity hover:opacity-60"
                 >
-                  <Image src={s.icon} alt={s.label} width={20} height={20} unoptimized />
+                  <Image src={s.icon} alt={s.label} width={16} height={16} unoptimized />
                 </a>
               ))}
             </div>
