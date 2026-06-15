@@ -12,5 +12,9 @@ export const PAGE_LINKS = [
 export const SOCIAL_LINKS = {
   instagram: 'https://www.instagram.com/30nen_syouten/',
   x: 'https://x.com/30nensyouten',
-  contact: '/contact', // メールアイコンの飛び先（お問い合わせページ・後回し）
+  // メールアイコンの飛び先＝専用ページは作らず、左コラムの「お便りフォーム」(#otayori)へ誘導する。
+  //  - フォームはトップ以外の全ページに出る → 同じページ内なら #otayori でその場へスクロール。
+  //  - トップにはフォームが無い → フォームのある /about へ飛んでからスクロールする。
+  contactAnchor: '#otayori',
+  contactFromTop: '/about#otayori',
 } as const;

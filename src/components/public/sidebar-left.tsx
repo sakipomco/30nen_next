@@ -83,8 +83,12 @@ export function SidebarLeft({
       </Link>
 
       {/* お便りフォーム（左コラム）。トップページ以外でのみ表示（ContactFormSlot が出し分け）。
+          さらにスマホ（lg未満）では非表示にする＝モバイルは縦1列で左コラムが日記の上に積まれ、
+          フォームが日記より前に出てしまうのを防ぐため。PC（lg以上）でのみ表示する。
           宛先プルダウンに並べる連載一覧を渡す。 */}
-      <ContactFormSlot recipients={recipients} />
+      <div className="hidden w-full lg:block">
+        <ContactFormSlot recipients={recipients} />
+      </div>
     </div>
   );
 }

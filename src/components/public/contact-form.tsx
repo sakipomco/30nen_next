@@ -38,7 +38,9 @@ export function ContactForm({
   const [agree, setAgree] = useState(false);
 
   return (
-    <section className="mt-10 w-full text-left">
+    // id="otayori"＝メールアイコン（右端）からここへスクロールしてくるための目印。
+    // scroll-mt-6 で、飛んできたとき帯見出しが画面上端に貼り付かないよう少し余白を残す。
+    <section id="otayori" className="mt-10 w-full scroll-mt-6 text-left">
       <SectionHeading>お便りフォーム</SectionHeading>
 
       {state?.ok ? (
