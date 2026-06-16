@@ -12,6 +12,7 @@ import { SidebarLeft } from '@/components/public/sidebar-left';
 import { SidebarContent } from '@/components/public/sidebar-right';
 import { EdgeNav } from '@/components/public/edge-nav';
 import { EdgeIcons } from '@/components/public/edge-icons';
+import { SocialIcons } from '@/components/public/social-icons';
 import { HamburgerMenu } from '@/components/public/hamburger-menu';
 import type { SeriesItem } from '@/components/public/series-list';
 
@@ -55,6 +56,11 @@ export default async function PublicLayout({
         <aside className="hidden lg:block lg:pt-2">
           <SidebarContent series={series} archive={archive} />
         </aside>
+      </div>
+
+      {/* スマホ: ページ最下部にSNS・メールアイコンを横一列（PCは右端の縦並びで表示済み＝ここは lg:hidden） */}
+      <div className="flex items-center justify-center gap-8 px-5 pt-4 lg:hidden">
+        <SocialIcons size={22} />
       </div>
 
       {/* コピーライト（控えめに） */}
