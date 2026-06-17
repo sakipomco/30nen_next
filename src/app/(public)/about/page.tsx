@@ -91,7 +91,8 @@ export default function AboutPage() {
         </div>
 
         {/* 投げ銭（イメージ画像＋ボタン） */}
-        <figure className="mx-auto -mt-6 w-[85%]">
+        {/* -mt-3=画像を直前の文章に寄せつつ重ならない位置（-mt-6だと文字に画像がかぶる） */}
+        <figure className="mx-auto -mt-3 w-[85%]">
           <Image
             src="/30nen_nagesen.jpg"
             alt="投げ銭：イメージ画像"
@@ -141,15 +142,14 @@ export default function AboutPage() {
             順を追ってご返信させて頂きます。なお、商店の性質上お断りすることもあります。ご理解のほど宜しくお願い致します。
           </p>
           <p>
-            宛先：
+            ご応募は、このページ下部の{' '}
             <a
-              href="mailto:30nensyouten@gmail.com"
+              href="#otayori"
               className="text-[#2563eb] underline underline-offset-2 transition-opacity hover:opacity-60"
             >
-              30nensyouten@gmail.com
+              お便りフォーム
             </a>
-            <br />
-            店主：サイコ・しげやす宛
+            （宛先で「店主」をお選びください）よりお送りください。
           </p>
         </div>
 
