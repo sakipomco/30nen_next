@@ -14,13 +14,24 @@ import { getUserById, toPublicUser, type PublicUser } from '@/db/users';
 const COOKIE_NAME = 'session';
 const MAX_AGE_SECONDS = 7 * 24 * 60 * 60; // 7日（jwt.ts の有効期限と揃える）
 
+// 会員証Cookieを「HTTPSのときだけ送る」設定にするか。
+// 既定は本番(production)で true ＝ HTTPS必須（安全）。
+// ただし HTTPS未設定のサーバー（例：IP直アクセスでお試し中）では、secure=true だと
+// ブラウザがCookieを保存せずログインが続かない。その場合だけ環境変数
+// SESSION_COOKIE_SECURE=false を設定して一時的にHTTPでも保持できるようにする。
+// 本番でHTTPSを整えたら、この変数は外す（＝既定の secure=true に戻る）。
+const COOKIE_SECURE =
+  process.env.SESSION_COOKIE_SECURE !== undefined
+    ? process.env.SESSION_COOKIE_SECURE === 'true'
+    : process.env.NODE_ENV === 'production';
+
 // ログイン成功時：会員証を発行してCookieにしまう。
 export async function createSession(payload: SessionPayload): Promise<void> {
   const token = await signSession(payload);
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true, // ブラウザのJavaScriptから読めない（盗み見対策）
-    secure: process.env.NODE_ENV === 'production', // 本番はHTTPSのときだけ送る
+    secure: COOKIE_SECURE, // 本番はHTTPSのときだけ送る（上のメモ参照）
     sameSite: 'lax', // 別サイト経由の送信を制限（なりすまし対策）
     maxAge: MAX_AGE_SECONDS,
     path: '/',

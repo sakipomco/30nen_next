@@ -3,9 +3,15 @@
 // 中身はHTMLとして取り出し、見えない入力欄（hidden input）に入れてフォーム送信に乗せる。
 // ※ App Router では最初の描画がサーバー側でも行われるため、immediatelyRender:false で
 //    「画面に出てから編集機能を組み立てる」ようにする（ズレ＝hydrationエラー防止）。
+//
+// 画像の入れ方は3通り（どれも同じアップロードの仕組みを通る）：
+//   ① ツールバーの「画像」ボタンで選ぶ
+//   ② 写真ファイルを本文にドラッグ＆ドロップする
+//   ③ コピーした写真を本文に貼り付ける（⌘/Ctrl+V）
 
 import { useRef, useState } from 'react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
+import type { EditorView } from '@tiptap/pm/view';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { uploadImage } from './upload-image';
@@ -14,6 +20,12 @@ type Props = {
   name: string; // フォーム送信時の項目名（例: "content"）
   initialHTML?: string; // 編集時の初期本文（HTML）
 };
+
+// DataTransfer（ドラッグやコピペで運ばれてくる中身）から画像ファイルだけ取り出す。
+function getImageFiles(dt: DataTransfer | null): File[] {
+  if (!dt) return [];
+  return Array.from(dt.files).filter((f) => f.type.startsWith('image/'));
+}
 
 // ツールバーの1ボタン分。
 function ToolbarButton({
@@ -99,6 +111,26 @@ export function RichEditor({ name, initialHTML }: Props) {
   // 画像挿入用の隠しファイル選択欄。ボタンを押すとこれをクリックさせる。
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ドラッグ＆ドロップ／貼り付け用：写真をアップロードして指定位置（なければ今のカーソル）に挿入する。
+  // ※ editor ではなく view（ProseMirror）を直接使うので、useEditor の設定内からでも安全に呼べる。
+  //   function 宣言は巻き上げ（hoist）されるため、下の useEditor から参照してOK。
+  async function uploadIntoView(view: EditorView, file: File, pos?: number) {
+    setError(null);
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      const imageType = view.state.schema.nodes.image;
+      if (!imageType) return;
+      const node = imageType.create({ src: url });
+      const at = Math.min(pos ?? view.state.selection.from, view.state.doc.content.size);
+      view.dispatch(view.state.tr.insert(at, node));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'アップロードに失敗しました。');
+    } finally {
+      setUploading(false);
+    }
+  }
+
   const editor = useEditor({
     extensions: [StarterKit, Image],
     content: initialHTML ?? '',
@@ -109,6 +141,25 @@ export function RichEditor({ name, initialHTML }: Props) {
         // 編集エリアの見た目。globals.css の .tiptap-editor で中身（見出し・箇条書き）を整える。
         class:
           'tiptap-editor min-h-64 rounded-md border border-zinc-300 px-3 py-2 text-base leading-7 outline-none focus:border-zinc-500',
+      },
+      // 写真ファイルを本文にドラッグ＆ドロップしたとき。
+      handleDrop(view, event) {
+        const dragEvent = event as DragEvent;
+        const files = getImageFiles(dragEvent.dataTransfer);
+        if (files.length === 0) return false; // 画像でなければ通常動作にまかせる
+        event.preventDefault();
+        // 落とした位置に挿入（取れなければ末尾＝今のカーソル）。
+        const dropped = view.posAtCoords({ left: dragEvent.clientX, top: dragEvent.clientY });
+        for (const file of files) void uploadIntoView(view, file, dropped?.pos);
+        return true;
+      },
+      // コピーした写真を本文に貼り付け（⌘/Ctrl+V）したとき。
+      handlePaste(view, event) {
+        const files = getImageFiles((event as ClipboardEvent).clipboardData);
+        if (files.length === 0) return false; // 画像でなければ通常の貼り付け（文字など）にまかせる
+        event.preventDefault();
+        for (const file of files) void uploadIntoView(view, file);
+        return true;
       },
     },
   });
@@ -143,6 +194,11 @@ export function RichEditor({ name, initialHTML }: Props) {
         />
       )}
       <EditorContent editor={editor} />
+      {/* 操作のヒント（写真の入れ方は3通り）。 */}
+      <p className="mt-1 text-xs text-zinc-500">
+        写真は「画像」ボタンのほか、本文へ<strong>ドラッグ＆ドロップ</strong>・
+        <strong>貼り付け（⌘/Ctrl+V）</strong>でも入れられます。
+      </p>
       {error && (
         <p className="mt-1 text-sm text-red-600" role="alert">
           {error}
