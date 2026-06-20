@@ -21,7 +21,7 @@ export type NewUserInput = {
   avatarPath?: string | null;
   bio?: string | null;
   location?: string | null;
-  age?: number | null;
+  birthday?: string | null; // 誕生日 'YYYY-MM-DD'（任意）
   instagramUrl?: string | null;
   xUrl?: string | null;
   youtubeUrl?: string | null;
@@ -37,7 +37,7 @@ export type UpdateUserInput = {
   avatarPath?: string | null;
   bio?: string | null;
   location?: string | null;
-  age?: number | null;
+  birthday?: string | null; // 誕生日 'YYYY-MM-DD'（任意）
   instagramUrl?: string | null;
   xUrl?: string | null;
   youtubeUrl?: string | null;
@@ -86,7 +86,7 @@ export async function createUser(input: NewUserInput): Promise<PublicUser> {
       avatarPath: input.avatarPath ?? null,
       bio: input.bio ?? null,
       location: input.location ?? null,
-      age: input.age ?? null,
+      birthday: input.birthday ?? null,
       instagramUrl: input.instagramUrl ?? null,
       xUrl: input.xUrl ?? null,
       youtubeUrl: input.youtubeUrl ?? null,
@@ -121,7 +121,7 @@ export async function updateUser(
   if (input.avatarPath !== undefined) patch.avatarPath = input.avatarPath;
   if (input.bio !== undefined) patch.bio = input.bio;
   if (input.location !== undefined) patch.location = input.location;
-  if (input.age !== undefined) patch.age = input.age;
+  if (input.birthday !== undefined) patch.birthday = input.birthday;
   if (input.instagramUrl !== undefined) patch.instagramUrl = input.instagramUrl;
   if (input.xUrl !== undefined) patch.xUrl = input.xUrl;
   if (input.youtubeUrl !== undefined) patch.youtubeUrl = input.youtubeUrl;

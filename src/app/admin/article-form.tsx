@@ -74,6 +74,26 @@ export function ArticleForm({ action, categories, initial }: Props) {
         />
       </label>
 
+      <div className="flex flex-col gap-1 text-sm">
+        本文
+        <RichEditor name="content" initialHTML={initial?.content} />
+      </div>
+
+      <FeaturedImage name="featuredImage" initialPath={initial?.featuredImagePath} />
+
+      <label className="flex flex-col gap-1 text-sm">
+        公開日時
+        <input
+          type="datetime-local"
+          name="publishedAt"
+          defaultValue={initial?.publishedAtInput ?? ''}
+          className="w-fit rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
+        />
+        <span className="text-xs text-zinc-500">
+          空欄のまま「投稿する」を押すと今すぐ公開します。日時を選ぶと、その日時で公開します（過去の日付にも設定できます）。
+        </span>
+      </label>
+
       {/* 連載（カテゴリ）。未分類を作らないため必須。担当が1つだけなら自動で選ばれる。 */}
       <label className="flex flex-col gap-1 text-sm">
         連載
@@ -97,26 +117,6 @@ export function ArticleForm({ action, categories, initial }: Props) {
             ))}
           </select>
         )}
-      </label>
-
-      <div className="flex flex-col gap-1 text-sm">
-        本文
-        <RichEditor name="content" initialHTML={initial?.content} />
-      </div>
-
-      <FeaturedImage name="featuredImage" initialPath={initial?.featuredImagePath} />
-
-      <label className="flex flex-col gap-1 text-sm">
-        公開日時
-        <input
-          type="datetime-local"
-          name="publishedAt"
-          defaultValue={initial?.publishedAtInput ?? ''}
-          className="w-fit rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
-        />
-        <span className="text-xs text-zinc-500">
-          空欄のまま「投稿する」を押すと今すぐ公開します。日時を選ぶと、その日時で公開します（過去の日付にも設定できます）。
-        </span>
       </label>
 
       {state?.error && (

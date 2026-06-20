@@ -85,6 +85,12 @@ body {
   color: #52525b;
   margin: 0.5em 0;
 }
+/* リンク：編集中も「リンクになっている」と分かるよう、公開ページと同じ青＋下線にする。 */
+.tiptap-editor :where(a) {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
 .tiptap-editor :where(p) {
   margin: 0.4em 0;
 }

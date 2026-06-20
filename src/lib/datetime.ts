@@ -48,6 +48,30 @@ export function formatJstDate(utc: string): string {
   });
 }
 
+// 誕生日（'YYYY-MM-DD'）→ 今日時点の満年齢（日本時間基準）。
+// 誕生日が未設定・形式が変なら null（＝年齢を出さない）。
+// 一度登録すれば、誕生日が来るたびに自動で1つ増える（手で書き換え不要）。
+export function calcAge(birthday: string | null | undefined): number | null {
+  if (!birthday) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthday.trim());
+  if (!m) return null;
+  const by = Number(m[1]);
+  const bm = Number(m[2]);
+  const bd = Number(m[3]);
+
+  // 「今日」を日本時間で取り出す（サーバーのタイムゾーンに左右されないよう +9 で換算）。
+  const nowJst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const ty = nowJst.getUTCFullYear();
+  const tm = nowJst.getUTCMonth() + 1;
+  const td = nowJst.getUTCDate();
+
+  let age = ty - by;
+  // 今年の誕生日がまだ来ていなければ1つ引く。
+  if (tm < bm || (tm === bm && td < bd)) age -= 1;
+  if (age < 0 || age > 150) return null; // 明らかにおかしい値は出さない
+  return age;
+}
+
 // DBのUTC文字列 → 公開トップ「最新」用の日時表示（日本時間。例: "6月3日 15時26分"）
 export function formatJstDatetime(utc: string): string {
   const d = new Date(utc.replace(' ', 'T') + 'Z');

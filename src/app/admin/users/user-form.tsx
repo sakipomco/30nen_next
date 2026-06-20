@@ -24,7 +24,7 @@ type Props = {
     categoryId: number | null; // 現在の担当連載
     avatarPath: string | null;
     location: string | null;
-    age: number | null;
+    birthday: string | null; // 誕生日 'YYYY-MM-DD'（任意）
     instagramUrl: string | null;
     xUrl: string | null;
     youtubeUrl: string | null;
@@ -137,16 +137,17 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
               className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
             />
           </label>
-          <label className="flex w-28 flex-col gap-1 text-sm">
-            年齢
+          <label className="flex w-44 flex-col gap-1 text-sm">
+            誕生日
             <input
-              type="number"
-              name="age"
-              min={0}
-              max={120}
-              defaultValue={initial?.age != null ? String(initial.age) : ''}
+              type="date"
+              name="birthday"
+              defaultValue={initial?.birthday ?? ''}
               className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
             />
+            <span className="text-xs text-zinc-500">
+              年齢は誕生日から自動で表示されます（毎年の書き換え不要）。
+            </span>
           </label>
         </div>
 

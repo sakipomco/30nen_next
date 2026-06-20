@@ -27,6 +27,40 @@ function getImageFiles(dt: DataTransfer | null): File[] {
   return Array.from(dt.files).filter((f) => f.type.startsWith('image/'));
 }
 
+// 選んだ文字にリンクを貼る／貼り直す／外す。
+//  ・文字を選んでから押す → その文字がリンクになる
+//  ・文字を選ばずに押す → 入力したURLがそのまま文字＋リンクとして入る
+//  ・URLを空欄にして押す → リンクを解除する
+function setLink(editor: Editor) {
+  const prev = editor.getAttributes('link').href as string | undefined;
+  const input = window.prompt(
+    'リンク先のURLを入力してください（空欄にすると解除します）',
+    prev ?? 'https://',
+  );
+  if (input === null) return; // キャンセル
+  const url = input.trim();
+
+  if (url === '') {
+    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    return;
+  }
+  // 文字を選んでいない＆今リンク上でもない → URLそのものを文字として入れてリンク化。
+  if (editor.state.selection.empty && !editor.isActive('link')) {
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'text',
+        text: url,
+        marks: [{ type: 'link', attrs: { href: url } }],
+      })
+      .run();
+    return;
+  }
+  // 選択範囲（または今のリンク全体）にリンクを設定。
+  editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+}
+
 // ツールバーの1ボタン分。
 function ToolbarButton({
   onClick,
@@ -94,6 +128,12 @@ function Toolbar({
         active={editor.isActive('blockquote')}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
       />
+      {/* リンク：文字を選んでから押すと、その文字にリンクを貼れる。 */}
+      <ToolbarButton
+        label="リンク"
+        active={editor.isActive('link')}
+        onClick={() => setLink(editor)}
+      />
       {/* 本文に画像を挿入。押すとファイル選択 → アップロード → カーソル位置に差し込む。 */}
       <ToolbarButton
         label={uploading ? 'アップロード中…' : '画像'}
@@ -132,7 +172,18 @@ export function RichEditor({ name, initialHTML }: Props) {
   }
 
   const editor = useEditor({
-    extensions: [StarterKit, Image],
+    extensions: [
+      // StarterKit v3 はリンク機能を内蔵。編集中はクリックで飛ばない（openOnClick:false）、
+      // URLは既定で https、外部リンクは新しいタブ＋安全属性で開く設定にする。
+      StarterKit.configure({
+        link: {
+          openOnClick: false,
+          defaultProtocol: 'https',
+          HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer nofollow' },
+        },
+      }),
+      Image,
+    ],
     content: initialHTML ?? '',
     immediatelyRender: false,
     onUpdate: ({ editor }) => setHtml(editor.getHTML()),

@@ -31,9 +31,7 @@ function readForm(formData: FormData) {
     // 書き手プロフィール（すべて任意・空欄は null）
     avatarPath: String(formData.get('avatarPath') ?? '').trim() || null,
     location: String(formData.get('location') ?? '').trim() || null,
-    age: String(formData.get('age') ?? '').trim()
-      ? Number(formData.get('age'))
-      : null,
+    birthday: String(formData.get('birthday') ?? '').trim() || null, // 'YYYY-MM-DD'（空欄＝なし）
     instagramUrl: String(formData.get('instagramUrl') ?? '').trim() || null,
     xUrl: String(formData.get('xUrl') ?? '').trim() || null,
     youtubeUrl: String(formData.get('youtubeUrl') ?? '').trim() || null,
@@ -59,7 +57,7 @@ export async function createUserAction(
 
   const {
     name, email, password, role, bio, categoryId,
-    avatarPath, location, age, instagramUrl, xUrl, youtubeUrl, websiteUrl,
+    avatarPath, location, birthday, instagramUrl, xUrl, youtubeUrl, websiteUrl,
   } = readForm(formData);
   if (!name) return { error: '名前を入力してください。' };
   if (!email) return { error: 'メールアドレスを入力してください。' };
@@ -68,7 +66,7 @@ export async function createUserAction(
   try {
     const created = await createUser({
       name, email, password, role, bio,
-      avatarPath, location, age, instagramUrl, xUrl, youtubeUrl, websiteUrl,
+      avatarPath, location, birthday, instagramUrl, xUrl, youtubeUrl, websiteUrl,
     });
     await setUserCategory(created.id, categoryId); // 担当連載を登録（なしも可）
   } catch (e) {
@@ -92,7 +90,7 @@ export async function updateUserAction(
   }
   const {
     name, email, password, role, bio, categoryId,
-    avatarPath, location, age, instagramUrl, xUrl, youtubeUrl, websiteUrl,
+    avatarPath, location, birthday, instagramUrl, xUrl, youtubeUrl, websiteUrl,
   } = readForm(formData);
   if (!name) return { error: '名前を入力してください。' };
   if (!email) return { error: 'メールアドレスを入力してください。' };
@@ -112,7 +110,7 @@ export async function updateUserAction(
     // password は空欄なら据え置き（updateUser 側で判定）。
     await updateUser(id, {
       name, email, role, bio, password: password || undefined,
-      avatarPath, location, age, instagramUrl, xUrl, youtubeUrl, websiteUrl,
+      avatarPath, location, birthday, instagramUrl, xUrl, youtubeUrl, websiteUrl,
     });
     await setUserCategory(id, categoryId);
   } catch (e) {

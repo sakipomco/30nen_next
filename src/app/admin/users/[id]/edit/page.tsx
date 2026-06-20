@@ -65,7 +65,7 @@ export default async function EditUserPage({
               categoryId: currentCategoryId,
               avatarPath: publicUser.avatarPath,
               location: publicUser.location,
-              age: publicUser.age,
+              birthday: publicUser.birthday,
               instagramUrl: publicUser.instagramUrl,
               xUrl: publicUser.xUrl,
               youtubeUrl: publicUser.youtubeUrl,

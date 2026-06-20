@@ -18,6 +18,8 @@ export default async function AdminPage() {
   const articles = await listArticles(
     user.role === 'admin' ? undefined : { authorId: user.id },
   );
+  // 新規作成の呼び方（管理者・書き手とも共通のやさしい言い回し）。
+  const newArticleLabel = '新しい日記をかく';
 
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 px-4 py-12">
@@ -49,11 +51,25 @@ export default async function AdminPage() {
                 </Link>
               </>
             )}
+            {/* 画像フォルダ（これまでに上げた写真の一覧・全員） */}
+            <Link
+              href="/admin/media"
+              className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+            >
+              画像フォルダ
+            </Link>
+            {/* 自分のプロフィール編集（書き手・管理者とも本人の分） */}
+            <Link
+              href="/admin/profile"
+              className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+            >
+              myPROFILE
+            </Link>
             <Link
               href="/admin/new"
               className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
             >
-              新規作成
+              {newArticleLabel}
             </Link>
             <form action={logout}>
               <button
@@ -74,7 +90,7 @@ export default async function AdminPage() {
         {/* 記事一覧 */}
         {articles.length === 0 ? (
           <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-500">
-            まだ記事がありません。「新規作成」から書いてみましょう。
+            まだ記事がありません。「{newArticleLabel}」から書いてみましょう。
           </div>
         ) : (
           <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white">

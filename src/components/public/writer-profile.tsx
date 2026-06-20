@@ -4,13 +4,16 @@
 
 import Image from 'next/image';
 import type { PublicUser } from '@/db/users';
+import { calcAge } from '@/lib/datetime';
 import { SectionHeading } from './section-heading';
 
 export function WriterProfile({ author }: { author: PublicUser }) {
   // 「神奈川県藤沢市／49歳」のように、ある項目だけをつなげる。
+  // 年齢は誕生日から自動計算（誕生日そのものは表示しない）。
+  const age = calcAge(author.birthday);
   const metaParts: string[] = [];
   if (author.location) metaParts.push(author.location);
-  if (author.age != null) metaParts.push(`${author.age}歳`);
+  if (age != null) metaParts.push(`${age}歳`);
   const meta = metaParts.join('／');
 
   const socials = [

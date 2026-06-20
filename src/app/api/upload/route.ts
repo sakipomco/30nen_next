@@ -13,6 +13,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { getCurrentUser } from '@/auth/session';
+import { recordUpload } from '@/db/uploads';
 
 // 受け付ける画像の種類（MIMEタイプ → 保存時の拡張子）。
 const ALLOWED: Record<string, string> = {
@@ -99,7 +100,15 @@ export async function POST(request: Request) {
   await mkdir(publicDir, { recursive: true });
   await writeFile(path.join(publicDir, filename), bytes);
 
-  // ⑦ 表示に使う公開URLを返す
+  // ⑦ 「誰が上げたか」を台帳に記録する（画像フォルダ一覧で“自分の写真だけ削除”に使う）。
+  //    記録に失敗しても画像保存自体は成功しているので、本処理は止めない（持ち主不明になるだけ）。
   const url = '/' + path.posix.join(relDir, filename);
+  try {
+    await recordUpload({ path: url, uploadedBy: user.id });
+  } catch {
+    // 台帳への記録失敗は致命的ではないため無視（次回以降の削除判定で持ち主不明になるだけ）。
+  }
+
+  // ⑧ 表示に使う公開URLを返す
   return Response.json({ url });
 }
