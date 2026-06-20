@@ -1,7 +1,7 @@
 // 新規記事の作成ページ（/admin/new）。ログイン必須。
 import Link from 'next/link';
 import { requireUser } from '@/auth/session';
-import { createArticleAction } from '@/app/actions/articles';
+import { saveArticleAction } from '@/app/actions/articles';
 import { listSelectableCategories } from '@/db/categories';
 import { ArticleForm } from '../article-form';
 
@@ -25,7 +25,7 @@ export default async function NewArticlePage() {
           </Link>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-6">
-          <ArticleForm action={createArticleAction} categories={categories} />
+          <ArticleForm action={saveArticleAction} categories={categories} />
         </div>
       </div>
     </div>

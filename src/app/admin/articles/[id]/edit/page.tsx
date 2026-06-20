@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/auth/session';
-import { updateArticleAction } from '@/app/actions/articles';
+import { saveArticleAction } from '@/app/actions/articles';
 import { getArticleById, canManageArticle } from '@/db/articles';
 import { listSelectableCategories, getCategoryById } from '@/db/categories';
 import { utcToJstInput } from '@/lib/datetime';
@@ -50,12 +50,13 @@ export default async function EditArticlePage({
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-6">
           <ArticleForm
-            action={updateArticleAction}
+            action={saveArticleAction}
             categories={categories}
             initial={{
               id: article.id,
               title: article.title,
               content: article.content,
+              status: article.status,
               featuredImagePath: article.featuredImagePath,
               categoryId: article.categoryId,
               // 公開日時があれば日本時間の入力欄の形にして初期表示
