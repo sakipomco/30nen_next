@@ -45,7 +45,7 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
       {initial && <input type="hidden" name="id" value={initial.id} />}
 
       <label className="flex flex-col gap-1 text-sm">
-        名前（表示名・ペンネーム）
+        名前
         <input
           type="text"
           name="name"
@@ -123,7 +123,7 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
         {/* 顔写真（丸く表示される。アイキャッチと同じアップロードの仕組みを流用） */}
         <FeaturedImage
           name="avatarPath"
-          label="顔写真"
+          label="プロフィール写真"
           initialPath={initial?.avatarPath}
         />
 
@@ -152,7 +152,7 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
         </div>
 
         <label className="flex flex-col gap-1 text-sm">
-          Instagram の URL
+          Instagram
           <input
             type="url"
             name="instagramUrl"
@@ -163,7 +163,7 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
-          X（旧Twitter）の URL
+          X（旧Twitter）
           <input
             type="url"
             name="xUrl"
@@ -174,7 +174,7 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
-          YouTube の URL
+          YouTube
           <input
             type="url"
             name="youtubeUrl"
@@ -185,7 +185,7 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
-          Webサイトの URL
+          Webサイト
           <input
             type="url"
             name="websiteUrl"
