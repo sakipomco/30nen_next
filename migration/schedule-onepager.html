@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+    color: #333; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 297mm; height: 210mm; padding: 9mm 10mm; display: flex; flex-direction: column; }
+
+  /* Header */
+  header { border-bottom: 2px solid #150c0c; padding-bottom: 5px; margin-bottom: 8px; }
+  .title-row { display: flex; align-items: baseline; justify-content: space-between; }
+  h1 { font-size: 19px; color: #150c0c; letter-spacing: .5px; }
+  h1 .sub { font-size: 11px; color: #777; font-weight: normal; margin-left: 8px; }
+  .meta { font-size: 9.5px; color: #777; text-align: right; line-height: 1.5; }
+  .goal { margin-top: 4px; font-size: 11px; }
+  .goal b { color: #150c0c; }
+  .pill { display: inline-block; background: #150c0c; color: #fff; font-size: 9.5px; padding: 1px 7px; border-radius: 9px; margin-left: 4px; }
+
+  /* Timeline table */
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 1px solid #d8d2cc; padding: 5px 7px; vertical-align: top; font-size: 9.7px; line-height: 1.45; }
+  thead th { background: #150c0c; color: #fff; font-size: 10px; text-align: left; padding: 6px 7px; }
+  .wk { width: 52px; }
+  .per { width: 70px; }
+  td.wk { font-weight: bold; color: #150c0c; font-size: 10px; }
+  td.per { color: #555; font-size: 9.2px; }
+  tbody tr:nth-child(even) td { background: #faf8f6; }
+  .col-a { width: 30%; }
+  .col-b { width: 28%; }
+  .col-c { width: 23%; }
+  b.hi { color: #150c0c; }
+  .tag { display: inline-block; font-size: 9px; padding: 0 5px; border-radius: 8px; margin-right: 3px; color: #fff; }
+  .t-go { background: #2e7d32; }
+  .t-ann { background: #b5651d; }
+  .t-cut { background: #150c0c; }
+  .row-cut td { background: #f3ede7 !important; }
+
+  /* Bottom notes */
+  .notes { display: flex; gap: 8px; margin-top: 9px; }
+  .card { flex: 1; border: 1px solid #d8d2cc; border-radius: 4px; padding: 7px 9px; }
+  .card h3 { font-size: 10.5px; color: #150c0c; margin-bottom: 4px; border-bottom: 1px solid #e6ded6; padding-bottom: 3px; }
+  .card ul { list-style: none; }
+  .card li { font-size: 9px; line-height: 1.5; padding-left: 10px; position: relative; }
+  .card li::before { content: "・"; position: absolute; left: 0; color: #b5651d; }
+  footer { margin-top: auto; padding-top: 6px; font-size: 8.5px; color: #999; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="title-row">
+      <h1>記事データ移行　通しスケジュール<span class="sub">30nen.com（三十年商店）WordPress → 自前システム</span></h1>
+      <div class="meta">作成 2026-06-16 ／ 公開記事 約7,790件<br>担当: ① Claude Code　② SAKI × Claude</div>
+    </div>
+    <div class="goal">
+      切替目標 <b>7月下旬（努力目標）</b><span class="pill">7/6 Go判定で8月末へ延期可</span>
+      ／ 方針: WordPressは止めず並行稼働・本物の投稿は切替まで現行へ・新システムは練習用
+    </div>
+  </header>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="wk">週</th>
+        <th class="per">期間</th>
+        <th class="col-a">① 記事移行の準備（Claude Code）</th>
+        <th class="col-b">② 書き手のアナウンス・お試し（SAKI×Claude）</th>
+        <th class="col-c">③ 本移行・切替</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="wk">今週</td><td class="per">6/16〜6/22</td>
+        <td>著者一覧を読取り取得→<b class="hi">著者対応表のひな形</b>／新システムに連載を作成（wp_term_id 紐付け）／wp_id に unique index 追加</td>
+        <td>書き手20名の名簿を確定（氏名・メアド・担当連載・使用言語）</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="wk">W+1</td><td class="per">6/23〜6/29</td>
+        <td><b class="hi">最優先：Xサーバーへテストデプロイ＋本番相当ビルド成功</b>／全件エクスポート方式を確立／移行スクリプト作成</td>
+        <td>📖 マニュアル作成（日本語＋スペイン語・3ステップ）</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="wk">W+2</td><td class="per">6/30〜7/6</td>
+        <td>リハーサル移行 第1回（手元・全件）→点検→修正／画像移行を検証　<b class="hi">＊7/6 Go/No-Go判定</b></td>
+        <td>本番アカウント20名を作成／<span class="tag t-ann">📣アナウンス①</span>予告＋マニュアル配布</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="wk">W+3</td><td class="per">7/7〜7/13</td>
+        <td>リハーサル第2回・Xサーバー上でも試す／画像の総容量・転送時間・欠落数を確認</td>
+        <td><span class="tag t-go">🟢お試し期間</span>開始＝各自ログイン→お試し投稿・質問対応</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="wk">W+4</td><td class="per">7/14〜7/20</td>
+        <td>最終リハーサル・点検チェックリスト全クリア／本番手順書を確定</td>
+        <td>お試し期間つづき／<span class="tag t-ann">📣アナウンス②</span>リマインド「○/○に切替」</td>
+        <td>—</td>
+      </tr>
+      <tr class="row-cut">
+        <td class="wk">W+5</td><td class="per">7/21〜7/27</td>
+        <td>切替当日の手順を最終確認</td>
+        <td>切替日サポート／以後 全員 新システムへ</td>
+        <td><span class="tag t-cut">切替</span><b class="hi">本移行①（一括）→ ②（差分）→ ドメイン向け替え</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="notes">
+    <div class="card">
+      <h3>🟢 お試し期間のルール（書き手へ明示）</h3>
+      <ul>
+        <li>本物の投稿は切替まで WordPress へ（出どころを1つに）</li>
+        <li>新システムは練習用。お試し投稿は切替後に消えてOK</li>
+        <li>練習画面に「ここは練習用」表示・最終投稿の締切時刻を明示</li>
+        <li>差分移行後、最新10件を新旧で目視照合</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>⚠ 7/6 Go/No-Go の合格条件（一部）</h3>
+      <ul>
+        <li>テストURLで稼働＋本番相当でビルド成功</li>
+        <li>全件データを一度取り込めている（画像容量も把握）</li>
+        <li>記事詳細・連載別・著者・月別アーカイブが実データで見られる</li>
+        <li>著者/連載 対応表・切替手順書・ロールバック手順がある</li>
+        <li>1つでも大きく欠ければ → 8月末へ延期</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🛟 切替の安全装置</h3>
+      <ul>
+        <li>SEO: slug維持＋301リダイレクト・sitemap・OGP</li>
+        <li>切替前にDBと画像をバックアップ・WordPressは温存</li>
+        <li>DNSのTTLを数日前に短縮・戻す判断基準を決める</li>
+        <li>スクリプト: 冪等・dry-run・件数照合・エラーログ</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <span>詳細: migration/data-migration-plan.md ／ レビュー: letter_box/inbox/2026-06-16_review-02.md</span>
+    <span>30nen_next ／ 記事データ移行プラン v1</span>
+  </footer>
+</div>
+</body>
+</html>

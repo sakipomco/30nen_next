@@ -53,3 +53,6 @@ next-env.d.ts
 
 # ローカル専用ツール設定（プレビュー起動設定など。絶対パスを含むため各自の環境固有）
 /.claude/
+
+# 移行スケジュールのPDF（schedule-onepager.html から書き出した派生物。元データのHTMLだけGit管理する）
+/migration/記事データ移行スケジュール.pdf
