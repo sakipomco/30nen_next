@@ -31,23 +31,25 @@
   - 接続先: `the30nen@the30nen.xsrv.jp`（ポート10022・鍵 `~/.ssh/30nen_xserver`）
   - WordPress本体: `/home/the30nen/30nen.com/public_html`
   - WP-CLI（記事を読み出す道具）: `php7.4 /usr/bin/wp …`（既定のphpは古いので必ず `php7.4` を付ける）
-- **書き出しスクリプト**: `migration/export-wp.sh`（このリポジトリにある。サーバーへ送って実行する）
+- **書き出しスクリプト**: `migration/export-wp.sh`（高速版。サーバーへ送って実行＝**まとめ取り2回**）
+- **分割**: `migration/split-export.ts`（手元で実行＝まとめファイルを1記事ごとに分ける）
 - **補助ファイル生成**: `migration/derive-aux-files.ts`（手元で実行する後処理）
 
 ---
 
-## 2. 出力されるファイルの形（サンプルと同じ）
+## 2. しくみ（速いやり方＝まとめ取り）
 
-1記事につき4ファイル。サンプル `reference/sample-posts/posts/` と同じ構成です。
+1件ずつ聞くと8,101件で数時間かかるため、**サーバーへのアクセスは2回だけ**にして、
+細かい分割は手元(ローカル)で行います。
 
-| ファイル | 中身 | 作る場所 |
+| 段階 | 何を作る | 場所 |
 |---|---|---|
-| `<ID>.json` | 記事本体（本文HTML・タイトル・公開日時・著者番号・slug 等） | サーバー（export-wp.sh） |
-| `<ID>.categories.json` | 連載（term_id・名前・slug・親） | サーバー（export-wp.sh） |
-| `<ID>.author_id.txt` | 著者番号 | 手元（derive-aux-files.ts） |
-| `<ID>.imagelist.txt` | 本文で使う画像の相対パス一覧 | 手元（derive-aux-files.ts） |
+| ① 書き出し | `all-posts.json`（記事本体の配列）／`all-categories.tsv`（連載対応） | サーバー（export-wp.sh・**2回のまとめ取り**） |
+| ② 分割 | `<ID>.json`／`<ID>.categories.json`（1記事ごと） | 手元（split-export.ts） |
+| ③ 補助 | `<ID>.author_id.txt`／`<ID>.imagelist.txt` | 手元（derive-aux-files.ts） |
 
-> 後半2つを手元で作るのは、**本番サーバーでの処理を軽くする**ため（サーバーでは記事本体とカテゴリだけ取り、本文の解析は手元のNodeで確実に行う）。
+③まで終わると、サンプル `reference/sample-posts/posts/` と同じ **1記事4ファイル**構成になり、
+移行スクリプト `migrate-articles.ts` がそのまま使えます。
 
 ---
 
@@ -63,45 +65,48 @@ scp migration/export-wp.sh xserver-30nen:~/export-wp.sh
 # サーバーにログイン
 ssh xserver-30nen
 
-# （サーバー上で）先頭20件だけ書き出す試運転
+# （サーバー上で）本体は先頭20件だけ取得する試運転
 LIMIT=20 bash ~/export-wp.sh
-# → ~/30nen_export/posts/ に 20件ぶんの <ID>.json と <ID>.categories.json ができる
+# → ~/30nen_export/ に all-posts.json（20件）と all-categories.tsv ができる
 ```
 
-中身が想定どおりか（本文・カテゴリが取れているか）を確認します。
-
 ### STEP 2. 全件を書き出す
-試運転がOKなら、件数制限なしで全件。記事数が多いので時間がかかります（必要なら `screen`/`nohup` で切断対策）。
+試運転がOKなら、件数制限なしで全件。**まとめ取り2回なので数分**で終わります。
 
 ```bash
 # （サーバー上で）全件書き出し
 bash ~/export-wp.sh
-# → 「公開記事: 7999 件」と表示され、~/30nen_export/posts/ に全件ぶんが書き出される
+# → 「記事本体 約 8101 件＋カテゴリ対応表」と表示される
 ```
 
-### STEP 3. 手元のパソコンへ持ち帰る
-書き出したフォルダを、このリポジトリの `migration/export/posts/` へコピーします。
+### STEP 3. 手元のパソコンへ持ち帰る（rsyncは2ファイルだけ）
 
 ```bash
 # （手元のターミナルで）サーバー → 手元へ転送
 mkdir -p migration/export
-rsync -avz xserver-30nen:~/30nen_export/posts migration/export/
+rsync -avz xserver-30nen:~/30nen_export/all-posts.json xserver-30nen:~/30nen_export/all-categories.tsv migration/export/
 ```
 
-### STEP 4. 補助ファイル（author_id / imagelist）を手元で生成
-JSONから、残り2種のファイルを作ってサンプルと同じ4ファイル構成にします。
+### STEP 4. 1記事ごとに分割（手元）
+
+```bash
+node --import tsx migration/split-export.ts migration/export
+# → migration/export/posts/ に <ID>.json と <ID>.categories.json ができる
+```
+
+### STEP 5. 補助ファイル（author_id / imagelist）を手元で生成
 
 ```bash
 node --import tsx migration/derive-aux-files.ts migration/export/posts
 # → 各 <ID>.author_id.txt と <ID>.imagelist.txt が作られる
 ```
 
-### STEP 5. 件数の確認
-書き出せた件数が想定（7,999）と合うかを照合します。
+### STEP 6. 件数の確認
+書き出せた件数が想定と合うかを照合します（移行直前の公開記事数。2026-06-24時点で約8,101）。
 
 ```bash
 ls migration/export/posts/*.json | grep -v categories | wc -l
-# → 7999 になればOK（移行時にID282を除外して7,998件取り込まれる）
+# → 約8,101 になればOK（移行時にID282を除外して1件少なく取り込まれる）
 ```
 
 ---
