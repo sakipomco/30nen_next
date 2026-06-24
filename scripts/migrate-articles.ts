@@ -21,7 +21,7 @@
 // 実行（本当に取り込む・画像はサンプルからコピー）:
 //   DATABASE_PATH=data/migrate-test.db node --env-file=.env.local --import tsx scripts/migrate-articles.ts
 
-import { readFileSync, readdirSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { eq } from 'drizzle-orm';
 import { db } from '../src/db/index';
@@ -33,6 +33,7 @@ import {
   wpStatusToStatus,
   normalizeSlug,
 } from '../migration/lib/transform';
+import { shrinkImage, mimeFromExtension } from '../src/lib/image';
 
 const PROJECT_ROOT = resolve(dirname(new URL(import.meta.url).pathname), '..');
 
@@ -76,27 +77,43 @@ type Report = {
 };
 
 // 本文画像1枚を public/uploads/<相対パス> へ配置する。
-//  - 既定（サンプル）: reference/sample-posts/images/<パスの / を _ にした名前> をコピー
+//  - 既定（サンプル）: reference/sample-posts/images/<パスの / を _ にした名前> を読む
 //  - --download: https://30nen.com/wp-content/uploads/<相対パス> から取得
+// どちらの場合も、新規投稿と同じ基準で「軽く」してから保存する（長辺1600px・圧縮）。
+//   → 30年運用の前提で容量を抑える方針（data-migration-plan.md S5「軽くして運ぶ」）。
+//   GIF（アニメ）と対応外の拡張子は無加工でそのまま保存。
 async function placeImage(relPath: string): Promise<{ ok: boolean; reason?: string }> {
   const dest = join(UPLOADS_DIR, relPath);
   if (existsSync(dest)) return { ok: true }; // すでにある（冪等）
   mkdirSync(dirname(dest), { recursive: true });
   try {
+    // ① 元データをメモリに読む（取得元はダウンロード or サンプル）
+    let raw: Buffer;
     if (DOWNLOAD) {
       const url = `https://30nen.com/wp-content/uploads/${relPath}`;
       const res = await fetch(url);
       if (!res.ok) return { ok: false, reason: `HTTP ${res.status} ${url}` };
-      const buf = Buffer.from(await res.arrayBuffer());
-      const { writeFileSync } = await import('node:fs');
-      writeFileSync(dest, buf);
-      return { ok: true };
+      raw = Buffer.from(await res.arrayBuffer());
     } else {
       const src = join(SAMPLE_IMAGES_DIR, relPath.replace(/\//g, '_'));
       if (!existsSync(src)) return { ok: false, reason: `サンプル画像なし: ${src}` };
-      copyFileSync(src, dest);
-      return { ok: true };
+      raw = readFileSync(src);
     }
+
+    // ② 軽くする（投稿時と同じ shrinkImage）。種類が分かるものだけ縮小し、
+    //    壊れた画像などで失敗したら原本のまま保存して画像欠けを防ぐ。
+    const mime = mimeFromExtension(relPath);
+    let bytes = raw;
+    if (mime) {
+      try {
+        bytes = await shrinkImage(raw, mime);
+      } catch {
+        bytes = raw; // 縮小に失敗しても原本を残す（移行を止めない）
+      }
+    }
+
+    writeFileSync(dest, bytes);
+    return { ok: true };
   } catch (e) {
     return { ok: false, reason: String(e) };
   }

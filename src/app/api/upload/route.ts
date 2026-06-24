@@ -11,9 +11,9 @@
 import { randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import sharp from 'sharp';
 import { getCurrentUser } from '@/auth/session';
 import { recordUpload } from '@/db/uploads';
+import { shrinkImage } from '@/lib/image';
 
 // 受け付ける画像の種類（MIMEタイプ → 保存時の拡張子）。
 const ALLOWED: Record<string, string> = {
@@ -25,26 +25,8 @@ const ALLOWED: Record<string, string> = {
 
 // 安全弁：自動で軽くするので普段は引っかからないが、極端に巨大なファイルだけ防ぐ上限。
 const MAX_BYTES = 40 * 1024 * 1024; // 40MB
-// 写真をこの長さ（px）まで縮める。ブログ表示にはこれで十分で、ファイルが大幅に軽くなる。
-const MAX_DIMENSION = 1600;
 
-// 写真を「軽く」する：向き補正（EXIF）→ 長辺1600pxまで縮小（元が小さければそのまま）→ 圧縮。
-// GIFはアニメーション（パラパラ動く）を壊さないよう、加工せずそのまま保存する。
-async function shrinkImage(input: Buffer, mime: string): Promise<Buffer> {
-  if (mime === 'image/gif') return input;
-
-  const pipeline = sharp(input)
-    .rotate() // スマホ写真の「横向き」などをEXIF情報どおりに正す
-    .resize(MAX_DIMENSION, MAX_DIMENSION, {
-      fit: 'inside', // 縦横比はそのまま、枠に収まるように縮める
-      withoutEnlargement: true, // 元が小さい画像は引き伸ばさない
-    });
-
-  if (mime === 'image/png') return pipeline.png({ compressionLevel: 9 }).toBuffer();
-  if (mime === 'image/webp') return pipeline.webp({ quality: 80 }).toBuffer();
-  // それ以外（JPEG）
-  return pipeline.jpeg({ quality: 80, mozjpeg: true }).toBuffer();
-}
+// 縮小・圧縮の本体は `@/lib/image` の shrinkImage を使う（移行スクリプトと同じ基準）。
 
 export async function POST(request: Request) {
   // ① ログイン必須（未ログインは弾く）

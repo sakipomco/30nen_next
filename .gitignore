@@ -56,3 +56,6 @@ next-env.d.ts
 
 # 移行スケジュールのPDF（schedule-onepager.html から書き出した派生物。元データのHTMLだけGit管理する）
 /migration/記事データ移行スケジュール.pdf
+
+# 現行WPから書き出した記事データ（大量のJSON/画像リスト。手順とスクリプトだけGit管理し、書き出し実体は管理外）
+/migration/export/
