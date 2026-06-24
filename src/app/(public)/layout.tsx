@@ -42,7 +42,7 @@ export default async function PublicLayout({
       <HamburgerMenu series={series} archive={archive} />
 
       {/* 3カラム本体 */}
-      <div className="mx-auto grid max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:grid-cols-[1fr_1.8fr_1fr] lg:gap-12 lg:px-20">
+      <div className="mx-auto grid max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:grid-cols-[1.1fr_1.8fr_1.1fr] lg:gap-12 lg:px-20">
         {/* 左コラム */}
         <aside className="lg:pt-2">
           <SidebarLeft leadText={leadText} recipients={recipients} />

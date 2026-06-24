@@ -4,7 +4,7 @@
 
 export function SectionHeading({
   children,
-  gapClass = 'mb-5',
+  gapClass = 'mb-3',
 }: {
   children: React.ReactNode;
   // 帯の下のアキ（余白）。詰めたい所だけ 'mb-2' などを渡す。

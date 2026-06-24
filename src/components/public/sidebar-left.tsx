@@ -23,7 +23,7 @@ export function SidebarLeft({
           左右は中央のまま。スマホは中央・大きめのまま。 */}
       <Link
         href="/"
-        className="-mt-10 block w-full max-w-[260px] lg:-mt-12 lg:max-w-[208px]"
+        className="-mt-10 block w-full max-w-[260px] lg:-mt-12 lg:max-w-[247px]"
       >
         <Image
           src="/30nen_logo_noren_plus.jpg"

@@ -8,7 +8,7 @@ export type Crumb = { label: string; href?: string };
 
 export function Breadcrumb({ items }: { items: Crumb[] }) {
   return (
-    <nav aria-label="現在地" className="mb-6 text-center">
+    <nav aria-label="現在地" className="mb-2 text-center">
       <ol className="gothic inline-flex flex-wrap items-center justify-center gap-1 text-[10px] text-[#808080]">
         {items.map((c, i) => {
           const isLast = i === items.length - 1;
