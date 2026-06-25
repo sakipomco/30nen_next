@@ -21,8 +21,10 @@
 // 実行（本当に取り込む・画像はサンプルからコピー）:
 //   DATABASE_PATH=data/migrate-test.db node --env-file=.env.local --import tsx scripts/migrate-articles.ts
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { execFileSync } from 'node:child_process';
 import { eq } from 'drizzle-orm';
 import { db } from '../src/db/index';
 import { users, categories, articles } from '../src/db/schema';
@@ -32,6 +34,7 @@ import {
   wpDateToUtc,
   wpStatusToStatus,
   normalizeSlug,
+  heicToJpgPath,
 } from '../migration/lib/transform';
 import { shrinkImage, mimeFromExtension } from '../src/lib/image';
 
@@ -82,12 +85,32 @@ type Report = {
 // どちらの場合も、新規投稿と同じ基準で「軽く」してから保存する（長辺1600px・圧縮）。
 //   → 30年運用の前提で容量を抑える方針（data-migration-plan.md S5「軽くして運ぶ」）。
 //   GIF（アニメ）と対応外の拡張子は無加工でそのまま保存。
+// HEICバッファを sips（macOS純正）でJPEGに変換する。
+//   sharp(libheif) はApple HEICの画素デコードに失敗するため、移行を回す手元のMacの sips を使う。
+function heicBufferToJpeg(buf: Buffer): Buffer {
+  const base = join(tmpdir(), `heic-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const inFile = `${base}.heic`;
+  const outFile = `${base}.jpg`;
+  try {
+    writeFileSync(inFile, buf);
+    execFileSync('sips', ['-s', 'format', 'jpeg', inFile, '--out', outFile], {
+      stdio: 'ignore',
+    });
+    return readFileSync(outFile);
+  } finally {
+    rmSync(inFile, { force: true });
+    rmSync(outFile, { force: true });
+  }
+}
+
 async function placeImage(relPath: string): Promise<{ ok: boolean; reason?: string }> {
-  const dest = join(UPLOADS_DIR, relPath);
+  const isHeic = /\.(?:heic|heif)$/i.test(relPath);
+  const destRel = heicToJpgPath(relPath); // HEICなら保存先は .jpg
+  const dest = join(UPLOADS_DIR, destRel);
   if (existsSync(dest)) return { ok: true }; // すでにある（冪等）
   mkdirSync(dirname(dest), { recursive: true });
   try {
-    // ① 元データをメモリに読む（取得元はダウンロード or サンプル）
+    // ① 元データをメモリに読む（取得元はダウンロード or サンプル。HEICは元の .heic を取りに行く）
     let raw: Buffer;
     if (DOWNLOAD) {
       const url = `https://30nen.com/wp-content/uploads/${relPath}`;
@@ -100,9 +123,15 @@ async function placeImage(relPath: string): Promise<{ ok: boolean; reason?: stri
       raw = readFileSync(src);
     }
 
-    // ② 軽くする（投稿時と同じ shrinkImage）。種類が分かるものだけ縮小し、
+    // ② HEIC は JPEG へ変換してから（以降は普通のJPEGとして扱う）
+    let mime = mimeFromExtension(relPath);
+    if (isHeic) {
+      raw = heicBufferToJpeg(raw);
+      mime = 'image/jpeg';
+    }
+
+    // ③ 軽くする（投稿時と同じ shrinkImage）。種類が分かるものだけ縮小し、
     //    壊れた画像などで失敗したら原本のまま保存して画像欠けを防ぐ。
-    const mime = mimeFromExtension(relPath);
     let bytes = raw;
     if (mime) {
       try {
@@ -188,6 +217,25 @@ async function migrateOne(idBase: string, report: Report): Promise<void> {
     }
   }
 
+  // ⑥-2 アイキャッチ（代表写真）: <ID>.featured.txt があれば配置し featuredImagePath にセット。
+  //      一覧カード・最新の大枠に出る画像。HEICは .jpg に変換した先のパスを記録する。
+  const featuredFile = join(POSTS_DIR, `${idBase}.featured.txt`);
+  let featuredImagePath: string | null = null;
+  if (existsSync(featuredFile)) {
+    const rel = readFileSync(featuredFile, 'utf8').trim();
+    if (rel) {
+      featuredImagePath = '/uploads/' + heicToJpgPath(rel);
+      if (!DRY_RUN) {
+        const r = await placeImage(rel);
+        if (r.ok) report.imagesPlaced++;
+        else {
+          report.imageErrors.push({ wpId, path: rel, reason: r.reason ?? '不明' });
+          featuredImagePath = null; // 取得できなければカードは仮画像に任せる
+        }
+      }
+    }
+  }
+
   // ⑦ 取り込み
   if (DRY_RUN) {
     report.imported++;
@@ -202,6 +250,7 @@ async function migrateOne(idBase: string, report: Report): Promise<void> {
       status,
       authorId: author.id,
       categoryId: category.id,
+      featuredImagePath,
       publishedAt: status === 'published' ? publishedAtUtc || null : null,
       wpId,
     })

@@ -10,7 +10,7 @@
 //   node --import tsx migration/split-export.ts <baseDir>
 //   例) node --import tsx migration/split-export.ts migration/export
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const baseDir = resolve(process.argv[2] ?? 'migration/export');
@@ -25,6 +25,19 @@ function parseJsonLoose<T>(text: string): T {
 
 type WpPost = { ID: number } & Record<string, unknown>;
 type WpCategory = { term_id: number; name: string; slug: string; parent: number };
+
+// タブ区切りの「post_id<TAB>値」ファイルを Map に読む（先頭が数字でない行は飛ばす）。無ければ空。
+function loadIdMap(path: string): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!existsSync(path)) return map;
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    const [postId, value] = line.split('\t');
+    if (!/^\d+$/.test(postId ?? '')) continue;
+    if (value) map.set(postId, value.trim());
+  }
+  return map;
+}
 
 function main() {
   // ① 記事本体（配列）
@@ -50,7 +63,10 @@ function main() {
     catsByPost.set(postId, arr);
   }
 
-  // ③ 1記事ごとに書き出し
+  // ③ アイキャッチ（代表写真）の対応表 post_id → 相対パス（あれば）
+  const featuredByPost = loadIdMap(join(baseDir, 'all-featured.tsv'));
+
+  // ④ 1記事ごとに書き出し
   let n = 0;
   for (const p of posts) {
     const id = String(p.ID);
@@ -59,9 +75,13 @@ function main() {
       join(postsOut, `${id}.categories.json`),
       JSON.stringify(catsByPost.get(id) ?? []),
     );
+    const featured = featuredByPost.get(id);
+    if (featured) writeFileSync(join(postsOut, `${id}.featured.txt`), featured);
     n++;
   }
-  console.log(`分割完了: ${n} 記事 → ${postsOut}（<ID>.json / <ID>.categories.json）`);
+  console.log(
+    `分割完了: ${n} 記事 → ${postsOut}（<ID>.json / .categories.json / .featured.txt）`,
+  );
 }
 
 main();

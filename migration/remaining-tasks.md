@@ -11,10 +11,10 @@
 
 ## A. 移行データの仕上げ（S4で判明した段取り）
 
-- ⬜〔高〕**連載ロゴの設定**: 移行で作る連載に `image_path` が未設定→小商店ロゴがplaceholderになる。本番手順に「ロゴ割り当て」工程を入れる（項目52で手動実施済みの内容を、`series-map.csv` 反映 or 別工程で再現）。
-- ⬜〔高〕**連載の並び順**: `migrate-categories` の `sortOrder` が項目52のSAKI指定順と別。本番で指定順に合わせる。
-- ⬜〔中〕**アイキャッチ画像**: WPのサムネイル(featured image)はエクスポート未対象→一覧/最新カードがdammy画像。①WPのthumbnailもエクスポートに足す ②本文先頭画像を自動アイキャッチにする ③dammyのまま、のどれかを決める。
-- ⬜〔中〕**HEIC画像21枚**: iPhone形式でブラウザ非表示の恐れ。移行時にJPEG変換するか判断。
+- ✅〔高〕**連載ロゴの設定**: `scripts/migrate-categories.ts` に項目52のSAKI確定マップ（wp_term_id→sortOrder/imagePath）を組み込み済み。`ph_data/logo/`→`public/uploads/logo/` のコピーも自動。
+- ✅〔高〕**連載の並び順**: 上記マップで指定順（店主よりお知らせ→度々の旅→…→Seize the day）に。子の山陰編は末尾扱い。
+- ✅〔中〕**アイキャッチ画像**: WP本番サイトに**99.8%（8,085/8,102）でアイキャッチ設定あり**を確認。`migration/export/all-featured.tsv` を書き出し→`split-export.ts` で `<ID>.featured.txt` を生成→`migrate-articles.ts` が `featuredImagePath` をセット＋画像を配置（縮小・HEIC変換つき）。
+- ✅〔中〕**HEIC画像**: 移行時に**sips でJPEGへ自動変換**（22枚は本文・1枚はアイキャッチ）。本文URL書き換えで `.heic`/`.heif` 末尾を `.jpg` に（ファイル名途中の.HEICは誤変換しないよう正規表現を限定）。検証OK。
 - ⬜〔中〕**動画4.0GB**: 縮小不可。そのままVPSに置く（容量OK）か、重い動画だけ外部(YouTube等)化するか方針決定。
 - ⬜〔低〕**画像エラー2枚**: `known-issues.md` 記載（ID20524/ID472の404）。切替前に現行WPで貼り直し or 許容。
 

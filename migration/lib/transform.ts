@@ -12,10 +12,21 @@ import { jstInputToUtc } from '../../src/lib/datetime';
 // 旧サイトの画像ベースURL（http/https・www有無を吸収）。グループ1は後続パス。
 const WP_UPLOADS_RE = /https?:\/\/(?:www\.)?30nen\.com\/wp-content\/uploads\//gi;
 
+// HEIC/HEIF（iPhone形式）はブラウザで表示できないことがあるため、移行時にJPEGへ変換する。
+// パス/URL末尾の .heic/.heif を .jpg に置き換える（実ファイルの変換は移行スクリプトの placeImage 側）。
+export function heicToJpgPath(path: string): string {
+  return path.replace(/\.(?:heic|heif)$/i, '.jpg');
+}
+
 // 本文中の画像URLを新サイトの相対パスへ書き換える。
 //   https://30nen.com/wp-content/uploads/2026/05/x.jpg → /uploads/2026/05/x.jpg
+//   さらに /uploads/…/x.heic → /uploads/…/x.jpg（HEICはJPEGへ）。
+// 注意: 拡張子は「URLの末尾」だけを対象にする（途中に "IMG.HEICのコピー.jpg" のような
+// ファイル名があっても誤変換しない）。URLの終わりは引用符・空白・閉じ括弧で判定。
 export function rewriteImageUrls(html: string): string {
-  return html.replace(WP_UPLOADS_RE, '/uploads/');
+  let out = html.replace(WP_UPLOADS_RE, '/uploads/');
+  out = out.replace(/(\/uploads\/[^\s"')]+?)\.(?:heic|heif)(?=["')\s]|$)/gi, '$1.jpg');
+  return out;
 }
 
 // すでにブロック要素で始まる塊は <p> で包まない（包むと二重になる）。
