@@ -24,7 +24,7 @@
 | PM2 | **7.0.1** |
 | Nginx | **1.28.3 (Ubuntu)** |
 | プラン | 2GBメモリ / 仮想2コア / NVMe（お試しは30GB・有料2GBプランは50GB） |
-| 接続 | `ssh -i ~/.ssh/30nen_vps root@<サーバーIP>`（Mac側の鍵で認証。お試し時のIP=162.43.22.151） |
+| 接続 | `ssh -i ~/.ssh/30nen_vps root@<サーバーIP>`（Mac側の鍵で認証。お試しIP=162.43.22.151／本契約IP=162.43.43.144） |
 | アプリ常駐メモリ | 約82MB（参考・お試し実測） |
 
 > ※IPアドレスは契約ごとに変わる。建て直し時は新しいIPに読み替える。
@@ -68,9 +68,20 @@
 ### 3-4. 依存をサーバーで入れて、ビルド
 ```
 cd /var/www/30nen_next
-npm ci          # better-sqlite3 / sharp はここでサーバー用にビルドされる
+npm ci          # better-sqlite3 / sharp はここでサーバー用にビルドされる…はずだが⚠下記
+npm run db:migrate   # 空の data/30nen.db に全テーブル作成
 npm run build   # 本番用に組み立て（package.json: "build": "next build"）
 ```
+
+> ⚠ **npm 11.16 以降の落とし穴**（2026-06-25 本契約時に判明）:
+> npm のセキュリティ強化で、`better-sqlite3` `sharp` `esbuild` `unrs-resolver` の **postinstall がブロック**される（`npm warn allow-scripts ... not yet covered by allowScripts` が出る）。
+> このままだとネイティブビルドが実行されず、`npm start` でクラッシュする。
+> **対処** = `npm ci` のあとに必ず:
+> ```
+> npm rebuild better-sqlite3 sharp --foreground-scripts
+> ```
+> 検証: `node -e "require('better-sqlite3')(':memory:')"` と `node -e "require('sharp').versions"` がエラーなく出力すればOK。
+> （お試し時の npm 11.13.0 ではこの問題は無かった。今後さらに厳格化が進むかもしれないので、新規環境を作るたびにこの検証を入れる。）
 
 ### 3-5. PM2 で常駐させる（つけっぱなし）
 - 起動コマンド（**`npm start` を PM2 で回す構成**。実測の登録内容）:
@@ -177,4 +188,5 @@ server {
 
 ---
 
-最終更新: 2026-06-22（初版・お試しVPS失効前の設定回収）
+最終更新: 2026-06-25（本契約での建て直し成功＝162.43.43.144／npm 11.16の `allow-scripts` 落とし穴を §3-4 に追記・項目64）
+初版: 2026-06-22（お試しVPS失効前の設定回収）

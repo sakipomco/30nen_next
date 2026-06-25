@@ -1,6 +1,6 @@
 # 本番公開までの残課題リスト
 
-最終更新: 2026-06-25（S4リハーサル完了後）
+最終更新: 2026-06-25（VPS本契約＋建て直し成功・項目64）
 出典: HANDOFF.md ＋ S4で見つかった事項 ＋ レビュー `letter_box/inbox/2026-06-24_review-04.md`（Codex 第4回）
 
 記号: ✅完了 ／ 🟡一部 ／ ⬜未着手　　優先度: 〔高〕〔中〕〔低〕
@@ -27,12 +27,13 @@
 
 ## C. インフラ・本番化
 
-- ⬜〔高〕**VPS本契約**（Xサーバー VPS・お試しは失効済み）。建て直しは `docs/deploy-notes.md`。
-- ⬜〔高〕**本番相当ビルド成功**（レビューR-04）: 再契約後すぐ `npm ci`→`npm run build`→PM2起動→Nginx経由表示→画像アップロード→ログインまで通す。**ここが通るまで切替日を確定しない**。
+- ✅〔高〕**VPS本契約**: Xサーバー VPS 2GB（3コア/SSD50GB）・1ヶ月契約・月1,496円・期間2026-06-25〜07-31・**IP=162.43.43.144**・Ubuntu 26.04 LTS。
+- 🟡〔高〕**本番相当ビルド成功**（レビューR-04）: ✅ `npm ci`→`npm run db:migrate`→`npm run build`→PM2起動→Nginx経由で全ページ200・応答0.07秒。**残**: 画像アップロード／ログインの実機テスト（管理者作成後）。
 - ⬜〔高〕**独自URL/ドメイン**: 現行30nen.comは触れず、まず別URL（サブドメイン等）で本番相当に。最終切替でドメインを向け替え。
-- ⬜〔高〕**https化**（Let's Encrypt）。済んだら `SESSION_COOKIE_SECURE` を本番で有効に戻す。
-- ⬜〔中〕**ハードニング**: 本番用 `.env`・`SESSION_SECRET` 再生成・専用ユーザー・ファイアウォール。
-- ⬜〔中〕**Nginx設定**: `/uploads/` 直接配信（`root`方式）・`client_max_body_size 40m`（`deploy-notes.md` に全文あり・本番で必ず入れる）。
+- ⬜〔高〕**https化**（Let's Encrypt）。済んだら `SESSION_COOKIE_SECURE=false` の行を `.env.local` から削除する。
+- 🟡〔中〕**ハードニング**: ✅ 本番用 `SESSION_SECRET` を `openssl rand -base64 32` で新規生成済み。**残**: 専用ユーザー（現状root実行）・ファイアウォール設定（基本のパケットフィルターのみ）。
+- ✅〔中〕**Nginx設定**: `/uploads/` 直接配信（`root`方式）・`client_max_body_size 40m` 投入済み（`/etc/nginx/sites-available/30nen`）。
+- ⬜〔中〕**deploy-notes.md にnpm 11.16の落とし穴を追記**: `better-sqlite3`/`sharp` の postinstall が `allow-scripts` でブロックされる→`npm rebuild ... --foreground-scripts` で明示リビルド必要。今回詰まったポイント。
 - ⬜〔低〕**PWA対応**（書き手のスマホ投稿をアプリ風に・将来検討）。
 
 ## D. バックアップ・復旧（レビューR-02・Go条件）
