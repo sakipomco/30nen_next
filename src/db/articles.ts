@@ -289,6 +289,21 @@ export async function getPublishedArticleById(id: number): Promise<PublicArticle
   return rows[0] ?? null;
 }
 
+// ── 旧URL(301転送)用: WordPress時代の記事ID(wp_id)から公開記事の slug/id を引く ──
+// 旧URL `/{連載}/{年}/{月}/{日}/{記事ID}/` の末尾IDが wp_id。転送先の組み立てに使う。
+export async function getPublishedArticleRefByWpId(
+  wpId: number,
+): Promise<{ id: number; slug: string | null } | null> {
+  const rows = await db
+    .select({ id: articles.id, slug: articles.slug })
+    .from(articles)
+    .where(
+      and(eq(articles.wpId, wpId), eq(articles.status, 'published'), lte(articles.publishedAt, now())),
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 // ── 「前後の日記」を取得（記事詳細ページの ← → ナビ用）──
 // 公開日時の並びで、今の記事の「1つ古い記事(prev)」と「1つ新しい記事(next)」を返す。
 // 公開日時が同じ記事があってもズレないよう、id を第2の基準にする（同時刻の取りこぼし防止）。
