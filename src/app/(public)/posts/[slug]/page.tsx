@@ -28,10 +28,20 @@ export const dynamic = 'force-dynamic';
 
 // slug もしくは id で記事を1件取得する（無ければ null）。
 async function findArticle(slugOrId: string): Promise<PublicArticle | null> {
-  const bySlug = await getPublishedArticleBySlug(slugOrId);
+  // ⚠ Next.js 16 では動的セグメント（[slug]）の params は URLデコードされず、
+  //    生の％エンコード（しかも大文字％XX）のまま渡ってくる。
+  //    DBの slug は「人が読める形」（復号済み・例: "抜歯の火曜"）で保存しているので、
+  //    ここで復号してから照合する。これで現行の符号化URLでもアクセスできる。
+  let key = slugOrId;
+  try {
+    key = decodeURIComponent(slugOrId);
+  } catch {
+    // 壊れた符号化はそのまま使う
+  }
+  const bySlug = await getPublishedArticleBySlug(key);
   if (bySlug) return bySlug;
-  if (/^\d+$/.test(slugOrId)) {
-    return getPublishedArticleById(Number(slugOrId));
+  if (/^\d+$/.test(key)) {
+    return getPublishedArticleById(Number(key));
   }
   return null;
 }

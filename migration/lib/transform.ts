@@ -65,8 +65,18 @@ export function wpDateToUtc(postDate: string): string {
   return jstInputToUtc(v.replace(' ', 'T'));
 }
 
-// WPの post_name(slug) はURLエンコード済みの日本語が入っている。現行と同じに保つため
-// デコードはせずそのまま使う（昔のリンク・検索結果を切らさない）。
+// WPの post_name(slug) はURLエンコード済みの日本語が入っている（例: "%c2%a50-%e9%b3%a9…"）。
+// これを「人が読める形」（例: "¥0-鳩サブレ（いただきもの）"）に復号して保存する。
+//   理由: Next.jsはURLの slug パラメータを自動で復号して渡すため、DBにも復号後で持つと
+//         照合が一致する。昔の符号化URL（%xx形）でアクセスされてもNextが復号して同じ値になり、
+//         旧リンク・検索結果も切れない（URLの継続性は保たれる）。
+// 壊れた符号化（復号に失敗する文字列）はそのまま使う（移行を止めない）。
 export function normalizeSlug(postName: string): string {
-  return (postName ?? '').trim();
+  const raw = (postName ?? '').trim();
+  if (!raw) return '';
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
 }
