@@ -1,12 +1,36 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { siteUrl, isIndexable } from "@/lib/site";
+
+const SITE_NAME = "三十年商店";
+const SITE_DESCRIPTION = "20名以上の書き手が日々投稿する日記サイト「三十年商店」";
+const OG_IMAGE = "/30nen_logo_noren_plus.jpg";
 
 export const metadata: Metadata = {
+  // 相対パスのOG画像などを絶対URLに展開する基準。
+  metadataBase: new URL(siteUrl()),
   title: {
-    default: "三十年商店",
-    template: "%s｜三十年商店",
+    default: SITE_NAME,
+    template: `%s｜${SITE_NAME}`,
   },
-  description: "20名以上の書き手が日々投稿する日記サイト「三十年商店」",
+  description: SITE_DESCRIPTION,
+  // 練習用/お試し（SITE_INDEXABLE≠true）のときは検索エンジンに載せない。
+  robots: isIndexable() ? undefined : { index: false, follow: false },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "ja_JP",
+    url: siteUrl(),
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [{ url: OG_IMAGE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
 };
 
 export default function RootLayout({

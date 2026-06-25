@@ -23,7 +23,7 @@
 - ✅〔高〕**日本語slugの記事URL**: S4で404バグを修正済み（旧符号化URLでも開く）。
 - ✅〔高〕**旧URL形式のリダイレクト**: 現行パーマリンク `/%category%/%year%/%monthnum%/%day%/%post_id%/`（例 `/oosamanomimiwa/2026/06/25/45564/`）を確認。**末尾の記事ID(=wp_id)で新記事を引き `/posts/{slug}` へ301転送**する仕組みを実装（`src/app/[category]/[year]/[month]/[day]/[id]/route.ts`＋`getPublishedArticleRefByWpId`）。検証＝旧URL→308(末尾/除去)→301→`/posts/{slug}`→200・存在しないIDは404・既存ページ回帰なし。※残: 本番DBで旧URLサンプル100件規模の最終確認。
 - ⬜〔中〕**about内の旧リンク**: `/oshirase/2025/07/23/12729`（POP UP募集＝ID12729）を移行後の新URLに差し替え（HANDOFF項目37のTODO）。
-- ⬜〔中〕**sitemap.xml / robots.txt / canonical / 記事OGP**: 未整備。Go条件に含める。
+- 🟡〔中〕**sitemap.xml / robots.txt / canonical / 記事OGP**: ✅実装済み（`src/app/sitemap.ts`＝固定+連載+全記事8,127URL／`src/app/robots.ts`／記事`generateMetadata`にOGP・canonical・twitter／root layoutにOGP既定）。**安全装置**＝既定はnoindex（robots全拒否＋meta noindex）、本番だけ `SITE_INDEXABLE=true` で公開索引。`SITE_URL` で公開URL指定（既定 https://30nen.com）。**残**: 本番でSITE_URL/SITE_INDEXABLE設定＋Google Search Consoleにsitemap登録。
 
 ## C. インフラ・本番化
 
@@ -70,7 +70,7 @@
   - [x] 全件リハーサルで記事数・著者・連載・日時・画像欠落を確認（S4で完了）
   - [x] 移行画像の容量と縮小方針が決定（縮小実装済み・約6.4GB実測）
   - [x] 旧URLサンプルが新サイトで開く or 301転送（実装＆ローカル検証済・本番で最終確認）
-  - [ ] sitemap/robots/canonical/OGP 用意
+  - [x] sitemap/robots/canonical/OGP 用意（実装＆検証済・本番でSITE_URL/SITE_INDEXABLE設定＋Search Console登録は残）
   - [ ] 本番相当VPSでビルド・起動・画像アップロード・ログイン確認
   - [ ] 空のVPSへバックアップから復旧確認
   - [ ] 書き手マニュアル＋アナウンスが日西で配布可能

@@ -17,6 +17,7 @@ import {
 import { getUserById, toPublicUser } from '@/db/users';
 import { formatJstDate } from '@/lib/datetime';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
+import { toMetaDescription } from '@/lib/site';
 import { Breadcrumb } from '@/components/public/breadcrumb';
 import { CategoryBanner } from '@/components/public/category-banner';
 import { WriterProfile } from '@/components/public/writer-profile';
@@ -55,9 +56,32 @@ export async function generateMetadata({
   const article = await findArticle(slug);
   // 末尾の「｜三十年商店」は src/app/layout.tsx の template が自動で付ける
   if (!article) return { title: '記事が見つかりません' };
+
+  const description = toMetaDescription(article.excerpt || article.content);
+  const canonical = article.slug
+    ? `/posts/${encodeURIComponent(article.slug)}`
+    : `/posts/${article.id}`;
+  // OGP画像はアイキャッチがあればそれ、無ければサイト既定（暖簾ロゴ）。
+  const ogImage = article.featuredImagePath || '/30nen_logo_noren_plus.jpg';
+
   return {
     title: article.title,
-    description: article.excerpt ?? undefined,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      url: canonical,
+      title: article.title,
+      description,
+      images: [{ url: ogImage }],
+      publishedTime: article.publishedAt ?? undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description,
+      images: [ogImage],
+    },
   };
 }
 
