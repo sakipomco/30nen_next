@@ -37,7 +37,8 @@
 
 ## D. バックアップ・復旧（レビューR-02・Go条件）
 
-- ⬜〔高〕**復旧リハーサル合格**: 空のVPSへ、バックアップ（SQLite DB・`public/uploads/`・`.env.local`・Nginx設定・PM2設定）から復元できるか1回実演。**本番Goの必須条件**。
+- 🟡〔高〕**バックアップ計画＝合意済み・実装はVPS本契約後**: `docs/backup-plan.md`＋スクリプト `scripts/backup/backup-db.sh`・`backup-uploads.sh`。**決定＝DB毎日／画像 週1差分・保存先=Google Drive（非公開）・rcloneで暗号化（個人情報保護）**。30日分保持。⚠暗号化パスワードはVPSの外に控える（失うと復旧不能）。**残**: VPSでrclone設定→cron登録→実際に動かす。
+- ⬜〔高〕**復旧リハーサル合格**: 空のVPSへ、バックアップ（DB・`public/uploads/`・`.env.local`・Nginx/PM2設定）から復元しサイトが立ち上がるか1回実演（手順は backup-plan.md §4）。**本番Goの必須条件**。
 - ⬜〔中〕**復旧時の判断基準＋投稿者向け連絡文**を事前に用意。
 
 ## E. 書き手オンボーディング（未着手・レビューW-01〜08）
