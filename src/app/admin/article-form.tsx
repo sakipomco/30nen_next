@@ -175,6 +175,39 @@ export function ArticleForm({ action, categories, initial }: Props) {
     }
   }
 
+  // プレビュー処理中の表示。
+  const [previewBusy, setPreviewBusy] = useState(false);
+
+  // 「プレビュー」ボタン：今の編集内容で別タブに公開ページの見え方を表示する。
+  // - まだ id が無い新規でも、autosave を1回まわせば下書きとして id が確定する。
+  // - 公開中の記事は autosave が止まっている（書きかけが公開に出るのを防ぐため）。
+  //   そのときは id がすでにあるので、そのままプレビューを開く（最新の編集中は反映されない）。
+  async function handlePreviewClick() {
+    if (previewBusy) return;
+    setPreviewBusy(true);
+    try {
+      // 公開中以外は最新内容を1回保存してからプレビューを開く（書いた直後を見られるように）。
+      if (autosaveEnabled) {
+        const snap = readSnapshot();
+        const contentText = (snap?.content ?? '').replace(/<[^>]*>/g, '').trim();
+        // タイトルも本文も空のまま新規プレビューはできない（保存条件と同じ）。
+        if (!idRef.current && (!snap || (snap.title.trim() === '' && contentText === ''))) {
+          alert('プレビューする内容（タイトルか本文）を入力してください。');
+          return;
+        }
+        await runAutosave();
+      }
+      const id = idRef.current;
+      if (!id) {
+        alert('保存に失敗したためプレビューを開けません。少し書いてから再度お試しください。');
+        return;
+      }
+      window.open(`/preview/${id}`, '_blank', 'noopener,noreferrer');
+    } finally {
+      setPreviewBusy(false);
+    }
+  }
+
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-4">
       {/* 対象の記事id。新規は空（自動保存で確定したら入る）。React管理で再描画に強い。 */}
@@ -242,7 +275,7 @@ export function ArticleForm({ action, categories, initial }: Props) {
         </p>
       )}
 
-      <div className="mt-2 flex items-center gap-3">
+      <div className="mt-2 flex flex-wrap items-center gap-3">
         {/* 下書き保存 */}
         <button
           type="submit"
@@ -263,6 +296,15 @@ export function ArticleForm({ action, categories, initial }: Props) {
           className="rounded-md bg-zinc-900 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60"
         >
           {pending ? '送信中…' : '投稿する'}
+        </button>
+        {/* プレビュー（公開ページと同じ見た目で別タブ表示） */}
+        <button
+          type="button"
+          onClick={handlePreviewClick}
+          disabled={pending || previewBusy}
+          className="rounded-md border border-zinc-300 px-4 py-2 text-base text-zinc-700 transition-colors hover:bg-zinc-100 disabled:opacity-60"
+        >
+          {previewBusy ? 'プレビュー準備中…' : 'プレビュー'}
         </button>
 
         {/* 自動保存の状態（小さく表示） */}

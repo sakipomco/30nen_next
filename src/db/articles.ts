@@ -289,6 +289,20 @@ export async function getPublishedArticleById(id: number): Promise<PublicArticle
   return rows[0] ?? null;
 }
 
+// ── プレビュー用：状態（draft/published）や公開日時に関係なく id で取得 ──
+// 投稿画面の「プレビュー」ボタンから呼ぶ。/admin/preview/[id] は requireUser() で守られているため
+// このクエリ自体に公開判定は入れない（呼び出し側で「ログイン必須」を必ず保証する）。
+export async function getArticleForPreview(id: number): Promise<PublicArticle | null> {
+  const rows = await db
+    .select(publicColumns)
+    .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .where(eq(articles.id, id))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 // ── 旧URL(301転送)用: WordPress時代の記事ID(wp_id)から公開記事の slug/id を引く ──
 // 旧URL `/{連載}/{年}/{月}/{日}/{記事ID}/` の末尾IDが wp_id。転送先の組み立てに使う。
 export async function getPublishedArticleRefByWpId(
