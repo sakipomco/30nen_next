@@ -138,17 +138,22 @@ function Toolbar({
         onClick={() => setLink(editor)}
       />
       {/* 本文に画像を挿入。押すとファイル選択 → アップロード → カーソル位置に差し込む。 */}
-      <ToolbarButton
-        label={uploading ? 'アップロード中…' : 'デバイスから選ぶ'}
-        active={false}
+      <button
+        type="button"
         onClick={onPickImage}
-      />
+        disabled={uploading}
+        className="rounded-md border border-dashed border-zinc-400 px-4 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-50 disabled:opacity-50"
+      >
+        {uploading ? 'アップロード中…' : '画像をデバイスから選ぶ'}
+      </button>
       {/* 画像フォルダから選んで挿入。 */}
-      <ToolbarButton
-        label="画像フォルダから選ぶ"
-        active={false}
+      <button
+        type="button"
         onClick={onPickFromFolder}
-      />
+        className="rounded-md border border-dashed border-zinc-400 px-4 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
+      >
+        画像フォルダから選ぶ
+      </button>
     </div>
   );
 }

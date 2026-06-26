@@ -56,16 +56,16 @@ export function FeaturedImage({
             <button
               type="button"
               onClick={() => !uploading && fileInputRef.current?.click()}
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="rounded-md border border-dashed border-zinc-400 px-4 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
             >
-              {uploading ? 'アップロード中…' : 'デバイスから選ぶ'}
+              {uploading ? 'アップロード中…' : '画像をデバイスから選ぶ'}
             </button>
             <button
               type="button"
               onClick={() => setPickerOpen(true)}
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="rounded-md border border-dashed border-zinc-400 px-4 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
             >
-              フォルダから選ぶ
+              画像フォルダから選ぶ
             </button>
             <button
               type="button"
@@ -77,21 +77,21 @@ export function FeaturedImage({
           </div>
         </div>
       ) : (
-        // 未設定：「画像を選ぶ」「フォルダから選ぶ」ボタン
+        // 未設定：「画像をデバイスから選ぶ」「画像フォルダから選ぶ」ボタン
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => !uploading && fileInputRef.current?.click()}
-            className="rounded-md border border-dashed border-zinc-400 px-4 py-3 text-zinc-600 transition-colors hover:bg-zinc-50"
+            className="rounded-md border border-dashed border-zinc-400 px-4 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
           >
-            {uploading ? 'アップロード中…' : '＋ デバイスから選ぶ'}
+            {uploading ? 'アップロード中…' : '画像をデバイスから選ぶ'}
           </button>
           <button
             type="button"
             onClick={() => setPickerOpen(true)}
-            className="rounded-md border border-zinc-300 px-4 py-3 text-zinc-600 transition-colors hover:bg-zinc-50"
+            className="rounded-md border border-dashed border-zinc-400 px-4 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
           >
-            フォルダから選ぶ
+            画像フォルダから選ぶ
           </button>
         </div>
       )}
