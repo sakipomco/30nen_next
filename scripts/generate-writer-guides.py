@@ -75,7 +75,7 @@ def lat(name, **kw):
 
 JA = {
     "title":    cjk("ja_title",    fontName=JP_BOLD,   fontSize=19, leading=25, alignment=TA_CENTER, spaceAfter=6),
-    "subtitle": cjk("ja_subtitle", fontSize=10,         leading=15, alignment=TA_CENTER, textColor=MUTED, spaceAfter=12),
+    "subtitle": cjk("ja_subtitle", fontSize=10,         leading=16, alignment=TA_CENTER, spaceAfter=12),
     "h1":       cjk("ja_h1",       fontName=JP_BOLD,   fontSize=12, leading=17, spaceBefore=10, spaceAfter=4, leftIndent=0),
     "h2":       cjk("ja_h2",       fontName=JP_BOLD,   fontSize=10.5, leading=15, spaceBefore=7, spaceAfter=3, leftIndent=0),
     "body":     cjk("ja_body",     fontSize=10,         leading=16, spaceAfter=5),
@@ -183,7 +183,7 @@ def build_ja():
 
     cover(story, s,
         "30nen.com 新しい投稿画面の手引き",
-        "書き手のみなさんへいつも更新ありがとう。サイト切替のため、お手数おかけします。わからないところ、不便なところは、すぐに言ってね！",
+        "書き手のみなさんへいつも更新ありがとう。サイト切替のため、お手数おかけします。<br/>わからないところ、不便なところは、すぐに言ってねー！",
         ["ログイン", "パスワード変更", "プロフィール確認", "試し書き", "7/29から本番"],
     )
 
