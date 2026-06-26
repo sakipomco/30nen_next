@@ -6,6 +6,7 @@
 import { useActionState } from 'react';
 import type { UserFormState } from '@/app/actions/users';
 import { FeaturedImage } from '@/app/admin/featured-image';
+import { PasswordInput } from '@/components/password-input';
 
 type UserAction = (
   prevState: UserFormState,
@@ -73,13 +74,11 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
             変更したいときだけ入力してください（空欄なら今のままです）。
           </span>
         )}
-        <input
-          type="password"
+        <PasswordInput
           name="password"
           required={!isEdit}
           autoComplete="new-password"
           placeholder={isEdit ? '（変更しない）' : ''}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
         />
       </label>
 
