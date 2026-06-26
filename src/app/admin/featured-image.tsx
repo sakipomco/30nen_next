@@ -5,6 +5,7 @@
 
 import { useRef, useState } from 'react';
 import { uploadImage } from './upload-image';
+import { ImagePickerModal } from '@/components/admin/image-picker-modal';
 
 type Props = {
   name: string; // フォーム送信時の項目名（例: "featuredImage"）
@@ -20,6 +21,7 @@ export function FeaturedImage({
   const [path, setPath] = useState<string>(initialPath ?? '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -50,13 +52,20 @@ export function FeaturedImage({
             alt="アイキャッチのプレビュー"
             className="max-h-48 w-fit rounded-md border border-zinc-200 object-contain"
           />
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => !uploading && fileInputRef.current?.click()}
               className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               {uploading ? 'アップロード中…' : '画像を変更'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 transition-colors hover:bg-zinc-100"
+            >
+              フォルダから選ぶ
             </button>
             <button
               type="button"
@@ -68,14 +77,23 @@ export function FeaturedImage({
           </div>
         </div>
       ) : (
-        // 未設定：「画像を選ぶ」ボタン
-        <button
-          type="button"
-          onClick={() => !uploading && fileInputRef.current?.click()}
-          className="w-fit rounded-md border border-dashed border-zinc-400 px-4 py-3 text-zinc-600 transition-colors hover:bg-zinc-50"
-        >
-          {uploading ? 'アップロード中…' : '＋ 画像を選ぶ'}
-        </button>
+        // 未設定：「画像を選ぶ」「フォルダから選ぶ」ボタン
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => !uploading && fileInputRef.current?.click()}
+            className="rounded-md border border-dashed border-zinc-400 px-4 py-3 text-zinc-600 transition-colors hover:bg-zinc-50"
+          >
+            {uploading ? 'アップロード中…' : '＋ 画像を選ぶ'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            className="rounded-md border border-zinc-300 px-4 py-3 text-zinc-600 transition-colors hover:bg-zinc-50"
+          >
+            フォルダから選ぶ
+          </button>
+        </div>
       )}
       {error && (
         <p className="text-sm text-red-600" role="alert">
@@ -91,6 +109,14 @@ export function FeaturedImage({
         className="hidden"
         onChange={handleFileChange}
       />
+
+      {/* 画像フォルダピッカー：選ぶとアイキャッチに設定 */}
+      {pickerOpen && (
+        <ImagePickerModal
+          onSelect={(url) => setPath(url)}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }

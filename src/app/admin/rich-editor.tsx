@@ -15,6 +15,7 @@ import type { EditorView } from '@tiptap/pm/view';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { uploadImage } from './upload-image';
+import { ImagePickerModal } from '@/components/admin/image-picker-modal';
 
 type Props = {
   name: string; // フォーム送信時の項目名（例: "content"）
@@ -90,10 +91,12 @@ function ToolbarButton({
 function Toolbar({
   editor,
   onPickImage,
+  onPickFromFolder,
   uploading,
 }: {
   editor: Editor;
   onPickImage: () => void;
+  onPickFromFolder: () => void;
   uploading: boolean;
 }) {
   return (
@@ -140,6 +143,12 @@ function Toolbar({
         active={false}
         onClick={onPickImage}
       />
+      {/* 画像フォルダから選んで挿入。 */}
+      <ToolbarButton
+        label="フォルダから選ぶ"
+        active={false}
+        onClick={onPickFromFolder}
+      />
     </div>
   );
 }
@@ -148,6 +157,7 @@ export function RichEditor({ name, initialHTML }: Props) {
   const [html, setHtml] = useState(initialHTML ?? '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   // 画像挿入用の隠しファイル選択欄。ボタンを押すとこれをクリックさせる。
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -242,6 +252,7 @@ export function RichEditor({ name, initialHTML }: Props) {
           onPickImage={() => {
             if (!uploading) fileInputRef.current?.click();
           }}
+          onPickFromFolder={() => setPickerOpen(true)}
         />
       )}
       <EditorContent editor={editor} />
@@ -265,6 +276,16 @@ export function RichEditor({ name, initialHTML }: Props) {
       />
       {/* 本文HTMLをフォーム送信に乗せる見えない欄 */}
       <input type="hidden" name={name} value={html} />
+
+      {/* 画像フォルダピッカー：選ぶとカーソル位置に画像を挿入 */}
+      {pickerOpen && editor && (
+        <ImagePickerModal
+          onSelect={(url) => {
+            editor.chain().focus().setImage({ src: url }).run();
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }
