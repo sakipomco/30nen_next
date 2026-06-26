@@ -32,9 +32,26 @@ export default async function UsersAdminPage() {
       <div className="w-full max-w-3xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-zinc-900">投稿者</h1>
-          <Link href="/admin" className="text-sm text-zinc-500 hover:underline">
-            ← 投稿へ戻る
-          </Link>
+          <div className="flex items-center gap-4">
+            {/* 書き手ガイドPDFのダウンロード */}
+            <a
+              href="/pdf/30nen-writer-guide-ja.pdf"
+              download
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+            >
+              手引き（日本語）
+            </a>
+            <a
+              href="/pdf/30nen-writer-guide-es.pdf"
+              download
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+            >
+              手引き（スペイン語）
+            </a>
+            <Link href="/admin" className="text-sm text-zinc-500 hover:underline">
+              ← 投稿へ戻る
+            </Link>
+          </div>
         </div>
 
         {/* 投稿者一覧 */}

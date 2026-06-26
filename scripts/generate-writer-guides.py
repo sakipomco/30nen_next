@@ -388,6 +388,17 @@ def build_es():
 
 
 if __name__ == "__main__":
+    import shutil
     OUT.mkdir(parents=True, exist_ok=True)
-    print(build_ja())
-    print(build_es())
+    PUBLIC_PDF = ROOT / "public" / "pdf"
+    PUBLIC_PDF.mkdir(parents=True, exist_ok=True)
+
+    ja = build_ja()
+    es = build_es()
+    print(ja)
+    print(es)
+
+    # public/pdf/ にもコピーしてURLからダウンロードできるようにする。
+    shutil.copy(ja, PUBLIC_PDF / ja.name)
+    shutil.copy(es, PUBLIC_PDF / es.name)
+    print(f"→ public/pdf/ にコピーしました")
