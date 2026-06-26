@@ -6,12 +6,19 @@
 
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// キーが未設定のときはモジュール読み込み時ではなく送信時にエラーを出す（遅延初期化）。
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error('RESEND_API_KEY が設定されていません。.env.local を確認してください。');
+  return new Resend(key);
+}
+
 const FROM = process.env.EMAIL_FROM ?? '三十年商店 <noreply@30nen.com>';
 const SITE_URL = (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
 
 // 招待メール（初回パスワード設定）
 export async function sendInviteEmail(to: string, name: string, rawToken: string) {
+  const resend = getResend();
   const url = `${SITE_URL}/invite/${rawToken}`;
   await resend.emails.send({
     from: FROM,
@@ -32,6 +39,7 @@ export async function sendInviteEmail(to: string, name: string, rawToken: string
 
 // パスワードリセットメール
 export async function sendResetEmail(to: string, name: string, rawToken: string) {
+  const resend = getResend();
   const url = `${SITE_URL}/reset-password/${rawToken}`;
   await resend.emails.send({
     from: FROM,

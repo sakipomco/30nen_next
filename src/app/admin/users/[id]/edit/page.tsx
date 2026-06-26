@@ -10,6 +10,7 @@ import {
   getCategoriesForUser,
 } from '@/db/categories';
 import { UserForm } from '../../user-form';
+import { ResendInviteButton } from './resend-invite-button';
 
 export const metadata = {
   title: '投稿者の編集｜30nen',
@@ -45,12 +46,15 @@ export default async function EditUserPage({
       <div className="w-full max-w-2xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-zinc-900">投稿者を編集</h1>
-          <Link
-            href="/admin/users"
-            className="text-sm text-zinc-500 hover:underline"
-          >
-            ← 投稿者へ戻る
-          </Link>
+          <div className="flex items-center gap-4">
+            <ResendInviteButton userId={publicUser.id} />
+            <Link
+              href="/admin/users"
+              className="text-sm text-zinc-500 hover:underline"
+            >
+              ← 投稿者へ戻る
+            </Link>
+          </div>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-6">
           <UserForm

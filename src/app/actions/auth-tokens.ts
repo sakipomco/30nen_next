@@ -14,13 +14,22 @@ import { createSession } from '@/auth/session';
 export type TokenFormState = { error?: string; success?: string } | undefined;
 
 // ── 招待リンクを（再）送信する ──────────────────────────────
-// users.ts の createUserAction / updateUserAction から内部的に呼ぶ。
+// users.ts の createUserAction から内部的に呼ぶ。
 export async function sendInvite(userId: number) {
   const user = await getUserById(userId);
   if (!user) return;
   const { raw, hash } = generateToken();
   await createAuthToken(userId, hash, 'invite', tokenExpiresAt(7 * 24)); // 7日有効
   await sendInviteEmail(user.email, user.name, raw);
+}
+
+// ── 管理者が編集画面から招待メールを再送する（Server Action）──
+export async function resendInviteAction(formData: FormData): Promise<void> {
+  const { requireAdmin } = await import('@/auth/session');
+  await requireAdmin();
+  const userId = Number(formData.get('userId'));
+  if (!Number.isInteger(userId) || userId <= 0) return;
+  await sendInvite(userId);
 }
 
 // ── 招待リンクでパスワードを設定（/invite/[token]）──────────
