@@ -14,6 +14,7 @@ import {
   getUserById,
 } from '@/db/users';
 import { setUserCategory } from '@/db/categories';
+import { sendInvite } from '@/app/actions/auth-tokens';
 
 export type UserFormState = { error?: string } | undefined;
 
@@ -56,19 +57,23 @@ export async function createUserAction(
   await requireAdmin();
 
   const {
-    name, email, password, role, bio, categoryId,
+    name, email, role, bio, categoryId,
     avatarPath, location, birthday, instagramUrl, xUrl, youtubeUrl, websiteUrl,
   } = readForm(formData);
   if (!name) return { error: '名前を入力してください。' };
   if (!email) return { error: 'メールアドレスを入力してください。' };
-  if (!password) return { error: 'パスワードを入力してください。' };
 
   try {
+    // パスワードは仮の文字列（招待メールで書き手が自分で設定する）。
     const created = await createUser({
-      name, email, password, role, bio,
+      name, email, password: `invite-pending-${Date.now()}`, role, bio,
       avatarPath, location, birthday, instagramUrl, xUrl, youtubeUrl, websiteUrl,
     });
-    await setUserCategory(created.id, categoryId); // 担当連載を登録（なしも可）
+    await setUserCategory(created.id, categoryId);
+    // 招待メールを送信（失敗してもアカウント作成自体は成功として扱う）
+    await sendInvite(created.id).catch((e: unknown) => {
+      console.error('招待メール送信エラー:', e);
+    });
   } catch (e) {
     return { error: saveErrorMessage(e) };
   }

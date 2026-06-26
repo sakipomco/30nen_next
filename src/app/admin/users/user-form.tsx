@@ -67,20 +67,21 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
-        パスワード
-        {isEdit && (
+      {/* 新規作成ではパスワード欄を出さない（招待メールで書き手が自分で設定する）。
+          編集時のみ「変えたい場合だけ」入力欄を出す。 */}
+      {isEdit && (
+        <label className="flex flex-col gap-1 text-sm">
+          パスワード
           <span className="text-xs text-zinc-500">
             変更したいときだけ入力してください（空欄なら今のままです）。
           </span>
-        )}
-        <PasswordInput
-          name="password"
-          required={!isEdit}
-          autoComplete="new-password"
-          placeholder={isEdit ? '（変更しない）' : ''}
-        />
-      </label>
+          <PasswordInput
+            name="password"
+            autoComplete="new-password"
+            placeholder="（変更しない）"
+          />
+        </label>
+      )}
 
       <label className="flex flex-col gap-1 text-sm">
         権限
@@ -198,6 +199,13 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
       {state?.error && (
         <p className="text-sm text-red-600" role="alert">
           {state.error}
+        </p>
+      )}
+
+      {!isEdit && (
+        <p className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
+          保存すると、このメールアドレス宛に<strong>招待メール</strong>が届きます。
+          書き手はリンクを踏んで自分でパスワードを設定します（店主がパスワードを知る必要はありません）。
         </p>
       )}
 

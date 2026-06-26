@@ -6,6 +6,7 @@
 //   - pending … 送信中かどうか（true の間はボタンを押せなくする）
 
 import { useActionState } from 'react';
+import Link from 'next/link';
 import { login, type LoginState } from '@/app/actions/auth';
 import { PasswordInput } from '@/components/password-input';
 
@@ -51,6 +52,13 @@ export function LoginForm() {
       >
         {pending ? 'ログイン中…' : 'ログイン'}
       </button>
+
+      <Link
+        href="/forgot-password"
+        className="text-center text-sm text-zinc-500 hover:underline"
+      >
+        パスワードを忘れた方
+      </Link>
     </form>
   );
 }

@@ -83,6 +83,20 @@ export const uploads = sqliteTable('uploads', {
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 });
 
+// ── 招待・パスワードリセット用のトークン ──────────────────────
+// アカウント作成時の招待メール（type='invite'）と、
+// パスワード忘れのリセットメール（type='reset'）で共用する使い捨てリンクの管理表。
+// raw token（64文字のランダム文字列）はURLに埋め込み、DBにはSHA-256ハッシュだけ保存する。
+export const authTokens = sqliteTable('auth_tokens', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(), // SHA-256(raw token)
+  type: text('type', { enum: ['invite', 'reset'] }).notNull(),
+  expiresAt: text('expires_at').notNull(), // UTC datetime
+  usedAt: text('used_at'), // null=未使用
+  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
+});
+
 // ── 連載×投稿者の担当名簿（中間テーブル）─────────────────────
 // 1連載＝複数担当を表す。複合主キー（category_id, user_id）で同じ組合せの二重登録を防ぐ。
 export const categoryAuthors = sqliteTable(
