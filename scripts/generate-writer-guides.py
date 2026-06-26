@@ -249,7 +249,6 @@ def build_ja():
         "<b>デバイスから直接選ぶ</b>：投稿画面の「画像をデバイスから選ぶ」ボタンで、その場でアップロードして入れる。",
         "<b>ドラッグ＆ドロップ</b>：写真ファイルを本文エリアにドラッグして入れる（コピーした写真の貼り付けも可）。",
     ], s["bullet"]))
-    story.append(p("うまく入らない・向きがおかしい・重すぎる気がするときは、メッセンジャー／LINEでそのまま相談してください。", s["body"]))
 
     story.append(p("切替日までの注意", s["h1"]))
     story.append(note_box(
@@ -265,7 +264,7 @@ def build_ja():
         "<b>写真の形式</b>：使えるのは JPEG・PNG・GIF・WebP。重い写真もサイト側で自動的に軽くします。うまくいかない時は1枚ずつ、Wi-Fiで試してください。",
         "<b>アイキャッチ画像</b>：「投稿する」のとき、アイキャッチ画像（記事の代表写真）が未設定だと確認が出ます。アイキャッチ画像は必須です。必ず設定してください。",
         "<b>公開の日時</b>：公開日時は日本時間です。空欄のまま投稿すると「今すぐ公開」になります。よくわからなければ空欄で大丈夫です。",
-    ], s["small"]))
+    ], s["bullet"]))
 
     story.append(p("困ったとき", s["h1"]))
     story.append(p("店主とのメッセンジャーグループ／グループLINEに、次のどれかを送ってください。", s["body"]))
@@ -373,7 +372,7 @@ def build_es():
         "<b>Formatos de foto</b>: JPEG, PNG, GIF y WebP. El sitio aligera las fotos pesadas. Si falla, sube una por una con Wi-Fi.",
         "<b>Imagen destacada</b>: al publicar sin imagen destacada aparece una confirmación. La imagen destacada es obligatoria.",
         "<b>Fecha y hora</b>: usa la hora de Japón. Si la dejas en blanco, se publica de inmediato.",
-    ], s["small"]))
+    ], s["bullet"]))
 
     story.append(p("Si necesitas ayuda", s["h1"]))
     story.append(p("En el grupo LINE / Messenger puedes enviar cualquiera de estas cosas.", s["body"]))
