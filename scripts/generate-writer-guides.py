@@ -76,8 +76,8 @@ def lat(name, **kw):
 JA = {
     "title":    cjk("ja_title",    fontName=JP_BOLD,   fontSize=19, leading=25, alignment=TA_CENTER, spaceAfter=6),
     "subtitle": cjk("ja_subtitle", fontSize=10,         leading=16, alignment=TA_CENTER, spaceAfter=12),
-    "h1":       cjk("ja_h1",       fontName=JP_BOLD,   fontSize=12, leading=17, spaceBefore=10, spaceAfter=4, leftIndent=0),
-    "h2":       cjk("ja_h2",       fontName=JP_BOLD,   fontSize=10.5, leading=15, spaceBefore=7, spaceAfter=3, leftIndent=0),
+    "h1":       cjk("ja_h1",       fontName=JP_BOLD,   fontSize=12, leading=17, spaceBefore=10, spaceAfter=4, leftIndent=-12),
+    "h2":       cjk("ja_h2",       fontName=JP_BOLD,   fontSize=10.5, leading=15, spaceBefore=18, spaceAfter=3, leftIndent=-12),
     "body":     cjk("ja_body",     fontSize=10,         leading=16, spaceAfter=5),
     "small":    cjk("ja_small",    fontSize=8.8,        leading=13, textColor=MUTED),
     "note":     cjk("ja_note",     fontSize=9.5,        leading=15),
@@ -90,8 +90,8 @@ JA = {
 ES = {
     "title":    lat("es_title",    fontName="LatB", fontSize=19, leading=25, alignment=TA_CENTER, spaceAfter=6),
     "subtitle": lat("es_subtitle", fontSize=10, leading=15, alignment=TA_CENTER, textColor=MUTED, spaceAfter=12),
-    "h1":       lat("es_h1",       fontName="LatB", fontSize=12, leading=17, spaceBefore=10, spaceAfter=4, leftIndent=0),
-    "h2":       lat("es_h2",       fontName="LatB", fontSize=10.5, leading=15, spaceBefore=7, spaceAfter=3, leftIndent=0),
+    "h1":       lat("es_h1",       fontName="LatB", fontSize=12, leading=17, spaceBefore=10, spaceAfter=4, leftIndent=-12),
+    "h2":       lat("es_h2",       fontName="LatB", fontSize=10.5, leading=15, spaceBefore=7, spaceAfter=3, leftIndent=-12),
     "body":     lat("es_body",     fontSize=10, leading=15, spaceAfter=5),
     "small":    lat("es_small",    fontSize=8.8, leading=12.8, textColor=MUTED),
     "note":     lat("es_note",     fontSize=9.5, leading=14.5),
