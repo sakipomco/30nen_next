@@ -46,7 +46,7 @@ export default async function EditCategoryPage({
             href="/admin/categories"
             className="text-sm text-zinc-500 hover:underline"
           >
-            ← 連載の管理へ戻る
+            ← 連載へ戻る
           </Link>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-6">

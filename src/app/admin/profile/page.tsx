@@ -23,7 +23,7 @@ export default async function MyProfilePage({
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-zinc-900">myPROFILE</h1>
           <Link href="/admin" className="text-sm text-zinc-500 hover:underline">
-            ← 投稿管理へ戻る
+            ← 投稿へ戻る
           </Link>
         </div>
 

@@ -49,7 +49,7 @@ export default async function EditUserPage({
             href="/admin/users"
             className="text-sm text-zinc-500 hover:underline"
           >
-            ← 投稿者の管理へ戻る
+            ← 投稿者へ戻る
           </Link>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-6">

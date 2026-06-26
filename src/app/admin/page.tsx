@@ -9,7 +9,7 @@ import { listArticles } from '@/db/articles';
 import { formatJst } from '@/lib/datetime';
 
 export const metadata = {
-  title: '投稿管理｜30nen',
+  title: '投稿｜30nen',
 };
 
 export default async function AdminPage() {
@@ -26,7 +26,7 @@ export default async function AdminPage() {
       <div className="w-full max-w-3xl">
         {/* ヘッダー：タイトル・新規作成・ログアウト */}
         <div className="mb-6 flex items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold text-zinc-900">投稿管理</h1>
+          <h1 className="text-xl font-semibold text-zinc-900">投稿</h1>
           <div className="flex items-center gap-3">
             {/* 連載・投稿者の管理は管理者だけ */}
             {user.role === 'admin' && (
@@ -35,13 +35,13 @@ export default async function AdminPage() {
                   href="/admin/categories"
                   className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
                 >
-                  連載の管理
+                  連載
                 </Link>
                 <Link
                   href="/admin/users"
                   className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
                 >
-                  投稿者の管理
+                  投稿者
                 </Link>
                 <Link
                   href="/admin/settings"

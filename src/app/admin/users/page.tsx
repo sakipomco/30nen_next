@@ -13,7 +13,7 @@ import {
 import { UserForm } from './user-form';
 
 export const metadata = {
-  title: '投稿者の管理｜30nen',
+  title: '投稿者｜30nen',
 };
 
 export default async function UsersAdminPage() {
@@ -31,9 +31,9 @@ export default async function UsersAdminPage() {
     <div className="flex flex-1 flex-col items-center bg-zinc-50 px-4 py-12">
       <div className="w-full max-w-3xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-zinc-900">投稿者の管理</h1>
+          <h1 className="text-xl font-semibold text-zinc-900">投稿者</h1>
           <Link href="/admin" className="text-sm text-zinc-500 hover:underline">
-            ← 投稿管理へ戻る
+            ← 投稿へ戻る
           </Link>
         </div>
 
