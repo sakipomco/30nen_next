@@ -6,6 +6,7 @@ import { requireUser } from '@/auth/session';
 import { listUploadedImageFiles } from '@/lib/media';
 import { getUploadOwners } from '@/db/uploads';
 import { MediaGrid } from './media-grid';
+import { UploadButton } from './upload-button';
 
 export const metadata = {
   title: '画像フォルダ｜30nen',
@@ -45,9 +46,12 @@ export default async function MediaPage({
       <div className="w-full max-w-5xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-zinc-900">画像フォルダ</h1>
-          <Link href="/admin" className="text-sm text-zinc-500 hover:underline">
-            ← 投稿へ戻る
-          </Link>
+          <div className="flex items-center gap-4">
+            <UploadButton />
+            <Link href="/admin" className="text-sm text-zinc-500 hover:underline">
+              ← 投稿へ戻る
+            </Link>
+          </div>
         </div>
 
         <p className="mb-4 text-sm text-zinc-500">
