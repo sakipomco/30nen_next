@@ -237,7 +237,8 @@ def build_ja():
 
     story.append(p("まずお願いしたいこと", s["h1"]))
     story.append(bullets([
-        "店主から届くログイン情報で、<b>https://30nen.com/login</b> に入ってみる。",
+        "店主からの<b>招待メール</b>のリンクを踏んで、パスワードを自分で設定する。",
+        "設定できたら <b>https://30nen.com/login</b> に入ってみる。",
         "プロフィール画面を開き、表示名・プロフィール文・写真などを確認する。",
         "西暦を含めた誕生日を入力する。例: 1980年4月3日。",
         "新規投稿で短い試し書きをして、画像アップロード、下書き保存、プレビューを試す。",
@@ -245,12 +246,14 @@ def build_ja():
     ], s["bullet"]))
 
     story.append(p("ログインについて", s["h1"]))
-    story.append(p("ログインに使うメールアドレスとパスワードは、店主から個別にお知らせします。できるだけこれまでと変わらない形で使えるよう準備していますが、入れない場合はあわてずグループLINEで知らせてください。", s["body"]))
+    story.append(p("店主がアカウントを作ると、登録メールアドレス宛に<b>招待メール</b>が届きます。メール内のリンクを踏んで、自分でパスワードを設定してください。店主はパスワードを知りません。", s["body"]))
     story.append(bullets([
-        "ログイン画面: <b>https://30nen.com/login</b>",
-        "メールアドレスとパスワードを入力します。",
-        "ログインできたら、投稿管理画面が開きます。",
-        "何度か試しても入れないときは、画面の様子をそのままLINEに送ってください。",
+        "招待メール（件名：【三十年商店】アカウントのご案内）のリンクを踏む。",
+        "パスワードを自分で決めて設定する（8文字以上）。",
+        "設定完了すると、そのまま投稿管理画面が開く。",
+        "次回以降は <b>https://30nen.com/login</b> からメールアドレスとパスワードで入る。",
+        "パスワードを忘れたときは、ログイン画面の「パスワードを忘れた方」から再設定できる。",
+        "何度試しても入れないときは、画面の様子をそのままLINEに送ってください。",
     ], s["bullet"]))
 
     story.append(p("プロフィール確認で大事なこと", s["h1"]))
@@ -340,7 +343,8 @@ def build_es():
 
     story.append(p("Lo primero que te pedimos", s["h1"]))
     story.append(bullets([
-        "Entra a <b>https://30nen.com/login</b> con los datos que te enviará Tenshu.",
+        "Abre el correo de invitación que recibirás y haz clic en el enlace para crear tu contraseña.",
+        "Una vez configurada, entra a <b>https://30nen.com/login</b>.",
         "Abre tu perfil y revisa tu nombre, texto de presentación y foto.",
         "Completa tu fecha de nacimiento con el año. Ejemplo: 3 de abril de 1980.",
         "Haz una entrada de prueba: escribe algo corto, sube una imagen, guarda como borrador y mira la vista previa.",
@@ -348,12 +352,14 @@ def build_es():
     ], s["bullet"]))
 
     story.append(p("Sobre el inicio de sesión", s["h1"]))
-    story.append(p("Tenshu enviará a cada persona el correo y la contraseña para entrar. Estamos preparando todo para que el cambio sea lo más sencillo posible. Si no puedes entrar, no te preocupes: avisa en el grupo LINE.", s["body"]))
+    story.append(p("Cuando Tenshu cree tu cuenta, recibirás un <b>correo de invitación</b>. Haz clic en el enlace del correo y elige tu propia contraseña. Tenshu no sabrá tu contraseña.", s["body"]))
     story.append(bullets([
-        "Página de login: <b>https://30nen.com/login</b>",
-        "Escribe tu correo y contraseña.",
-        "Si el login funciona, se abrirá la pantalla de administración.",
-        "Si no puedes entrar después de intentarlo, envía al LINE una captura o cuenta qué aparece en la pantalla.",
+        "Abre el correo con asunto「【三十年商店】アカウントのご案内」y haz clic en el enlace.",
+        "Escoge una contraseña (mínimo 8 caracteres) y guárdala.",
+        "Al terminar, se abrirá directamente la pantalla de administración.",
+        "La próxima vez: entra desde <b>https://30nen.com/login</b> con tu correo y contraseña.",
+        "Si olvidas la contraseña, usa el enlace「パスワードを忘れた方」en la pantalla de login.",
+        "Si no puedes entrar, envía al LINE una captura o describe qué aparece.",
     ], s["bullet"]))
 
     story.append(p("Revisa tu perfil", s["h1"]))
