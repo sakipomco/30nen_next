@@ -226,7 +226,7 @@ export function RichEditor({ name, initialHTML }: Props) {
       {editor && <Toolbar editor={editor} />}
       <EditorContent editor={editor} />
       {/* 画像挿入ボタン（エディタの直下）。 */}
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => { if (!uploading) fileInputRef.current?.click(); }}
@@ -244,7 +244,7 @@ export function RichEditor({ name, initialHTML }: Props) {
         </button>
       </div>
       {/* 操作のヒント。 */}
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="mt-3 text-xs text-zinc-500">
         写真は本文へ<strong>ドラッグ＆ドロップ</strong>・
         <strong>貼り付け（⌘/Ctrl+V）</strong>でも入れられます。
       </p>
