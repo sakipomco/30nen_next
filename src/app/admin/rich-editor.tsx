@@ -139,13 +139,13 @@ function Toolbar({
       />
       {/* 本文に画像を挿入。押すとファイル選択 → アップロード → カーソル位置に差し込む。 */}
       <ToolbarButton
-        label={uploading ? 'アップロード中…' : '画像'}
+        label={uploading ? 'アップロード中…' : 'デバイスから選ぶ'}
         active={false}
         onClick={onPickImage}
       />
       {/* 画像フォルダから選んで挿入。 */}
       <ToolbarButton
-        label="フォルダから選ぶ"
+        label="画像フォルダから選ぶ"
         active={false}
         onClick={onPickFromFolder}
       />

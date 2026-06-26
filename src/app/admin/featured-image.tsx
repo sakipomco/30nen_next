@@ -58,7 +58,7 @@ export function FeaturedImage({
               onClick={() => !uploading && fileInputRef.current?.click()}
               className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 transition-colors hover:bg-zinc-100"
             >
-              {uploading ? 'アップロード中…' : '画像を変更'}
+              {uploading ? 'アップロード中…' : 'デバイスから選ぶ'}
             </button>
             <button
               type="button"
@@ -84,7 +84,7 @@ export function FeaturedImage({
             onClick={() => !uploading && fileInputRef.current?.click()}
             className="rounded-md border border-dashed border-zinc-400 px-4 py-3 text-zinc-600 transition-colors hover:bg-zinc-50"
           >
-            {uploading ? 'アップロード中…' : '＋ 画像を選ぶ'}
+            {uploading ? 'アップロード中…' : '＋ デバイスから選ぶ'}
           </button>
           <button
             type="button"
