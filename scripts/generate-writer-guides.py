@@ -31,7 +31,7 @@ from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT  = ROOT / "output" / "pdf"
-LOGO = ROOT / "public" / "30nen_logo_noren_plus.jpg"
+LOGO = ROOT / "ph_data" / "30nen_logo_noren.jpg"
 
 LOGIN_URL       = "https://30nen.com/login"
 SWITCH_DATE_JA  = "2026年7月29日（仮）"
@@ -103,18 +103,8 @@ ES = {
 
 
 def footer_only(canvas, doc, lang: str):
-    """ヘッダーなし・フッターのみ。"""
-    canvas.saveState()
-    width, _ = A4
-    canvas.setStrokeColor(RULE)
-    canvas.setLineWidth(0.5)
-    canvas.line(18 * mm, 14 * mm, width - 18 * mm, 14 * mm)
-    canvas.setFillColor(MUTED)
-    font = JP_NORMAL if lang == "ja" else "Lat"
-    canvas.setFont(font, 8)
-    footer = "困ったときは、メッセンジャーグループ／グループLINEへ" if lang == "ja" else "Si necesitas ayuda, escribe al grupo LINE / Messenger"
-    canvas.drawString(18 * mm, 9.5 * mm, footer)
-    canvas.restoreState()
+    """ヘッダー・フッターなし。"""
+    pass
 
 
 class GuideDoc(BaseDocTemplate):
@@ -122,7 +112,8 @@ class GuideDoc(BaseDocTemplate):
         super().__init__(filename, pagesize=A4,
                          leftMargin=18*mm, rightMargin=18*mm,
                          topMargin=16*mm, bottomMargin=18*mm)
-        frame = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id="main")
+        frame = Frame(self.leftMargin, self.bottomMargin, self.width, self.height,
+                      leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0, id="main")
         self.addPageTemplates([PageTemplate(
             id="guide", frames=[frame],
             onPage=lambda c, d: footer_only(c, d, lang)
@@ -140,11 +131,14 @@ def blist(items, style, btype="bullet"):
     )
 
 def note_box(text, styles):
-    """点線囲み・背景なし・テキスト色の罫線。"""
-    tbl = Table([[p(text, styles["note"])]], colWidths=[174*mm])
+    """実線囲み・背景なし・チップスと同じケイ・テキスト太字。"""
+    # noteスタイルをベースに太字フォントを上書き
+    bold_note = ParagraphStyle("note_bold", parent=styles["note"],
+                               fontName=JP_BOLD if styles is JA else "LatB")
+    tbl = Table([[p(text, bold_note)]], colWidths=[174*mm])
     tbl.setStyle(TableStyle([
         ("BACKGROUND",    (0,0), (-1,-1), WHITE),
-        ("BOX",           (0,0), (-1,-1), 0.6, INK, 0, [2, 3]),
+        ("BOX",           (0,0), (-1,-1), 0.5, RULE),
         ("LEFTPADDING",   (0,0), (-1,-1), 8),
         ("RIGHTPADDING",  (0,0), (-1,-1), 8),
         ("TOPPADDING",    (0,0), (-1,-1), 6),
@@ -189,7 +183,7 @@ def build_ja():
 
     cover(story, s,
         "30nen.com 新しい投稿画面の手引き",
-        "書き手のみなさんへいつも更新ありがとう。ゆっくり試して慣れるための切替の手順案内です。",
+        "書き手のみなさんへいつも更新ありがとう。サイト切替のため、お手数おかけします。わからないところ、不便なところは、すぐに言ってね！",
         ["ログイン", "パスワード変更", "プロフィール確認", "試し書き", "7/29から本番"],
     )
 
@@ -226,10 +220,8 @@ def build_ja():
     story.append(p("プロフィール確認で大事なこと", s["h1"]))
     story.append(p("新しいサイトでは、書き手のプロフィールを少し整えて表示します。初回ログイン後に確認をお願いします。", s["body"]))
     story.append(blist([
-        "表示名",
-        "プロフィール文（自己紹介）",
-        "写真またはアイコン",
-        "メールアドレス",
+        "名前（表示名）",
+        "写真またはアイコン（これは管理者が登録します）",
         "<b>西暦を含めた誕生日</b>",
     ], s["bullet"]))
     story.append(p("誕生日そのものは公開されません。公開ページでは「◎歳」のように年齢として表示するために使います。", s["subtle"]))
