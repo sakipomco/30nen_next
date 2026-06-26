@@ -88,17 +88,7 @@ function ToolbarButton({
   );
 }
 
-function Toolbar({
-  editor,
-  onPickImage,
-  onPickFromFolder,
-  uploading,
-}: {
-  editor: Editor;
-  onPickImage: () => void;
-  onPickFromFolder: () => void;
-  uploading: boolean;
-}) {
+function Toolbar({ editor }: { editor: Editor }) {
   return (
     <div className="mb-2 flex flex-wrap gap-1">
       <ToolbarButton
@@ -137,23 +127,6 @@ function Toolbar({
         active={editor.isActive('link')}
         onClick={() => setLink(editor)}
       />
-      {/* 本文に画像を挿入。押すとファイル選択 → アップロード → カーソル位置に差し込む。 */}
-      <button
-        type="button"
-        onClick={onPickImage}
-        disabled={uploading}
-        className="rounded-md border border-dashed border-zinc-400 px-4 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-50 disabled:opacity-50"
-      >
-        {uploading ? 'アップロード中…' : '画像をデバイスから選ぶ'}
-      </button>
-      {/* 画像フォルダから選んで挿入。 */}
-      <button
-        type="button"
-        onClick={onPickFromFolder}
-        className="rounded-md border border-dashed border-zinc-400 px-4 py-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
-      >
-        画像フォルダから選ぶ
-      </button>
     </div>
   );
 }
@@ -250,20 +223,29 @@ export function RichEditor({ name, initialHTML }: Props) {
 
   return (
     <div>
-      {editor && (
-        <Toolbar
-          editor={editor}
-          uploading={uploading}
-          onPickImage={() => {
-            if (!uploading) fileInputRef.current?.click();
-          }}
-          onPickFromFolder={() => setPickerOpen(true)}
-        />
-      )}
+      {editor && <Toolbar editor={editor} />}
       <EditorContent editor={editor} />
-      {/* 操作のヒント（写真の入れ方は3通り）。 */}
+      {/* 画像挿入ボタン（エディタの直下）。 */}
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => { if (!uploading) fileInputRef.current?.click(); }}
+          disabled={uploading}
+          className="rounded-md border border-zinc-400 bg-white px-4 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-100 disabled:opacity-50"
+        >
+          {uploading ? 'アップロード中…' : '画像をデバイスから選ぶ'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="rounded-md border border-zinc-400 bg-white px-4 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-100"
+        >
+          画像フォルダから選ぶ
+        </button>
+      </div>
+      {/* 操作のヒント。 */}
       <p className="mt-1 text-xs text-zinc-500">
-        写真は「画像」ボタンのほか、本文へ<strong>ドラッグ＆ドロップ</strong>・
+        写真は本文へ<strong>ドラッグ＆ドロップ</strong>・
         <strong>貼り付け（⌘/Ctrl+V）</strong>でも入れられます。
       </p>
       {error && (
