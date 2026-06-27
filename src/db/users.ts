@@ -34,6 +34,7 @@ export type UpdateUserInput = {
   email?: string;
   password?: string; // 渡したときだけハッシュ化して上書き
   role?: 'admin' | 'author';
+  locale?: 'ja' | 'es';
   avatarPath?: string | null;
   bio?: string | null;
   location?: string | null;
@@ -118,6 +119,7 @@ export async function updateUser(
   if (input.name !== undefined) patch.name = input.name;
   if (input.email !== undefined) patch.email = input.email;
   if (input.role !== undefined) patch.role = input.role;
+  if (input.locale !== undefined) patch.locale = input.locale;
   if (input.avatarPath !== undefined) patch.avatarPath = input.avatarPath;
   if (input.bio !== undefined) patch.bio = input.bio;
   if (input.location !== undefined) patch.location = input.location;

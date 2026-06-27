@@ -1,11 +1,10 @@
 'use client';
-// 画像フォルダ画面の「写真を追加」ボタン。
-// ファイルを選ぶ（複数可）→ /api/upload に順番に送る→ 終わったらページを再読み込みして一覧に反映。
 
 import { useRef, useState } from 'react';
 import { uploadImage } from '@/app/admin/upload-image';
+import { t, tReplace, type Locale } from '@/lib/i18n';
 
-export function UploadButton() {
+export function UploadButton({ locale = 'ja' }: { locale?: Locale }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<
     | { status: 'idle' }
@@ -24,18 +23,16 @@ export function UploadButton() {
       try {
         await uploadImage(files[i]);
       } catch (err) {
-        errors.push(files[i].name + ': ' + (err instanceof Error ? err.message : '失敗'));
+        errors.push(files[i].name + ': ' + (err instanceof Error ? err.message : t('common.error', locale)));
       }
       setState({ status: 'uploading', done: i + 1, total: files.length });
     }
 
-    // input をリセット（同じファイルを再選択できるように）
     if (inputRef.current) inputRef.current.value = '';
 
     if (errors.length > 0) {
       setState({ status: 'error', message: errors.join('\n') });
     } else {
-      // 成功したらページを再読み込みして一覧に反映
       window.location.reload();
     }
   }
@@ -52,18 +49,20 @@ export function UploadButton() {
             onClick={() => setState({ status: 'idle' })}
             className="ml-2 underline"
           >
-            閉じる
+            {t('media.close', locale)}
           </button>
         </p>
       )}
 
       {uploading && (
         <span className="text-sm text-zinc-500">
-          アップロード中… {state.done} / {state.total}
+          {tReplace('media.uploadingProgress', locale, {
+            done: String(state.done),
+            total: String(state.total),
+          })}
         </span>
       )}
 
-      {/* 隠しファイル入力（複数・画像のみ） */}
       <input
         ref={inputRef}
         type="file"
@@ -80,7 +79,7 @@ export function UploadButton() {
         disabled={uploading}
         className="rounded-md bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        写真を追加
+        {t('media.addPhoto', locale)}
       </button>
     </div>
   );

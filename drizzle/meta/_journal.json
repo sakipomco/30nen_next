@@ -85,6 +85,13 @@
       "when": 1782466004458,
       "tag": "0011_organic_magus",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1782521385009,
+      "tag": "0012_cultured_namorita",
+      "breakpoints": true
     }
   ]
 }

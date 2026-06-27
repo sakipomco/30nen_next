@@ -1,16 +1,12 @@
 'use client';
-// ログイン入力フォーム（ブラウザ側で動く部分）。
-// useActionState＝「Server Action の実行状態（処理中か・戻り値）」を受け取るReactのフック。
-//   - state   … login の戻り値（エラー文言など）
-//   - action  … <form action={...}> に渡すと送信時に login が走る
-//   - pending … 送信中かどうか（true の間はボタンを押せなくする）
 
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { login, type LoginState } from '@/app/actions/auth';
 import { PasswordInput } from '@/components/password-input';
+import { t, type Locale } from '@/lib/i18n';
 
-export function LoginForm() {
+export function LoginForm({ locale = 'ja' }: { locale?: Locale }) {
   const [state, action, pending] = useActionState<LoginState, FormData>(
     login,
     undefined,
@@ -19,7 +15,7 @@ export function LoginForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1 text-sm">
-        メールアドレス
+        {t('login.email', locale)}
         <input
           type="email"
           name="email"
@@ -30,7 +26,7 @@ export function LoginForm() {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        パスワード
+        {t('login.password', locale)}
         <PasswordInput
           name="password"
           required
@@ -38,7 +34,6 @@ export function LoginForm() {
         />
       </label>
 
-      {/* エラーがあれば赤字で表示 */}
       {state?.error && (
         <p className="text-sm text-red-600" role="alert">
           {state.error}
@@ -50,14 +45,14 @@ export function LoginForm() {
         disabled={pending}
         className="mt-2 rounded-md bg-zinc-900 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60"
       >
-        {pending ? 'ログイン中…' : 'ログイン'}
+        {pending ? t('login.submitting', locale) : t('login.submit', locale)}
       </button>
 
       <Link
-        href="/forgot-password"
+        href={`/forgot-password${locale === 'es' ? '?lang=es' : ''}`}
         className="text-center text-sm text-zinc-500 hover:underline"
       >
-        パスワードを忘れた方
+        {t('login.forgot', locale)}
       </Link>
     </form>
   );

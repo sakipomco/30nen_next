@@ -19,6 +19,7 @@ export const users = sqliteTable('users', {
   email: text('email').notNull().unique(), // ログインID（重複不可）
   passwordHash: text('password_hash').notNull(), // パスワード（ハッシュ化して保存）
   role: text('role', { enum: ['admin', 'author'] }).notNull().default('author'),
+  locale: text('locale', { enum: ['ja', 'es'] }).notNull().default('ja'),
   avatarPath: text('avatar_path'), // 顔写真（任意）
   bio: text('bio'), // 自己紹介（任意）
   location: text('location'), // 居住地（例: 神奈川県藤沢市・任意）

@@ -1,25 +1,22 @@
 'use client';
-// 画像フォルダ一覧の見た目（クライアント側）。
-//  ・サムネイルを並べる
-//  ・クリックで大きく拡大（黒い画面に全体表示・もう一度クリックで閉じる）
-//  ・削除できる写真にだけ「削除」ボタン（押すと確認ダイアログ）
 
 import { useState } from 'react';
 import Image from 'next/image';
 import { deleteUploadAction } from '@/app/actions/media';
+import { t, type Locale } from '@/lib/i18n';
 
 type Item = {
   url: string;
-  canDelete: boolean; // 自分の写真 or 管理者なら true
+  canDelete: boolean;
 };
 
-export function MediaGrid({ items }: { items: Item[] }) {
+export function MediaGrid({ items, locale = 'ja' }: { items: Item[]; locale?: Locale }) {
   const [zoom, setZoom] = useState<string | null>(null);
 
   if (items.length === 0) {
     return (
       <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-500">
-        まだ写真がありません。日記に写真を入れると、ここに集まります。
+        {t('media.empty', locale)}
       </div>
     );
   }
@@ -29,7 +26,6 @@ export function MediaGrid({ items }: { items: Item[] }) {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {items.map((it) => (
           <div key={it.url} className="group relative">
-            {/* サムネイル（押すと拡大） */}
             <button
               type="button"
               onClick={() => setZoom(it.url)}
@@ -44,16 +40,11 @@ export function MediaGrid({ items }: { items: Item[] }) {
               />
             </button>
 
-            {/* 削除（自分の写真 or 管理者だけに出る） */}
             {it.canDelete && (
               <form
                 action={deleteUploadAction}
                 onSubmit={(e) => {
-                  if (
-                    !window.confirm(
-                      'この写真を削除しますか？元に戻せません。\n（記事で使っている写真を消すと、その記事から写真が消えます）',
-                    )
-                  ) {
+                  if (!window.confirm(t('media.confirmDelete', locale))) {
                     e.preventDefault();
                   }
                 }}
@@ -64,7 +55,7 @@ export function MediaGrid({ items }: { items: Item[] }) {
                   type="submit"
                   className="rounded bg-black/60 px-2 py-1 text-xs text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
                 >
-                  削除
+                  {t('admin.delete', locale)}
                 </button>
               </form>
             )}
@@ -72,7 +63,6 @@ export function MediaGrid({ items }: { items: Item[] }) {
         ))}
       </div>
 
-      {/* 拡大表示（クリックで閉じる） */}
       {zoom && (
         <div
           role="dialog"

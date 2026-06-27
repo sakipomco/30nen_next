@@ -1,11 +1,9 @@
 'use client';
-// マイプロフィールの入力フォーム（本人が自分の分だけ編集する）。
-// 編集できる項目：名前(ペンネーム)／顔写真／誕生日／居住地／SNS各URL。
-// メール(ログインID)・パスワード・権限・担当連載はここには無い（管理者にご依頼ください）。
 
 import { useActionState } from 'react';
 import type { ProfileFormState } from '@/app/actions/profile';
 import { FeaturedImage } from '@/app/admin/featured-image';
+import { t, type Locale } from '@/lib/i18n';
 
 type ProfileAction = (
   prevState: ProfileFormState,
@@ -14,10 +12,11 @@ type ProfileAction = (
 
 type Props = {
   action: ProfileAction;
+  locale?: Locale;
   initial: {
     name: string;
     avatarPath: string | null;
-    birthday: string | null; // 'YYYY-MM-DD'（任意）
+    birthday: string | null;
     location: string | null;
     instagramUrl: string | null;
     xUrl: string | null;
@@ -26,7 +25,7 @@ type Props = {
   };
 };
 
-export function ProfileForm({ action, initial }: Props) {
+export function ProfileForm({ action, initial, locale = 'ja' }: Props) {
   const [state, formAction, pending] = useActionState<ProfileFormState, FormData>(
     action,
     undefined,
@@ -35,7 +34,7 @@ export function ProfileForm({ action, initial }: Props) {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1 text-sm">
-        名前
+        {t('profile.nameLabel', locale)}
         <input
           type="text"
           name="name"
@@ -44,20 +43,20 @@ export function ProfileForm({ action, initial }: Props) {
           className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
         />
         <span className="text-xs text-zinc-500">
-          記事ページの「書き手」欄に表示される名前です。
+          {t('profile.nameHint', locale)}
         </span>
       </label>
 
-      {/* 顔写真（丸く表示される。本文画像と同じアップロードの仕組みを流用） */}
       <FeaturedImage
         name="avatarPath"
-        label="プロフィール写真"
+        label={t('profile.photoLabel', locale)}
         initialPath={initial.avatarPath}
+        locale={locale}
       />
 
       <div className="flex flex-wrap gap-4">
         <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-sm">
-          居住地（例：神奈川県藤沢市）
+          {t('profile.locationLabel', locale)}
           <input
             type="text"
             name="location"
@@ -66,7 +65,7 @@ export function ProfileForm({ action, initial }: Props) {
           />
         </label>
         <label className="flex w-44 flex-col gap-1 text-sm">
-          誕生日
+          {t('profile.birthdayLabel', locale)}
           <input
             type="date"
             name="birthday"
@@ -74,13 +73,13 @@ export function ProfileForm({ action, initial }: Props) {
             className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500"
           />
           <span className="text-xs text-zinc-500">
-            一度入れておけば、年齢は毎年自動で更新されます（書き換え不要）。誕生日そのものは公開されません。
+            {t('profile.birthdayHint', locale)}
           </span>
         </label>
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
-        Instagram
+        {t('profile.instagram', locale)}
         <input
           type="url"
           name="instagramUrl"
@@ -91,7 +90,7 @@ export function ProfileForm({ action, initial }: Props) {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        X（旧Twitter）
+        {t('profile.x', locale)}
         <input
           type="url"
           name="xUrl"
@@ -102,7 +101,7 @@ export function ProfileForm({ action, initial }: Props) {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        YouTube
+        {t('profile.youtube', locale)}
         <input
           type="url"
           name="youtubeUrl"
@@ -113,7 +112,7 @@ export function ProfileForm({ action, initial }: Props) {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Webサイト
+        {t('profile.website', locale)}
         <input
           type="url"
           name="websiteUrl"
@@ -124,7 +123,7 @@ export function ProfileForm({ action, initial }: Props) {
       </label>
 
       <p className="text-xs text-zinc-500">
-        メールアドレス（ログインID）・パスワード・担当連載の変更は、管理者にご依頼ください。
+        {t('profile.contactAdmin', locale)}
       </p>
 
       {state?.error && (
@@ -139,7 +138,7 @@ export function ProfileForm({ action, initial }: Props) {
           disabled={pending}
           className="rounded-md bg-zinc-900 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60"
         >
-          {pending ? '保存中…' : '保存する'}
+          {pending ? t('profile.saving', locale) : t('profile.save', locale)}
         </button>
       </div>
     </form>

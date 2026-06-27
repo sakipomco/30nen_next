@@ -1,14 +1,12 @@
 'use client';
-// 画像フォルダから1枚選ぶモーダル。
-// 使い方: <ImagePickerModal onSelect={(url) => { ...urlを受け取る処理... }} onClose={() => setOpen(false)} />
-// ・画像フォルダの一覧をページ送りで表示
-// ・サムネイルをクリックすると onSelect(url) を呼んで閉じる
 
 import { useEffect, useState, useCallback } from 'react';
+import { t, type Locale } from '@/lib/i18n';
 
 type Props = {
   onSelect: (url: string) => void;
   onClose: () => void;
+  locale?: Locale;
 };
 
 type MediaResponse = {
@@ -17,7 +15,7 @@ type MediaResponse = {
   page: number;
 };
 
-export function ImagePickerModal({ onSelect, onClose }: Props) {
+export function ImagePickerModal({ onSelect, onClose, locale = 'ja' }: Props) {
   const [page, setPage] = useState(1);
   const [data, setData] = useState<MediaResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,21 +26,20 @@ export function ImagePickerModal({ onSelect, onClose }: Props) {
     setError(null);
     try {
       const res = await fetch(`/api/media?page=${p}`);
-      if (!res.ok) throw new Error('読み込みに失敗しました。');
+      if (!res.ok) throw new Error(t('picker.loadFailed', locale));
       setData((await res.json()) as MediaResponse);
       setPage(p);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '読み込みに失敗しました。');
+      setError(err instanceof Error ? err.message : t('picker.loadFailed', locale));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     void load(1);
   }, [load]);
 
-  // Esc キーで閉じる
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose();
@@ -55,16 +52,15 @@ export function ImagePickerModal({ onSelect, onClose }: Props) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="画像フォルダから選ぶ"
+      aria-label={t('picker.title', locale)}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div className="flex h-[80vh] w-full max-w-3xl flex-col rounded-xl bg-white shadow-xl">
-        {/* ヘッダー */}
         <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
-          <h2 className="text-base font-semibold text-zinc-900">画像フォルダから選ぶ</h2>
+          <h2 className="text-base font-semibold text-zinc-900">{t('picker.title', locale)}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -74,17 +70,16 @@ export function ImagePickerModal({ onSelect, onClose }: Props) {
           </button>
         </div>
 
-        {/* 本体 */}
         <div className="flex-1 overflow-y-auto p-4">
           {loading && (
-            <p className="mt-8 text-center text-sm text-zinc-500">読み込み中…</p>
+            <p className="mt-8 text-center text-sm text-zinc-500">{t('picker.loading', locale)}</p>
           )}
           {error && (
             <p className="mt-8 text-center text-sm text-red-600">{error}</p>
           )}
           {!loading && !error && data && data.urls.length === 0 && (
             <p className="mt-8 text-center text-sm text-zinc-500">
-              まだ写真がありません。「写真を追加」で先に写真をアップロードしてください。
+              {t('picker.empty', locale)}
             </p>
           )}
           {!loading && !error && data && data.urls.length > 0 && (
@@ -111,7 +106,6 @@ export function ImagePickerModal({ onSelect, onClose }: Props) {
           )}
         </div>
 
-        {/* ページ送り */}
         {data && data.totalPages > 1 && (
           <div className="flex items-center justify-center gap-4 border-t border-zinc-200 py-3 text-sm">
             <button
@@ -120,7 +114,7 @@ export function ImagePickerModal({ onSelect, onClose }: Props) {
               onClick={() => void load(page - 1)}
               className="rounded-md border border-zinc-300 px-3 py-1 text-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-zinc-100"
             >
-              ← 前へ
+              {t('media.prev', locale)}
             </button>
             <span className="text-zinc-500">
               {page} / {data.totalPages}
@@ -131,7 +125,7 @@ export function ImagePickerModal({ onSelect, onClose }: Props) {
               onClick={() => void load(page + 1)}
               className="rounded-md border border-zinc-300 px-3 py-1 text-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-zinc-100"
             >
-              次へ →
+              {t('media.next', locale)}
             </button>
           </div>
         )}

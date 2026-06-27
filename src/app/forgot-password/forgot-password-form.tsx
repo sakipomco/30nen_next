@@ -3,8 +3,9 @@
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { forgotPasswordAction } from '@/app/actions/auth-tokens';
+import { t, type Locale } from '@/lib/i18n';
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ locale = 'ja' }: { locale?: Locale }) {
   const [state, formAction, pending] = useActionState(forgotPasswordAction, undefined);
 
   if (state?.success) {
@@ -13,8 +14,8 @@ export function ForgotPasswordForm() {
         <p className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800">
           {state.success}
         </p>
-        <Link href="/login" className="text-sm text-zinc-500 hover:underline">
-          ← ログイン画面に戻る
+        <Link href={`/login${locale === 'es' ? '?lang=es' : ''}`} className="text-sm text-zinc-500 hover:underline">
+          {t('forgot.backToLogin', locale)}
         </Link>
       </div>
     );
@@ -23,7 +24,7 @@ export function ForgotPasswordForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1 text-sm">
-        メールアドレス
+        {t('forgot.email', locale)}
         <input
           type="email"
           name="email"
@@ -42,11 +43,11 @@ export function ForgotPasswordForm() {
         disabled={pending}
         className="mt-2 rounded-md bg-zinc-900 py-2.5 text-base font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60"
       >
-        {pending ? '送信中…' : 'リセットメールを送る'}
+        {pending ? t('forgot.submitting', locale) : t('forgot.submit', locale)}
       </button>
 
-      <Link href="/login" className="text-center text-sm text-zinc-500 hover:underline">
-        ← ログイン画面に戻る
+      <Link href={`/login${locale === 'es' ? '?lang=es' : ''}`} className="text-center text-sm text-zinc-500 hover:underline">
+        {t('forgot.backToLogin', locale)}
       </Link>
     </form>
   );
