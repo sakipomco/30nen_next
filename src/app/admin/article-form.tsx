@@ -295,7 +295,7 @@ export function ArticleForm({ action, categories, initial }: Props) {
           onClick={handlePublishClick}
           className="rounded-md bg-zinc-900 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60"
         >
-          {pending ? '送信中…' : '投稿する'}
+          {pending ? '送信中…' : initial?.status === 'published' ? '更新する' : '投稿する'}
         </button>
         {/* プレビュー（公開ページと同じ見た目で別タブ表示） */}
         <button
@@ -311,7 +311,7 @@ export function ArticleForm({ action, categories, initial }: Props) {
         <span className="text-xs text-zinc-500">
           {autosaveEnabled
             ? autoSaveStatus
-            : '公開中の記事は自動保存されません。編集後は「投稿する」で保存してください。'}
+            : '公開中の記事は自動保存されません。編集後は「更新する」で保存してください。'}
         </span>
       </div>
     </form>
