@@ -191,7 +191,7 @@ def build_ja():
         f"{SWITCH_DATE_JA} までは練習期間です。新システムで書いた内容はプレビューできますが、30nen.com の本番サイトには反映されません。切替日以降は、新しい投稿画面から投稿をお願いします。",
         s,
     ))
-    story.append(Spacer(1, 3*mm))
+    story.append(Spacer(1, 6*mm))
 
     story.append(p("まずお願いしたいこと", s["h1"]))
     story.append(blist([
