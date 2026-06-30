@@ -5,7 +5,6 @@
 // - status（draft/published）や公開日時に関係なく取得（getArticleForPreview）。
 // - 前後の日記・関連記事は省略（下書きでは比較対象が無い・実装をシンプルに保つ）。
 
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { requireUser } from '@/auth/session';
@@ -87,18 +86,7 @@ export default async function PreviewPage({
         {article.title || '（無題）'}
       </h1>
 
-      {article.featuredImagePath && (
-        <Image
-          src={article.featuredImagePath}
-          alt={article.title || ''}
-          width={0}
-          height={0}
-          sizes="(max-width: 1024px) 100vw, 720px"
-          priority
-          className="mt-6"
-          style={{ width: '100%', height: 'auto' }}
-        />
-      )}
+      {/* アイキャッチは記事ページの一番上には出さない（公開ページと同じ・旧サイトと同じ）。 */}
 
       <div
         className="article-body mt-8 text-[#333]"

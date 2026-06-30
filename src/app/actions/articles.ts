@@ -20,6 +20,7 @@ import {
 } from '@/db/categories';
 import { jstInputToUtc } from '@/lib/datetime';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
+import { firstContentImageSrc } from '@/lib/article-image';
 
 // useActionState に渡すための状態の形（エラー文言を画面に返す）。
 export type ArticleFormState = { error?: string } | undefined;
@@ -38,10 +39,14 @@ function publishedAtFromForm(formData: FormData): string | undefined {
   return input ? jstInputToUtc(input) : undefined;
 }
 
-// アイキャッチ画像のパスを読む。空欄（未設定・削除）は null として保存する。
-function featuredImageFromForm(formData: FormData): string | null {
-  const input = String(formData.get('featuredImage') ?? '').trim();
-  return input ? input : null;
+// アイキャッチ画像のパスを決める。
+//  - 手動で設定済みなら、それを使う（本文と別の写真にしたいケースもOK）。
+//  - 空欄なら、本文の「一番上の写真」を自動でアイキャッチに流用する（書き手の手間を減らす）。
+//  - 本文にも写真が無ければ null（＝アイキャッチなし）。
+function resolveFeaturedImage(formData: FormData, content: string): string | null {
+  const explicit = String(formData.get('featuredImage') ?? '').trim();
+  if (explicit) return explicit;
+  return firstContentImageSrc(content);
 }
 
 // 連載(カテゴリ)を読み、検証し、担当ルールを適用する。
@@ -93,6 +98,8 @@ export async function saveArticleAction(
   if (!title) {
     return { error: 'タイトルを入力してください。' };
   }
+  // アイキャッチ：未設定なら本文の一番上の写真を自動採用する。
+  const featuredImagePath = resolveFeaturedImage(formData, content);
 
   const category = await resolveCategory(user, formData);
   if ('error' in category) return { error: category.error };
@@ -107,7 +114,7 @@ export async function saveArticleAction(
       title,
       content,
       categoryId: category.categoryId,
-      featuredImagePath: featuredImageFromForm(formData),
+      featuredImagePath,
       status: statusFromIntent(formData),
       publishedAt: publishedAtFromForm(formData), // 未指定なら既存の公開日時を維持
     });
@@ -119,7 +126,7 @@ export async function saveArticleAction(
       title,
       content,
       categoryId: category.categoryId,
-      featuredImagePath: featuredImageFromForm(formData),
+      featuredImagePath,
       status: statusFromIntent(formData),
       publishedAt: publishedAtFromForm(formData), // 未指定なら公開時に「今」を自動補完
       authorId: user.id, // 書いた人＝今ログイン中の人
@@ -157,7 +164,10 @@ export async function autosaveArticleAction(payload: {
     payload.categoryId && Number.isInteger(payload.categoryId) && payload.categoryId > 0
       ? payload.categoryId
       : null;
-  const featuredImagePath = payload.featuredImage?.trim() ? payload.featuredImage.trim() : null;
+  // アイキャッチ：未設定なら本文の一番上の写真を自動採用（手動保存と同じルール）。
+  const featuredImagePath = payload.featuredImage?.trim()
+    ? payload.featuredImage.trim()
+    : firstContentImageSrc(content);
   const publishedAtInput = (payload.publishedAt ?? '').trim();
   const publishedAt = publishedAtInput ? jstInputToUtc(publishedAtInput) : undefined;
 

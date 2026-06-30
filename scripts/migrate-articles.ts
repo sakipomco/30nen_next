@@ -37,6 +37,7 @@ import {
   heicToJpgPath,
 } from '../migration/lib/transform';
 import { shrinkImage, mimeFromExtension } from '../src/lib/image';
+import { firstContentImageSrc } from '../src/lib/article-image';
 
 const PROJECT_ROOT = resolve(dirname(new URL(import.meta.url).pathname), '..');
 
@@ -234,6 +235,14 @@ async function migrateOne(idBase: string, report: Report): Promise<void> {
         }
       }
     }
+  }
+
+  // ⑥-3 アイキャッチが無い記事は、本文の一番上の写真を代表写真に流用する
+  //      （投稿画面と同じルール。WPの _thumbnail_id が無い約0.2%の記事を救済）。
+  //      本文の画像URLはこの時点で /uploads/... に書き換え済みなので、
+  //      記事ページでも本文と同じ画像と判定され、上に二重表示されない。
+  if (!featuredImagePath) {
+    featuredImagePath = firstContentImageSrc(content);
   }
 
   // ⑦ 取り込み

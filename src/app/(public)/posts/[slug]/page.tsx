@@ -5,7 +5,6 @@
 //  - 記事は日々更新されるので常に最新DBを表示（force-dynamic）。
 
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import {
   getPublishedArticleBySlug,
@@ -159,20 +158,9 @@ export default async function PostPage({
         {article.title}
       </h1>
 
-      {/* アイキャッチ画像（設定があれば）。トリミングせず原寸比率のまま表示
-          （正方形・縦長もそのまま）。width/height=0＋styleで自然な比率に。 */}
-      {article.featuredImagePath && (
-        <Image
-          src={article.featuredImagePath}
-          alt={article.title}
-          width={0}
-          height={0}
-          sizes="(max-width: 1024px) 100vw, 720px"
-          priority
-          className="mt-6"
-          style={{ width: '100%', height: 'auto' }}
-        />
-      )}
+      {/* アイキャッチ画像は記事ページの一番上には出さない（旧サイトと同じ）。
+          一覧カード・関連記事・SNSシェアの代表写真としてだけ使う。
+          本文の写真は本文内（下記）で表示されるので、写真の二重表示は起きない。 */}
 
       {/* 本文（投稿のHTML）。表示直前にも無害化し、既存データもカバーする（R-02） */}
       <div

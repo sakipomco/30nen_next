@@ -139,9 +139,15 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
   function handlePublishClick(e: React.MouseEvent<HTMLButtonElement>) {
     const form = e.currentTarget.form;
     const featured = form?.elements.namedItem('featuredImage');
-    const isSet =
+    const featuredSet =
       featured instanceof HTMLInputElement && featured.value.trim() !== '';
-    if (!isSet) {
+    // 本文に写真があればアイキャッチに自動採用されるので、写真ありとみなす。
+    const content = form?.elements.namedItem('content');
+    const bodyHasImage =
+      (content instanceof HTMLInputElement || content instanceof HTMLTextAreaElement) &&
+      /<img\b/i.test(content.value);
+    // アイキャッチも本文の写真も無いときだけ「未設定です」と確認する。
+    if (!featuredSet && !bodyHasImage) {
       const ok = window.confirm(t('article.confirmNoImage', locale));
       if (!ok) e.preventDefault();
     }
@@ -193,7 +199,10 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
         <RichEditor name="content" initialHTML={initial?.content} locale={locale} />
       </div>
 
-      <FeaturedImage name="featuredImage" initialPath={initial?.featuredImagePath} locale={locale} />
+      <div className="flex flex-col gap-1">
+        <FeaturedImage name="featuredImage" initialPath={initial?.featuredImagePath} locale={locale} />
+        <span className="text-xs text-zinc-500">{t('article.featuredHint', locale)}</span>
+      </div>
 
       <label className="flex flex-col gap-1 text-sm">
         {t('article.publishedAtLabel', locale)}
