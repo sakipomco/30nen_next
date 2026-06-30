@@ -161,3 +161,12 @@ body {
 .article-body :where(strong) {
   font-weight: 700;
 }
+
+/* コラムの独立スクロール用：スクロールできるがスクロールバーは隠す（SAKIさん指定 2026-06-30） */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* 旧Edge/IE */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}

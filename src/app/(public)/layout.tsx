@@ -33,7 +33,7 @@ export default async function PublicLayout({
   const recipients = series.map((s) => ({ id: s.id, name: s.name }));
 
   return (
-    <div className="public-root flex-1 bg-white text-[#333]">
+    <div className="public-root flex-1 bg-white text-[#333] lg:flex lg:h-screen lg:flex-none lg:flex-col lg:overflow-hidden">
       {/* PC: 左端の縦書きメニュー・右端のSNSアイコン（lg以上のみ表示） */}
       <EdgeNav />
       <EdgeIcons />
@@ -42,18 +42,20 @@ export default async function PublicLayout({
       <HamburgerMenu series={series} archive={archive} />
 
       {/* 3カラム本体 */}
-      <div className="mx-auto grid max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:grid-cols-[1.1fr_1.8fr_1.1fr] lg:gap-12 lg:px-20">
+      {/* PC では本体を画面の高さいっぱいに固定し（lg:flex-1 lg:min-h-0）、各コラムを
+          それぞれの枠内だけでスクロールさせる（下の lg:overflow-y-auto）。 */}
+      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:min-h-0 lg:flex-1 lg:grid-cols-[1.1fr_1.8fr_1.1fr] lg:gap-12 lg:px-20 lg:pb-6">
         {/* 左コラム */}
-        <aside className="lg:pt-2">
+        <aside className="no-scrollbar lg:min-h-0 lg:overflow-y-auto lg:pt-2">
           <SidebarLeft leadText={leadText} recipients={recipients} />
         </aside>
 
-        {/* 中央コラム（各ページの中身） */}
-        <main className="min-w-0">{children}</main>
+        {/* 中央コラム（各ページの中身）＝自分の枠内だけでスクロール（スクロールバーは隠す） */}
+        <main className="no-scrollbar min-w-0 lg:min-h-0 lg:overflow-y-auto">{children}</main>
 
-        {/* 右コラム（PCのみ・スマホはハンバーガー内に同じ内容） */}
+        {/* 右コラム（PCのみ・スマホはハンバーガー内に同じ内容）＝中央とは別に独立スクロール */}
         {/* lg:pt-2 は左コラム（ロゴ）と上ラインをそろえるため。 */}
-        <aside className="hidden lg:block lg:pt-2">
+        <aside className="no-scrollbar hidden lg:block lg:min-h-0 lg:overflow-y-auto lg:pt-2">
           <SidebarContent series={series} archive={archive} />
         </aside>
       </div>
