@@ -43,19 +43,22 @@ export default async function PublicLayout({
 
       {/* 3カラム本体 */}
       {/* PC では本体を画面の高さいっぱいに固定し（lg:flex-1 lg:min-h-0）、各コラムを
-          それぞれの枠内だけでスクロールさせる（下の lg:overflow-y-auto）。 */}
-      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:min-h-0 lg:flex-1 lg:grid-cols-[1.1fr_1.8fr_1.1fr] lg:gap-12 lg:px-20 lg:pb-6">
-        {/* 左コラム */}
-        <aside className="no-scrollbar lg:min-h-0 lg:overflow-y-auto lg:pt-2">
+          それぞれの枠内だけでスクロールさせる（下の lg:overflow-y-auto）。
+          PC の上余白は grid でなく中央・右の各コラム側に持たせる＝左コラムのロゴを
+          マイナス余白なしで画面上端に付けるため（マイナス余白はスクロールの箱では切れる）。 */}
+      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:min-h-0 lg:flex-1 lg:grid-cols-[1.1fr_1.8fr_1.1fr] lg:gap-12 lg:px-20 lg:pb-6 lg:pt-0">
+        {/* 左コラム（ロゴが上端に付くので上余白なし） */}
+        <aside className="no-scrollbar lg:min-h-0 lg:overflow-y-auto">
           <SidebarLeft leadText={leadText} recipients={recipients} />
         </aside>
 
-        {/* 中央コラム（各ページの中身）＝自分の枠内だけでスクロール（スクロールバーは隠す） */}
-        <main className="no-scrollbar min-w-0 lg:min-h-0 lg:overflow-y-auto">{children}</main>
+        {/* 中央コラム（各ページの中身）＝自分の枠内だけでスクロール（スクロールバーは隠す）
+            lg:pt-10 は grid から移した上余白（従来と同じ見た目の位置）。 */}
+        <main className="no-scrollbar min-w-0 lg:min-h-0 lg:overflow-y-auto lg:pt-10">{children}</main>
 
         {/* 右コラム（PCのみ・スマホはハンバーガー内に同じ内容）＝中央とは別に独立スクロール */}
-        {/* lg:pt-2 は左コラム（ロゴ）と上ラインをそろえるため。 */}
-        <aside className="no-scrollbar hidden lg:block lg:min-h-0 lg:overflow-y-auto lg:pt-2">
+        {/* lg:pt-12 ＝ grid から移した上余白(40px)＋従来の pt-2(8px)。 */}
+        <aside className="no-scrollbar hidden lg:block lg:min-h-0 lg:overflow-y-auto lg:pt-12">
           <SidebarContent series={series} archive={archive} />
         </aside>
       </div>

@@ -18,12 +18,12 @@ export function SidebarLeft({
   return (
     <div className="flex flex-col items-center text-center">
       {/* ロゴ（暖簾ロゴ画像・クリックでトップへ）。
-          PC（lg以上）では約80%（208px）に縮小。上の余白の打ち消し（-mt-12＝48px）は
-          ページ上部の余白ぶんなのでロゴの幅とは無関係＝縮小しても変えない。
-          左右は中央のまま。スマホは中央・大きめのまま。 */}
+          PC（lg以上）はコラム側の上余白を外してあるのでマイナス余白なしで上端に付く
+          （マイナス余白は独立スクロールの箱では上が切れるため使わない）。
+          スマホは従来どおり -mt-10 でページ上部の余白を打ち消す。 */}
       <Link
         href="/"
-        className="-mt-10 block w-full max-w-[260px] lg:-mt-12 lg:max-w-[247px]"
+        className="-mt-10 block w-full max-w-[260px] lg:mt-0 lg:max-w-[247px]"
       >
         <Image
           src="/30nen_logo_noren_plus.jpg"
