@@ -101,7 +101,7 @@ const dict = {
   'profile.nameHint': { ja: '記事ページの「書き手」欄に表示される名前です。', es: 'Este nombre se mostrará como autor en la página del artículo.' },
   'profile.photoLabel': { ja: 'プロフィール写真', es: 'Foto de perfil' },
   'profile.locationLabel': { ja: '居住地（例：神奈川県藤沢市）', es: 'Ubicación (ej: Ciudad de México)' },
-  'profile.birthdayLabel': { ja: '誕生日', es: 'Fecha de nacimiento' },
+  'profile.birthdayLabel': { ja: '誕生日（西暦）', es: 'Fecha de nacimiento' },
   'profile.birthdayHint': { ja: '一度入れておけば、年齢は毎年自動で更新されます（書き換え不要）。誕生日そのものは公開されません。', es: 'Una vez ingresada, la edad se actualiza automáticamente cada año (no necesitas cambiarla). La fecha de nacimiento no se publica.' },
   'profile.instagram': { ja: 'Instagram', es: 'Instagram' },
   'profile.x': { ja: 'X（旧Twitter）', es: 'X (antes Twitter)' },

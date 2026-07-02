@@ -138,7 +138,7 @@ export function UserForm({ action, categories, initial, submitLabel = '保存' }
             />
           </label>
           <label className="flex w-44 flex-col gap-1 text-sm">
-            誕生日
+            誕生日（西暦）
             <input
               type="date"
               name="birthday"
