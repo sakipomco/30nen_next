@@ -33,7 +33,7 @@ export function WriterProfile({
 
   return (
     <section className={withHeading ? 'mt-12' : 'mt-8'}>
-      {withHeading && <SectionHeading>書き手</SectionHeading>}
+      {withHeading && <SectionHeading gapClass="mb-5">書き手</SectionHeading>}
       <div className="flex items-center gap-5">
         {/* 丸トリミングの顔写真（無ければ枠だけ） */}
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full bg-zinc-100">
@@ -50,7 +50,7 @@ export function WriterProfile({
 
         {/* 名前／居住地・年齢／SNS */}
         <div className="min-w-0">
-          <p className="serif text-lg text-[#333]">{author.name}</p>
+          <p className="serif text-xl text-[#333]">{author.name}</p>
           {meta && <p className="mt-0 text-sm text-[#333]">{meta}</p>}
           {socials.length > 0 && (
             <div className="mt-2 flex items-center gap-3">
