@@ -188,5 +188,43 @@ server {
 
 ---
 
-最終更新: 2026-06-25（本契約での建て直し成功＝162.43.43.144／npm 11.16の `allow-scripts` 落とし穴を §3-4 に追記・項目64）
+## 9. GitHub経由デプロイ（2026-07-01〜の標準・方式A＝手動git pull）
+
+これまでの「Mac から rsync でファイル直送」をやめ、**Mac → GitHub → 本番サーバー**の一本道にした。
+本番サーバーが GitHub から `git pull`（実体は `git reset --hard origin/main`）で取得する。
+
+### 一度きりの準備（2026-07-01実施済み）
+1. **GitHub 読み取り用の deploy key**をサーバーに作成 → GitHub の repo Settings → Deploy keys に**公開鍵を登録（Write access なし＝読み取り専用）**。
+   - `ssh-keygen -t ed25519 -f /root/.ssh/github_deploy -N ""`（サーバー上）
+   - `/root/.ssh/config` に `Host github.com` → `IdentityFile /root/.ssh/github_deploy`・`IdentitiesOnly yes`
+   - 疎通確認: `ssh -T git@github.com` で `Hi sakipomco/30nen_next! ...authenticated`
+2. **既存のrsync配備フォルダを git 管理下にして GitHub の最新に合わせる**（`/var/www/30nen_next`）:
+   ```
+   git config --global --add safe.directory /var/www/30nen_next
+   git init -b main
+   git remote add origin git@github.com:sakipomco/30nen_next.git
+   git fetch origin
+   git reset --hard origin/main
+   git branch --set-upstream-to=origin/main main
+   ```
+   - ⚠ `data/`（DB）・`public/uploads/`（画像）・`.env.local`（秘密）は **.gitignore 対象なので `reset --hard` でも触れられない**（自動で保護される。rsync時代のように除外指定に気を使わなくてよい）。**念のため事前にDB・.env.localをバックアップ**してから実施した。
+
+### 毎回のデプロイ（次回から）
+1. Mac で `git commit` → **`git push`**（GitHubへ）
+2. サーバーにログインしてスクリプトを1回:
+   ```
+   ssh -i ~/.ssh/30nen_vps root@162.43.43.144
+   bash /var/www/30nen_next/scripts/deploy-prod.sh
+   ```
+   - `scripts/deploy-prod.sh` の中身＝①`git reset --hard origin/main`②package変更時だけ`npm ci`＋native再ビルド③`db:migrate`④`npm run build`⑤`pm2 restart 30nen`。
+3. 確認: `curl -s -o /dev/null -w "%{http_code}" https://new.30nen.com/` が 200。
+
+### メモ
+- **push とデプロイは別物**：push は GitHub に控えを送るだけ（サイトは変わらない）。反映はサーバーで deploy スクリプトを実行したとき。
+- 将来「push=自動反映」にしたければ **方式B（GitHub Actions）** に移行できる（VPSのSSH鍵をGitHub Secretsに預ける必要あり）。まずは手動（方式A）で運用。
+
+---
+
+最終更新: 2026-07-01（**GitHub経由デプロイ（方式A・手動git pull）に切替**＝§9 追加・`scripts/deploy-prod.sh` 追加・項目78）
+既往: 2026-06-25（本契約での建て直し成功＝162.43.43.144／npm 11.16の `allow-scripts` 落とし穴を §3-4 に追記・項目64）
 初版: 2026-06-22（お試しVPS失効前の設定回収）
