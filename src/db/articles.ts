@@ -58,6 +58,24 @@ export async function listArticles(options?: {
     .offset(options?.offset ?? 0);
 }
 
+// ── Read：件数（管理画面の投稿一覧用）─────────────────────
+// listArticles と同じ絞り込みで数だけ返す（「ぜんぶ◯件」表示とページ送りの計算に使う）。
+export async function countArticles(options?: {
+  status?: 'draft' | 'published';
+  authorId?: number;
+}): Promise<number> {
+  const filters: SQL[] = [];
+  if (options?.status) filters.push(eq(articles.status, options.status));
+  if (options?.authorId != null)
+    filters.push(eq(articles.authorId, options.authorId));
+
+  const rows = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(articles)
+    .where(filters.length ? and(...filters) : undefined);
+  return rows[0]?.n ?? 0;
+}
+
 // ── Read：1件（id で取得）────────────────────────────────
 export async function getArticleById(id: number): Promise<Article | null> {
   const rows = await db.select().from(articles).where(eq(articles.id, id)).limit(1);

@@ -3,20 +3,43 @@ import { requireUser } from '@/auth/session';
 import { logout } from '@/app/actions/auth';
 import { switchLocaleAction } from '@/app/actions/locale';
 import { deleteArticleAction } from '@/app/actions/articles';
-import { listArticles } from '@/db/articles';
+import { listArticles, countArticles } from '@/db/articles';
 import { formatJst } from '@/lib/datetime';
 import { t, tReplace, type Locale } from '@/lib/i18n';
+import { Pagination } from '@/components/public/pagination';
 
 export const metadata = {
   title: '投稿｜30nen',
 };
 
-export default async function AdminPage() {
+// 1ページに出す記事の数（WPの投稿一覧と同じ20件）。
+const PER_PAGE = 20;
+
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const user = await requireUser();
   const locale = (user.locale ?? 'ja') as Locale;
-  const articles = await listArticles(
-    user.role === 'admin' ? undefined : { authorId: user.id },
-  );
+
+  // 投稿者は自分の記事だけ・管理者は全記事。
+  const scope = user.role === 'admin' ? undefined : { authorId: user.id };
+
+  // 件数（「ぜんぶ◯件」表示とページ送りの計算に使う）。
+  const total = await countArticles(scope);
+  const published = await countArticles({ ...scope, status: 'published' });
+  const draft = total - published;
+
+  const sp = await searchParams;
+  const page = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1);
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+
+  const articles = await listArticles({
+    ...scope,
+    limit: PER_PAGE,
+    offset: (page - 1) * PER_PAGE,
+  });
   const newArticleLabel = t('admin.newArticle', locale);
 
   return (
@@ -87,10 +110,19 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <p className="mb-4 text-sm text-zinc-500">
+        <p className="mb-1 text-sm text-zinc-500">
           {tReplace('admin.welcome', locale, {
             name: user.name,
             role: user.role === 'admin' ? t('admin.roleAdmin', locale) : t('admin.roleAuthor', locale),
+          })}
+        </p>
+
+        {/* 自分の投稿の件数（WPの「所有 (761)」にあたる表示）。 */}
+        <p className="mb-4 text-sm text-zinc-600">
+          {tReplace('admin.countSummary', locale, {
+            total: String(total),
+            published: String(published),
+            draft: String(draft),
           })}
         </p>
 
@@ -105,7 +137,19 @@ export default async function AdminPage() {
                 key={article.id}
                 className="flex items-center justify-between gap-4 p-4"
               >
-                <div className="min-w-0">
+                {/* アイキャッチのサムネイル（無い記事はグレーの枠だけ）。 */}
+                {article.featuredImagePath ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={article.featuredImagePath}
+                    alt=""
+                    className="h-12 w-12 shrink-0 rounded object-cover bg-zinc-100"
+                  />
+                ) : (
+                  <div className="h-12 w-12 shrink-0 rounded bg-zinc-100" />
+                )}
+
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span
                       className={
@@ -148,6 +192,9 @@ export default async function AdminPage() {
             ))}
           </ul>
         )}
+
+        {/* ページ送り（20件ずつ）。公開ページと同じ部品を使う。 */}
+        <Pagination currentPage={page} totalPages={totalPages} basePath="/admin" />
       </div>
     </div>
   );

@@ -7,7 +7,15 @@ import type { PublicUser } from '@/db/users';
 import { calcAge } from '@/lib/datetime';
 import { SectionHeading } from './section-heading';
 
-export function WriterProfile({ author }: { author: PublicUser }) {
+// withHeading=false にすると帯「書き手」を出さない
+// （連載ページで担当2名を並べるとき、帯は1回だけにするため）。
+export function WriterProfile({
+  author,
+  withHeading = true,
+}: {
+  author: PublicUser;
+  withHeading?: boolean;
+}) {
   // 「神奈川県藤沢市／49歳」のように、ある項目だけをつなげる。
   // 年齢は誕生日から自動計算（誕生日そのものは表示しない）。
   const age = calcAge(author.birthday);
@@ -24,8 +32,8 @@ export function WriterProfile({ author }: { author: PublicUser }) {
   ].filter((s) => s.url);
 
   return (
-    <section className="mt-12">
-      <SectionHeading>書き手</SectionHeading>
+    <section className={withHeading ? 'mt-12' : 'mt-8'}>
+      {withHeading && <SectionHeading>書き手</SectionHeading>}
       <div className="flex items-center gap-5">
         {/* 丸トリミングの顔写真（無ければ枠だけ） */}
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full bg-zinc-100">

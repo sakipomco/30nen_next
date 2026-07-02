@@ -6,7 +6,12 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getCategoryById, getCategoryBySlug, type Category } from '@/db/categories';
+import {
+  getCategoryById,
+  getCategoryBySlug,
+  getPublicAuthorsForCategory,
+  type Category,
+} from '@/db/categories';
 import {
   listPublishedArticles,
   countPublishedArticles,
@@ -15,6 +20,7 @@ import { Breadcrumb } from '@/components/public/breadcrumb';
 import { CategoryBanner } from '@/components/public/category-banner';
 import { ArticleCard } from '@/components/public/article-card';
 import { Pagination } from '@/components/public/pagination';
+import { WriterProfile } from '@/components/public/writer-profile';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,6 +72,9 @@ export default async function SeriesPage({
     offset,
   });
 
+  // この連載の担当書き手（ページ最下部の「書き手」欄。旧サイトと同じ位置）。
+  const authors = await getPublicAuthorsForCategory(category.id);
+
   // ページ送りの土台URL（slug があれば slug・無ければ id）。
   const basePath = `/series/${category.slug ?? category.id}`;
 
@@ -99,6 +108,12 @@ export default async function SeriesPage({
       )}
 
       <Pagination currentPage={page} totalPages={totalPages} basePath={basePath} />
+
+      {/* 書き手プロフィール（帯＋丸写真＋名前／居住地・年齢／SNS）。
+          担当2名（CAL TATAU・エフェメラ！など）は帯1本の下に2人ぶん並ぶ。 */}
+      {authors.map((author, i) => (
+        <WriterProfile key={author.id} author={author} withHeading={i === 0} />
+      ))}
     </div>
   );
 }

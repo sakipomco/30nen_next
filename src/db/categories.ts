@@ -5,6 +5,7 @@
 import { eq, asc, sql } from 'drizzle-orm';
 import { db } from './index';
 import { categories, categoryAuthors, articles, users } from './schema';
+import { toPublicUser, type PublicUser } from './users';
 
 // schema から型を自動生成（手書きしない＝設計とズレない）
 export type Category = typeof categories.$inferSelect; // DBから読んだ1件の形
@@ -287,4 +288,18 @@ export async function getAuthorsForCategory(
     .innerJoin(users, eq(categoryAuthors.userId, users.id))
     .where(eq(categoryAuthors.categoryId, categoryId))
     .orderBy(asc(users.name));
+}
+
+// その連載の担当書き手のプロフィール一式（連載ページ下部の「書き手」欄用）。
+// 担当2名の連載（CAL TATAU・エフェメラ！など）は全員ぶん返す。
+export async function getPublicAuthorsForCategory(
+  categoryId: number,
+): Promise<PublicUser[]> {
+  const rows = await db
+    .select({ user: users })
+    .from(categoryAuthors)
+    .innerJoin(users, eq(categoryAuthors.userId, users.id))
+    .where(eq(categoryAuthors.categoryId, categoryId))
+    .orderBy(asc(users.name));
+  return rows.map((r) => toPublicUser(r.user));
 }
