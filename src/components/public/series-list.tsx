@@ -31,7 +31,8 @@ export function SeriesList({ items }: { items: SeriesItem[] }) {
               <span className="pointer-events-none absolute right-0 top-0 h-2 w-2 translate-x-[0.75px] -translate-y-[0.75px] border-r-[1.5px] border-t-[1.5px] border-[#c0c0c0]" />
               <span className="pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[0.75px] translate-y-[0.75px] border-b-[1.5px] border-l-[1.5px] border-[#c0c0c0]" />
               <span className="pointer-events-none absolute bottom-0 right-0 h-2 w-2 translate-x-[0.75px] translate-y-[0.75px] border-b-[1.5px] border-r-[1.5px] border-[#c0c0c0]" />
-              <span className="relative block aspect-square w-full overflow-hidden">
+              {/* ロゴはマスのサイズはそのまま、描画だけ80%に縮めて余白をつくる。 */}
+              <span className="relative block aspect-square w-full scale-[0.8] overflow-hidden">
                 <Image
                   src={img}
                   alt={cat.name}
