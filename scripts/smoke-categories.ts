@@ -5,7 +5,6 @@
 import {
   createCategory,
   listCategories,
-  getCategoryById,
   updateCategory,
   deleteCategory,
   buildCategoryTree,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { t, type Locale } from '@/lib/i18n';
 
 type Props = {
@@ -21,24 +21,34 @@ export function ImagePickerModal({ onSelect, onClose, locale = 'ja' }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async (p: number) => {
+  // page が変わるたびに（初回=1ページ目も）その一覧を取得する。
+  // cancelled は「モーダルを閉じた後に届いた応答」を捨てるための印。
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/media?page=${page}`);
+        if (!res.ok) throw new Error(t('picker.loadFailed', locale));
+        const json = (await res.json()) as MediaResponse;
+        if (!cancelled) setData(json);
+      } catch (err) {
+        if (!cancelled)
+          setError(err instanceof Error ? err.message : t('picker.loadFailed', locale));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [page, locale]);
+
+  // ページ送りボタン用。読み込み中表示に切り替えてからページを変える。
+  function goToPage(p: number) {
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(`/api/media?page=${p}`);
-      if (!res.ok) throw new Error(t('picker.loadFailed', locale));
-      setData((await res.json()) as MediaResponse);
-      setPage(p);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('picker.loadFailed', locale));
-    } finally {
-      setLoading(false);
-    }
-  }, [locale]);
-
-  useEffect(() => {
-    void load(1);
-  }, [load]);
+    setPage(p);
+  }
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -111,7 +121,7 @@ export function ImagePickerModal({ onSelect, onClose, locale = 'ja' }: Props) {
             <button
               type="button"
               disabled={page <= 1}
-              onClick={() => void load(page - 1)}
+              onClick={() => goToPage(page - 1)}
               className="rounded-md border border-zinc-300 px-3 py-1 text-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-zinc-100"
             >
               {t('media.prev', locale)}
@@ -122,7 +132,7 @@ export function ImagePickerModal({ onSelect, onClose, locale = 'ja' }: Props) {
             <button
               type="button"
               disabled={page >= data.totalPages}
-              onClick={() => void load(page + 1)}
+              onClick={() => goToPage(page + 1)}
               className="rounded-md border border-zinc-300 px-3 py-1 text-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-zinc-100"
             >
               {t('media.next', locale)}

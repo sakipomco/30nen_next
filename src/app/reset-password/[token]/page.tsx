@@ -1,6 +1,7 @@
 // パスワードリセットのページ（/reset-password/[token]）。
 // メールに届いたリンクから来て、新しいパスワードを設定する。
 
+import Link from 'next/link';
 import { hashToken } from '@/lib/token';
 import { findValidToken } from '@/db/tokens';
 import { SetPasswordForm } from '@/app/invite/[token]/set-password-form';
@@ -23,9 +24,9 @@ export default async function ResetPasswordPage({
           <p className="mb-4 text-sm text-zinc-600">
             このリンクは期限切れか、すでに使用済みです。
           </p>
-          <a href="/forgot-password" className="text-sm text-zinc-800 underline">
+          <Link href="/forgot-password" className="text-sm text-zinc-800 underline">
             もう一度リセットメールを送る →
-          </a>
+          </Link>
         </div>
       </main>
     );

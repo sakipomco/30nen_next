@@ -3,7 +3,6 @@
 import { db } from '@/db';
 import { authTokens } from '@/db/schema';
 import { eq, and, isNull, gt } from 'drizzle-orm';
-import { sql } from 'drizzle-orm';
 
 export type TokenType = 'invite' | 'reset';
 
