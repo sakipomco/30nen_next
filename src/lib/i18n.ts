@@ -30,7 +30,7 @@ const dict = {
   'admin.roleAdmin': { ja: '管理者', es: 'Administrador' },
   'admin.roleAuthor': { ja: '投稿者', es: 'Escritor/a' },
   'admin.noArticles': { ja: 'まだ記事がありません。「{label}」から書いてみましょう。', es: 'Aún no hay artículos. Empieza a escribir desde "{label}".' },
-  'admin.countSummary': { ja: 'ぜんぶ {total}件（公開 {published}件・下書き {draft}件）', es: 'Total: {total} (publicados: {published} · borradores: {draft})' },
+  'admin.countSummary': { ja: '全部 {total}件（公開 {published}件・下書き {draft}件）', es: 'Total: {total} (publicados: {published} · borradores: {draft})' },
   'admin.statusPublished': { ja: '公開', es: 'Publicado' },
   'admin.statusDraft': { ja: '下書き', es: 'Borrador' },
   'admin.publishedAt': { ja: '公開: {date}', es: 'Publicado: {date}' },

@@ -46,7 +46,7 @@ export default async function AdminPage({
     <div className="flex flex-1 flex-col items-center bg-zinc-50 px-4 py-12">
       <div className="w-full max-w-3xl">
         <div className="mb-6 flex items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold text-zinc-900">{t('admin.title', locale)}</h1>
+          <h1 className="whitespace-nowrap text-xl font-semibold text-zinc-900">{t('admin.title', locale)}</h1>
           <div className="flex flex-wrap items-center justify-end gap-3 whitespace-nowrap">
             {user.role === 'admin' && (
               <>
