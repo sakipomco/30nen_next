@@ -5,7 +5,7 @@
 
 - 予告アナウンス（日本語）: ✅ 確定（2026-07-06・SAKI作成）
 - 予告アナウンス（スペイン語）: 🟡 下書き（Luis・Vanessa宛。招待メール本体は日本語のみなので、この一文が「事前の一言」を兼ねる）
-- リマインド文（パスワード未設定の人への声かけ）: ⬜ 未作成
+- リマインド文: ❌ 作らない（SAKI判断 2026-07-06。必要になったらその場で送る）
 
 ---
 
@@ -58,11 +58,6 @@ Si tenéis dudas o algo no funciona, escribidme aquí, al grupo de Messenger o p
 ¡Importante! La mudanza al nuevo sitio será el 29 de julio (miércoles). Hasta entonces, seguid publicando en WordPress como siempre.
 
 ---
-
-## 3. リマインド文（未作成）
-
-パスワード未設定の人への「メール届いてますか？」の声かけ。
-招待メール送信の数日後に送る想定。日本語＋スペイン語。
 
 ## メモ
 
