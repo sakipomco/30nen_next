@@ -2,6 +2,7 @@
 // 投稿者の一覧（名前・権限・担当連載）＋「新規作成」フォーム。各人に編集・削除。
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { requireAdmin } from '@/auth/session';
 import { createUserAction, deleteUserAction } from '@/app/actions/users';
 import { listUsers } from '@/db/users';
@@ -64,7 +65,20 @@ export default async function UsersAdminPage() {
                 key={u.id}
                 className="flex items-center justify-between gap-4 p-4"
               >
-                <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-3">
+                  {/* 名前の前に丸トリミングの顔写真（無ければ枠だけ） */}
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-zinc-100">
+                    {u.avatarPath && (
+                      <Image
+                        src={u.avatarPath}
+                        alt={u.name}
+                        fill
+                        sizes="40px"
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-zinc-900">{u.name}</span>
                     <span
@@ -85,6 +99,7 @@ export default async function UsersAdminPage() {
                     {' ・ 担当: '}
                     {assigned ? assigned.name : '未設定'}
                   </p>
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <Link
