@@ -37,13 +37,15 @@ LOGIN_URL       = "https://30nen.com/login"
 SWITCH_DATE_JA  = "2026年7月29日（水）"
 SWITCH_DATE_ES  = "29 de julio de 2026 (miércoles)"
 
-# 日本語フォント:
-#   本文・箇条書き = HeiseiMin-W3（明朝・細め）
-#   見出し・強調   = HeiseiKakuGo-W5（ゴシック・やや太）
-JP_NORMAL = "HeiseiMin-W3"
-JP_BOLD   = "HeiseiKakuGo-W5"
-pdfmetrics.registerFont(UnicodeCIDFont(JP_NORMAL))
-pdfmetrics.registerFont(UnicodeCIDFont(JP_BOLD))
+# 日本語フォント（PDFに埋め込む）:
+#   本文・箇条書き = IPAex明朝
+#   見出し・強調   = IPAexゴシック
+# 以前のCIDフォント（HeiseiMin等）は埋め込まれず、閲覧ソフト任せの表示で
+# JPG変換時に太字の区別が消えたため、埋め込み方式に変更（2026-07-06）。
+JP_NORMAL = "IPAexMincho"
+JP_BOLD   = "IPAexGothic"
+pdfmetrics.registerFont(TTFont(JP_NORMAL, str(ROOT / "ph_data" / "fonts" / "ipaexm.ttf")))
+pdfmetrics.registerFont(TTFont(JP_BOLD,   str(ROOT / "ph_data" / "fonts" / "ipaexg.ttf")))
 # <b> タグが効くよう「本文フォント→太字はゴシック」でひもづけ。
 pdfmetrics.registerFontFamily(
     JP_NORMAL, normal=JP_NORMAL, bold=JP_BOLD, italic=JP_NORMAL, boldItalic=JP_BOLD
