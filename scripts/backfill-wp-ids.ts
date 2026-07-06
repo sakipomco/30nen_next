@@ -31,6 +31,19 @@ async function main() {
 
   for (const entry of authorMap.entries) {
     const u = all.find((x) => x.email === entry.email);
+    // すでにこの wp_id を持っている人がいれば、それを正とする（手動で先に付与したケース。
+    // 例: 旧sakipomco(wp_id=2)はメールが店主アカウントと同じため、id=4へ手動付与済み＝2026-07-06 SAKI判断）
+    const holder = all.find((x) => x.wpId === entry.wpId);
+    if (holder) {
+      if (u && holder.id === u.id) {
+        already++;
+      } else {
+        console.log(
+          `  別のアカウントに付与済み（そのまま）: wp_id=${entry.wpId} → id=${holder.id} ${holder.name}`,
+        );
+      }
+      continue;
+    }
     if (!u) {
       missing++;
       console.log(`  DBに未作成（migrate-usersが後で作る）: wp_id=${entry.wpId} ${entry.displayName}`);
