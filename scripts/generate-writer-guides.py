@@ -329,14 +329,12 @@ def build_es():
         "Correo electrónico",
         "<b>Fecha de nacimiento con el año</b>",
     ], s["bullet"]))
-    story.append(p("Tu fecha completa de nacimiento no aparecerá en la página pública. Se usará para mostrar la edad, por ejemplo \"◎ años\".", s["subtle"]))
+    story.append(p("Tu fecha completa de nacimiento no aparecerá en la página pública. Se usará para mostrar la edad, por ejemplo \"45 años\".", s["subtle"]))
     story.append(Spacer(1, 3*mm))
     story.append(blist([
         "Lugar de residencia",
         "Enlaces a redes sociales o sitio web, solo si los tienes o quieres añadir",
     ], s["bullet"]))
-
-    story.append(PageBreak())
 
     story.append(p("Como hacer una entrada de prueba", s["h1"]))
     story.append(p("Hasta la fecha de cambio, puedes practicar sin miedo. Prueba guardar como borrador y revisar la vista previa.", s["body"]))
