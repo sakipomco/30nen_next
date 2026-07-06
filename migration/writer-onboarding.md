@@ -15,7 +15,9 @@
 
 いつも日記を書いてくださって、ありがとう！咲です
 
-突然な感じもありありですが……このたび三十年商店は、WordPressから、新しく手作りした自前サイトへお引越しすることにしました。書くときの投稿画面が、いまよりシンプルで使いやすくなっている予定です。これまでの記事は全部そのまま引き継ぎます。
+突然な感じもありありですが……このたび三十年商店は、WordPressから、新しく手作りした自前サイトへお引越しすることにしました。
+
+「30年つづける」を考えて、自分たちで調整・修正しやすいサイトにすることを念頭に土台から作り直すことにしました。書くときの投稿画面が、いまよりシンプルで使いやすくなっている予定です。これまでの記事は全部そのまま引き継ぎます。
 
 あわせて、今日か明日に 「三十年商店」から招待メール をお送りします。
 
@@ -40,7 +42,9 @@
 
 ¡Hola! Soy Saki. ¡Gracias por escribir siempre vuestros diarios!
 
-Puede parecer un poco repentino, pero… 三十年商店 (30nen) se mudará de WordPress a un nuevo sitio web hecho a mano. La pantalla para escribir será más simple y fácil de usar. Todos los artículos publicados hasta ahora se conservarán tal cual.
+Puede parecer un poco repentino, pero… 三十年商店 (30nen) se mudará de WordPress a un nuevo sitio web hecho a mano.
+
+Pensando en «seguir 30 años», hemos decidido reconstruir el sitio desde la base, con la idea de poder ajustarlo y mejorarlo con nuestras propias manos. La pantalla para escribir será más simple y fácil de usar. Todos los artículos publicados hasta ahora se conservarán tal cual.
 
 Hoy o mañana os enviaré un correo de invitación de «三十年商店».
 
