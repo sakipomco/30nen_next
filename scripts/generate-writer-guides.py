@@ -34,8 +34,8 @@ OUT  = ROOT / "output" / "pdf"
 LOGO = ROOT / "ph_data" / "30nen_logo_noren.jpg"
 
 LOGIN_URL       = "https://30nen.com/login"
-SWITCH_DATE_JA  = "2026年7月29日（仮）"
-SWITCH_DATE_ES  = "29 de julio de 2026 (provisional)"
+SWITCH_DATE_JA  = "2026年7月29日（水）"
+SWITCH_DATE_ES  = "29 de julio de 2026 (miércoles)"
 
 # 日本語フォント:
 #   本文・箇条書き = HeiseiMin-W3（明朝・細め）
