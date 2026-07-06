@@ -195,8 +195,8 @@ def build_ja():
 
     story.append(p("まずお願いしたいこと", s["h1"]))
     story.append(blist([
-        "<b>店主からの招待メール</b>のリンクを踏んで、仮パスワードでログイン後、<b>パスワードを再設定</b>する。",
-        "設定できたら <b>https://30nen.com/login</b> に入ってみる。",
+        "<b>店主からの招待メール</b>のリンクを踏んで、<b>自分でパスワードを決めて設定</b>する。",
+        "設定できたら <b>https://new.30nen.com/login</b> に入ってみる（練習期間中のログイン場所）。",
         "プロフィール画面 [myPROFILE] を開き、<b>西暦を含めた誕生日を入力する。</b>例: 1980年4月3日。<br/>　表示名・プロフィール文・写真、SNSのURLなどを確認する。",
         "投稿画面 [日記をかく] を開き、タイトル、本文、画像アップロード、 [下書き保存] 、 [プレビュー] を試す。",
         "うまくいかないところはメッセンジャーグループ／グループLINEで知らせる。",
@@ -208,13 +208,13 @@ def build_ja():
         "招待メール（件名：【三十年商店】アカウントのご案内）のリンクを踏む。",
         "パスワードを自分で決めて設定する（8文字以上）。",
         "設定完了すると、そのまま投稿管理画面が開く。",
-        "次回以降は <b>https://30nen.com/login</b> からメールアドレスとパスワードで入る。",
+        "次回以降は <b>https://new.30nen.com/login</b> からメールアドレスとパスワードで入る（7/29の切替後は <b>https://30nen.com/login</b> に変わります）。",
         "パスワードを忘れたときは、ログイン画面の「パスワードを忘れた方」から再設定できる。",
         "何度試しても入れないときは、画面の様子をそのままメッセンジャー／LINEに送ってください。",
     ], s["bullet"]))
 
     story.append(p("パスワードを変更したいとき", s["h1"]))
-    story.append(p("ログイン後、右上の [myPROFILE] →「パスワード」欄から変更できます。", s["body"]))
+    story.append(p("ログイン画面の<b>「パスワードを忘れた方」</b>から再設定できます（登録メール宛にリンクが届きます）。忘れたときも同じ方法でOK。", s["body"]))
 
     story.append(p("プロフィール確認で大事なこと", s["h1"]))
     story.append(p("新しいシステムでは、書き手のプロフィール（とくに年齢の部分）の反映方法を変更します。初回ログイン後に確認をお願いします。", s["body"]))
@@ -299,7 +299,7 @@ def build_es():
     story.append(p("Lo primero que te pedimos", s["h1"]))
     story.append(blist([
         "Abre el correo de invitación que recibirás y haz clic en el enlace para crear tu contraseña.",
-        "Una vez configurada, entra a <b>https://30nen.com/login</b>.",
+        "Una vez configurada, entra a <b>https://new.30nen.com/login</b> (la dirección durante el periodo de práctica).",
         "Abre tu perfil y revisa tu nombre, texto de presentación y foto.",
         "<b>Completa tu fecha de nacimiento con el año.</b> Ejemplo: 3 de abril de 1980.",
         "Haz una entrada de prueba: escribe algo, sube una imagen y mira la vista previa.",
@@ -312,13 +312,13 @@ def build_es():
         "Abre el correo con asunto「【三十年商店】アカウントのご案内」y haz clic en el enlace.",
         "Escoge una contraseña (mínimo 8 caracteres) y guárdala.",
         "Al terminar, se abrirá directamente la pantalla de administración.",
-        "La próxima vez: entra desde <b>https://30nen.com/login</b> con tu correo y contraseña.",
+        "La próxima vez: entra desde <b>https://new.30nen.com/login</b> con tu correo y contraseña (desde el 29/7 será <b>https://30nen.com/login</b>).",
         "Si olvidas la contraseña, usa el enlace「パスワードを忘れた方」en la pantalla de login.",
         "Si no puedes entrar, envía al LINE / Messenger una captura o describe qué aparece.",
     ], s["bullet"]))
 
     story.append(p("Cambiar la contraseña", s["h1"]))
-    story.append(p("Después de entrar, ve a \"myPROFILE\" (arriba a la derecha) → campo \"Contraseña\".", s["body"]))
+    story.append(p("Usa el enlace <b>「パスワードを忘れた方」</b> (He olvidado mi contraseña) en la pantalla de login. Recibirás un correo con un enlace para crear una nueva. Sirve también si la olvidas.", s["body"]))
 
     story.append(p("Revisa tu perfil", s["h1"]))
     story.append(p("En el nuevo sitio, el perfil de cada escritora o escritor se mostrará de forma más ordenada. Revisa lo siguiente cuando puedas.", s["body"]))
