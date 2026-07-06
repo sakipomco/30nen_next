@@ -35,7 +35,8 @@ if [ "$LIMIT" -gt 0 ]; then
 fi
 
 echo "▶ ① 全公開記事の本体をまとめて取得（1回）..."
-"${WPCMD[@]}" post list --post_type=post --post_status=publish "${PPP_OPT[@]}" \
+# ${PPP_OPT[@]+…} は「配列が空なら何も展開しない」書き方（古いbashはset -uで空配列を未定義扱いするため）
+"${WPCMD[@]}" post list --post_type=post --post_status=publish ${PPP_OPT[@]+"${PPP_OPT[@]}"} \
   --fields=ID,post_author,post_date,post_content,post_title,post_excerpt,post_status,post_name \
   --orderby=ID --order=ASC --format=json > "$OUT/all-posts.json"
 echo "  → $OUT/all-posts.json"
@@ -52,6 +53,16 @@ ORDER BY tr.object_id ASC"
 # --skip-column-names: 見出し行を出さず純粋なTSVにする（mysqlへ渡す読み取り用オプション）
 "${WPCMD[@]}" db query "$SQL" --skip-column-names > "$OUT/all-categories.tsv"
 echo "  → $OUT/all-categories.tsv"
+
+echo "▶ ③ アイキャッチ（代表写真）の対応をまとめて取得（1回・読み取りSELECT）..."
+SQL2="SELECT p.ID, am.meta_value \
+FROM ${PREFIX}posts p \
+JOIN ${PREFIX}postmeta pm ON pm.post_id = p.ID AND pm.meta_key = '_thumbnail_id' \
+JOIN ${PREFIX}postmeta am ON am.post_id = pm.meta_value AND am.meta_key = '_wp_attached_file' \
+WHERE p.post_type='post' AND p.post_status='publish' \
+ORDER BY p.ID ASC"
+"${WPCMD[@]}" db query "$SQL2" --skip-column-names > "$OUT/all-featured.tsv"
+echo "  → $OUT/all-featured.tsv"
 
 # 件数の目安を表示（本体JSONの "ID": 出現数）
 N=$(grep -o '"ID"' "$OUT/all-posts.json" | wc -l | tr -d ' ')
