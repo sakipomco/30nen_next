@@ -122,6 +122,7 @@ sqlite3 data/prod-import.db "SELECT COUNT(*) FROM articles WHERE author_id IS NU
 sqlite3 data/prod-import.db "SELECT COUNT(*) FROM articles WHERE category_id IS NULL;"  # 0
 sqlite3 data/prod-import.db "SELECT COUNT(*) FROM users;"                       # アカウント数が減っていないこと
 sqlite3 data/prod-import.db "SELECT COUNT(*) FROM articles WHERE content LIKE '%30nen.com/wp-content%';" # 0
+sqlite3 data/prod-import.db "SELECT COUNT(*) FROM articles WHERE content LIKE '%the30nen.xsrv.jp%';" # 0
 ```
 > **users の件数が事前より減っていないか**を必ず確認（アカウントが守られている証拠）。
 

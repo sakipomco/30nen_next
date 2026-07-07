@@ -9,8 +9,9 @@
 import { sanitizeArticleHtml } from '../../src/lib/sanitize';
 import { jstInputToUtc } from '../../src/lib/datetime';
 
-// 旧サイトの画像ベースURL（http/https・www有無を吸収）。グループ1は後続パス。
-const WP_UPLOADS_RE = /https?:\/\/(?:www\.)?30nen\.com\/wp-content\/uploads\//gi;
+// 旧サイトの画像ベースURL（http/https・www有無・Xサーバー初期ドメインを吸収）。
+const WP_UPLOADS_RE =
+  /https?:\/\/(?:(?:www\.)?30nen\.com|the30nen\.xsrv\.jp)\/wp-content\/uploads\//gi;
 
 // HEIC/HEIF（iPhone形式）はブラウザで表示できないことがあるため、移行時にJPEGへ変換する。
 // パス/URL末尾の .heic/.heif を .jpg に置き換える（実ファイルの変換は移行スクリプトの placeImage 側）。
