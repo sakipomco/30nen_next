@@ -37,7 +37,11 @@ export type UpdateArticleInput = Partial<NewArticleInput>;
 const now = () => new Date().toISOString().slice(0, 19).replace('T', ' '); // 'YYYY-MM-DD HH:MM:SS'
 
 // ── Read：一覧 ───────────────────────────────────────────
-// status を渡すと下書き/公開で絞り込み。新しい順（作成日時の降順）に返す。
+// status を渡すと下書き/公開で絞り込み。
+// 並び順は「画面に表示する日付」で新しい順にする：
+//   公開記事＝公開日時(publishedAt)／下書き＝更新日時(updatedAt)。
+//   publishedAt が無い（下書き）ときは updatedAt を使う（COALESCE＝先に値がある方を採用）。
+//   同じ日時のときは id の新しい順で安定させる。
 export async function listArticles(options?: {
   status?: 'draft' | 'published';
   authorId?: number; // 指定すると、その投稿者の記事だけに絞る（投稿者の管理一覧用）
@@ -49,11 +53,14 @@ export async function listArticles(options?: {
   if (options?.authorId != null)
     filters.push(eq(articles.authorId, options.authorId));
 
+  // 表示に使う日付（公開日 or 更新日）＝並び替えの基準
+  const sortDate = sql`COALESCE(${articles.publishedAt}, ${articles.updatedAt})`;
+
   return db
     .select()
     .from(articles)
     .where(filters.length ? and(...filters) : undefined)
-    .orderBy(desc(articles.createdAt))
+    .orderBy(desc(sortDate), desc(articles.id))
     .limit(options?.limit ?? 50)
     .offset(options?.offset ?? 0);
 }

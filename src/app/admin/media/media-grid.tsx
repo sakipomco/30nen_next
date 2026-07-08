@@ -53,7 +53,7 @@ export function MediaGrid({ items, locale = 'ja' }: { items: Item[]; locale?: Lo
                 <input type="hidden" name="path" value={it.url} />
                 <button
                   type="submit"
-                  className="rounded bg-black/60 px-2 py-1 text-xs text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
+                  className="rounded bg-black/60 px-2 py-1 text-xs text-white shadow-sm transition hover:bg-red-600"
                 >
                   {t('admin.delete', locale)}
                 </button>
