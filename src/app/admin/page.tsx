@@ -45,9 +45,11 @@ export default async function AdminPage({
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 px-4 py-12">
       <div className="w-full max-w-3xl">
-        <div className="mb-6 flex items-center justify-between gap-4">
+        {/* スマホでは「見出しの行」と「ボタンの行」を分けて縦に積む（横幅が足りず不揃いに折り返すため）。
+            sm以上（タブレット・PC）では従来どおり1行で左右に並べる。 */}
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <h1 className="whitespace-nowrap text-xl font-semibold text-zinc-900">{t('admin.title', locale)}</h1>
-          <div className="flex flex-wrap items-center justify-end gap-3 whitespace-nowrap">
+          <div className="flex flex-wrap items-center gap-3 whitespace-nowrap sm:justify-end">
             {user.role === 'admin' && (
               <>
                 <Link
@@ -151,11 +153,12 @@ export default async function AdminPage({
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
+                    {/* shrink-0 + whitespace-nowrap：スマホでバッジが潰れて縦書きにならないように */}
                     <span
                       className={
                         article.status === 'published'
-                          ? 'rounded bg-green-100 px-2 py-0.5 text-xs text-green-700'
-                          : 'rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600'
+                          ? 'shrink-0 whitespace-nowrap rounded bg-green-100 px-2 py-0.5 text-xs text-green-700'
+                          : 'shrink-0 whitespace-nowrap rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600'
                       }
                     >
                       {article.status === 'published' ? t('admin.statusPublished', locale) : t('admin.statusDraft', locale)}
