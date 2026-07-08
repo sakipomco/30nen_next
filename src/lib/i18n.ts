@@ -125,7 +125,7 @@ const dict = {
   'editor.imageFromFolder': { ja: '画像フォルダから選ぶ', es: 'Desde la carpeta de imágenes' },
   'editor.imageUploading': { ja: 'アップロード中…', es: 'Subiendo…' },
   'editor.imageUploadFailed': { ja: 'アップロードに失敗しました。', es: 'Error al subir la imagen.' },
-  'editor.imageHint': { ja: '写真は本文へドラッグ＆ドロップ・貼り付け（⌘/Ctrl+V）でも入れられます。', es: 'También puedes arrastrar o pegar (⌘/Ctrl+V) fotos en el contenido.' },
+  'editor.imageHint': { ja: '写真は上のボタンから入れられます。パソコンでは本文へのドラッグ＆ドロップ・貼り付け（⌘/Ctrl+V）でもOKです。', es: 'Puedes añadir fotos con los botones de arriba. En la computadora también puedes arrastrarlas o pegarlas (⌘/Ctrl+V) en el contenido.' },
 
   // ── 共通 ────────────────────────────────────
   'common.error': { ja: 'エラーが発生しました。', es: 'Ocurrió un error.' },
