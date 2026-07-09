@@ -1,7 +1,8 @@
 // 記事詳細ページの「三十年商店“全体”の前後の日記」へ移動するナビ（← →）。
 // カテゴリー内の前後ナビ（adjacent-nav）とは別物で、連載をまたいで全記事の前後をたどる。
 // 各カードに「カバー画像＋投稿日時（＋タイトル）」を入れる（SAKIさんの要望）。
-// 左＝前の日記（1つ古い）／右＝次の日記（1つ新しい）。片側が無ければプレースホルダ。
+// 並びは adjacent-nav と統一（書き手FB対応）: 左＝次の日記（1つ新しい・未来）／右＝前の日記（1つ古い・過去）。
+// 片側が無ければプレースホルダ。
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,31 +15,31 @@ function hrefOf(article: PublicArticle): string {
 
 function NavCard({
   article,
-  direction,
+  side,
 }: {
   article: PublicArticle;
-  direction: 'prev' | 'next';
+  side: 'left' | 'right';
 }) {
   const imageSrc = article.featuredImagePath || '/dammy.jpg';
   const datetime = article.publishedAt ? formatJstDatetime(article.publishedAt) : '';
-  const isPrev = direction === 'prev';
+  const isLeft = side === 'left';
 
   return (
     <Link
       href={hrefOf(article)}
-      className={`group flex w-full items-center gap-5 sm:w-1/2 ${isPrev ? '' : 'flex-row-reverse'}`}
+      className={`group flex w-full items-center gap-5 sm:w-1/2 ${isLeft ? '' : 'flex-row-reverse'}`}
     >
-      {/* 矢印は「く」の字画像。元画像は左向き(<)なので、次の日記(→)は左右反転して使う。 */}
+      {/* 矢印は「く」の字画像。元画像は左向き(<)なので、右側は左右反転(>)して使う。 */}
       <Image
         src="/30nen_kunoji.png"
         alt=""
         width={88}
         height={90}
         aria-hidden
-        className={`h-4 w-4 shrink-0 transition-opacity group-hover:opacity-60 ${isPrev ? '' : '-scale-x-100'}`}
+        className={`h-4 w-4 shrink-0 transition-opacity group-hover:opacity-60 ${isLeft ? '' : '-scale-x-100'}`}
       />
       {/* 写真＋その下に日時を2行（◎月◎日／◎時◎分）。文字ラベルは入れない。 */}
-      <span className={`flex flex-col gap-1.5 group-hover:opacity-80 ${isPrev ? '' : 'items-end'}`}>
+      <span className={`flex flex-col gap-1.5 group-hover:opacity-80 ${isLeft ? '' : 'items-end'}`}>
         <span className="relative aspect-[4/2.5] w-[120px] overflow-hidden bg-zinc-100">
           <Image
             src={imageSrc}
@@ -49,7 +50,7 @@ function NavCard({
           />
         </span>
         <span
-          className={`block whitespace-nowrap text-[0.8rem] leading-tight tracking-[0.05em] text-[#333] ${isPrev ? '' : 'text-right'}`}
+          className={`block whitespace-nowrap text-[0.8rem] leading-tight tracking-[0.05em] text-[#333] ${isLeft ? '' : 'text-right'}`}
         >
           {datetime}
         </span>
@@ -74,13 +75,15 @@ export function SiteAdjacentNav({
     >
       {/* スマホは縦積み（片側だけのときは行を作らない）。PCは左右に並べ、
           片側が無くても幅を保つよう空のプレースホルダを置く。 */}
-      {prev ? (
-        <NavCard article={prev} direction="prev" />
+      {/* 左＝次の日記（1つ新しい）。個別日記ナビ（adjacent-nav）と同じ並び。 */}
+      {next ? (
+        <NavCard article={next} side="left" />
       ) : (
         <span aria-hidden className="hidden sm:block sm:w-1/2" />
       )}
-      {next ? (
-        <NavCard article={next} direction="next" />
+      {/* 右＝前の日記（1つ古い） */}
+      {prev ? (
+        <NavCard article={prev} side="right" />
       ) : (
         <span aria-hidden className="hidden sm:block sm:w-1/2" />
       )}
