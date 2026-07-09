@@ -71,21 +71,21 @@ export function SiteAdjacentNav({
   return (
     <nav
       aria-label="三十年商店全体の前後の日記"
-      className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
+      className="mt-12 flex items-start justify-between gap-3"
     >
-      {/* スマホは縦積み（片側だけのときは行を作らない）。PCは左右に並べ、
+      {/* スマホもPCも1行に左右で並べる（書き手FB対応で縦積みをやめ、写真の上端を揃える）。
           片側が無くても幅を保つよう空のプレースホルダを置く。 */}
       {/* 左＝次の日記（1つ新しい）。個別日記ナビ（adjacent-nav）と同じ並び。 */}
       {next ? (
         <NavCard article={next} side="left" />
       ) : (
-        <span aria-hidden className="hidden sm:block sm:w-1/2" />
+        <span aria-hidden className="w-1/2" />
       )}
       {/* 右＝前の日記（1つ古い） */}
       {prev ? (
         <NavCard article={prev} side="right" />
       ) : (
-        <span aria-hidden className="hidden sm:block sm:w-1/2" />
+        <span aria-hidden className="w-1/2" />
       )}
     </nav>
   );
