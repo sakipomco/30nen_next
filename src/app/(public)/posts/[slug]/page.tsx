@@ -1,11 +1,12 @@
 // 記事詳細ページ（/posts/[slug]）。一覧・最新カードのリンク先。
-//  - [slug] には「slug」または「id（数字）」が入る（記事に slug が無ければ id でリンクするため）。
+//  - [slug] には「slug」または「id（数字）」が入る。正式URLは番号（id）形式に統一し、
+//    slug でのアクセスは番号URLへ恒久転送する（書き手FB対応：日本語URLのコピペ長大化を防ぐ）。
 //  - 構成: 足跡（三十年商店＞連載＞タイトル）→ 連載名＋日付 → タイトル → 書き手 →
 //          アイキャッチ画像 → 本文（投稿のHTML）。共通レイアウトの中央に入る。
 //  - 記事は日々更新されるので常に最新DBを表示（force-dynamic）。
 
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import {
   getPublishedArticleBySlug,
   getPublishedArticleById,
@@ -16,7 +17,7 @@ import {
 import { getUserById, toPublicUser } from '@/db/users';
 import { formatJstDate } from '@/lib/datetime';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
-import { toMetaDescription } from '@/lib/site';
+import { toMetaDescription, postHref } from '@/lib/site';
 import { Breadcrumb } from '@/components/public/breadcrumb';
 import { CategoryBanner } from '@/components/public/category-banner';
 import { WriterProfile } from '@/components/public/writer-profile';
@@ -57,9 +58,7 @@ export async function generateMetadata({
   if (!article) return { title: '記事が見つかりません' };
 
   const description = toMetaDescription(article.excerpt || article.content);
-  const canonical = article.slug
-    ? `/posts/${encodeURIComponent(article.slug)}`
-    : `/posts/${article.id}`;
+  const canonical = postHref(article);
   // OGP画像はアイキャッチがあればそれ、無ければサイト既定（暖簾ロゴ）。
   const ogImage = article.featuredImagePath || '/30nen_logo_noren_plus.jpg';
 
@@ -92,6 +91,18 @@ export default async function PostPage({
   const { slug } = await params;
   const article = await findArticle(slug);
   if (!article) notFound();
+
+  // 正式URLは番号（id）形式。日本語slug等の旧URLで来たら番号URLへ恒久転送（308）。
+  // すでに共有済みのリンクやブックマークはこの転送で切れずに番号URLへ届く。
+  let requested = slug;
+  try {
+    requested = decodeURIComponent(slug);
+  } catch {
+    // 壊れた符号化はそのまま比較する
+  }
+  if (requested !== String(article.id)) {
+    permanentRedirect(postHref(article));
+  }
 
   // 書き手プロフィール（記事末尾の「書き手」欄用）。
   const authorRaw = article.authorId ? await getUserById(article.authorId) : null;

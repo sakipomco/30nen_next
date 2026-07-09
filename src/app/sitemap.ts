@@ -2,7 +2,7 @@
 //  - 固定ページ（トップ・about など）＋ 連載ページ ＋ 全公開記事。
 //  - 記事は日々増えるので1時間ごとに作り直す（revalidate）。
 import type { MetadataRoute } from 'next';
-import { siteUrl } from '@/lib/site';
+import { siteUrl, postHref } from '@/lib/site';
 import { listPublishedArticles, countPublishedArticles } from '@/db/articles';
 import { listCategories } from '@/db/categories';
 
@@ -13,10 +13,6 @@ function toDate(utc: string | null): Date {
   if (!utc) return new Date();
   const d = new Date(utc.replace(' ', 'T') + 'Z');
   return Number.isNaN(d.getTime()) ? new Date() : d;
-}
-
-function postPath(a: { slug: string | null; id: number }): string {
-  return a.slug ? `/posts/${encodeURIComponent(a.slug)}` : `/posts/${a.id}`;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -47,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const total = await countPublishedArticles();
   const articles = await listPublishedArticles({ limit: Math.max(total, 1) });
   const articleEntries: MetadataRoute.Sitemap = articles.map((a) => ({
-    url: `${base}${postPath(a)}`,
+    url: `${base}${postHref(a)}`,
     lastModified: toDate(a.publishedAt),
     changeFrequency: 'monthly',
     priority: 0.7,

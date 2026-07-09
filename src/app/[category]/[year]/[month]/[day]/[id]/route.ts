@@ -2,7 +2,7 @@
 //
 // 現行パーマリンク構造: /%category%/%year%/%monthnum%/%day%/%post_id%/
 //   例) https://30nen.com/oosamanomimiwa/2026/06/25/45564/
-// 末尾の記事ID（= 旧 wp_id）で新記事を引き、 /posts/{slug} へ転送する。
+// 末尾の記事ID（= 旧 wp_id）で新記事を引き、 /posts/{id} へ転送する。
 //   → 読者のブックマーク・検索結果・古いリンクが切れない（SEO継続）。
 //
 // このルートは5セグメント（[category]/[year]/[month]/[day]/[id]）が全部そろう時だけ一致する。
@@ -10,6 +10,7 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { getPublishedArticleRefByWpId } from '@/db/articles';
+import { postHref } from '@/lib/site';
 
 export async function GET(
   req: NextRequest,
@@ -32,10 +33,7 @@ export async function GET(
   if (Number.isInteger(wpId) && wpId > 0) {
     const ref = await getPublishedArticleRefByWpId(wpId);
     if (ref) {
-      const path = ref.slug
-        ? `/posts/${encodeURIComponent(ref.slug)}`
-        : `/posts/${ref.id}`;
-      return NextResponse.redirect(new URL(path, origin), 301);
+      return NextResponse.redirect(new URL(postHref(ref), origin), 301);
     }
   }
 

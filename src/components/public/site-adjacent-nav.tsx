@@ -8,10 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { PublicArticle } from '@/db/articles';
 import { formatJstDatetime } from '@/lib/datetime';
-
-function hrefOf(article: PublicArticle): string {
-  return article.slug ? `/posts/${article.slug}` : `/posts/${article.id}`;
-}
+import { postHref } from '@/lib/site';
 
 function NavCard({
   article,
@@ -26,7 +23,7 @@ function NavCard({
 
   return (
     <Link
-      href={hrefOf(article)}
+      href={postHref(article)}
       className={`group flex w-full items-center gap-5 sm:w-1/2 ${isLeft ? '' : 'flex-row-reverse'}`}
     >
       {/* 矢印は「く」の字画像。元画像は左向き(<)なので、右側は左右反転(>)して使う。 */}

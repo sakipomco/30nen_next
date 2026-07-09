@@ -6,10 +6,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { PublicArticle } from '@/db/articles';
-
-function hrefOf(article: PublicArticle): string {
-  return article.slug ? `/posts/${article.slug}` : `/posts/${article.id}`;
-}
+import { postHref } from '@/lib/site';
 
 // 「く」字矢印の画像。flip=true で左右反転（>になる）。
 function Arrow({ flip }: { flip?: boolean }) {
@@ -42,7 +39,7 @@ export function AdjacentNav({
     <nav className="mt-10 flex items-center justify-between gap-3">
       {/* 左＝つぎの日記（1つ新しい）。左に矢印< */}
       {next ? (
-        <Link href={hrefOf(next)} className={linkClass}>
+        <Link href={postHref(next)} className={linkClass}>
           <Arrow />
           つぎの日記
         </Link>
@@ -52,7 +49,7 @@ export function AdjacentNav({
 
       {/* 右＝まえの日記（1つ古い）。右に矢印> */}
       {prev ? (
-        <Link href={hrefOf(prev)} className={linkClass}>
+        <Link href={postHref(prev)} className={linkClass}>
           まえの日記
           <Arrow flip />
         </Link>

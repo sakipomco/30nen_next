@@ -22,6 +22,13 @@ export function absoluteUrl(path: string): string {
   return `${siteUrl()}${p}`;
 }
 
+// 記事詳細ページへのサイト内パス。リンクは常に通し番号（id）のURLに統一する。
+// 書き手FB対応：日本語slugのURLはコピペで％の羅列になり長大化するため。
+// 旧slug形式のURLでのアクセスは記事ページ側で番号URLへ恒久転送する。
+export function postHref(article: { id: number }): string {
+  return `/posts/${article.id}`;
+}
+
 // HTMLや改行を除いた、メタ説明文（og:description 等）用の短いテキストを作る。
 export function toMetaDescription(
   source: string | null | undefined,

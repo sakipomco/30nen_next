@@ -6,9 +6,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { PublicArticle } from '@/db/articles';
 import { formatJstDate } from '@/lib/datetime';
+import { postHref } from '@/lib/site';
 
 export function ArticleCard({ article }: { article: PublicArticle }) {
-  const href = article.slug ? `/posts/${article.slug}` : `/posts/${article.id}`;
+  const href = postHref(article);
   const imageSrc = article.featuredImagePath || '/dammy.jpg';
   const date = article.publishedAt ? formatJstDate(article.publishedAt) : '';
 

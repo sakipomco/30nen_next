@@ -6,10 +6,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { PublicArticle } from '@/db/articles';
 import { textExcerpt } from '@/lib/sanitize';
+import { postHref } from '@/lib/site';
 import { SectionHeading } from './section-heading';
 
 function RelatedCard({ article }: { article: PublicArticle }) {
-  const href = article.slug ? `/posts/${article.slug}` : `/posts/${article.id}`;
+  const href = postHref(article);
   const imageSrc = article.featuredImagePath || '/dammy.jpg';
   // 本文の冒頭（excerpt があればそれを優先、無ければ本文HTMLから生成）。横並びなので少し長め。
   const preview = article.excerpt?.trim() || textExcerpt(article.content, 90);
