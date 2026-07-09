@@ -31,7 +31,8 @@ function RelatedCard({ article }: { article: PublicArticle }) {
           {article.title}
         </h3>
         {preview && (
-          <p className="mt-2 line-clamp-3 text-[0.8rem] leading-relaxed text-[#555]">
+          // 色はリード・日記本文と同じ #333 に統一（SAKIさんの指定）
+          <p className="mt-2 line-clamp-3 text-[0.8rem] leading-relaxed text-[#333]">
             {preview}
           </p>
         )}
