@@ -126,6 +126,12 @@ body {
   line-height: 2;
   letter-spacing: -0.02em;
 }
+/* スマホは現行サイトと同じく1px大きく（現行CSS: p{font-size:1.5rem} @767px以下。SAKIさん指定 2026-07-10） */
+@media (max-width: 767px) {
+  .article-body {
+    font-size: 15px;
+  }
+}
 .article-body :where(p) {
   margin: 1em 0;
 }

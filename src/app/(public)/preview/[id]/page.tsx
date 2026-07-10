@@ -80,9 +80,10 @@ export default async function PreviewPage({
         </div>
       )}
 
-      <p className="mt-6 text-xs text-[#333]">{date}</p>
+      {/* 日付・タイトルの大きさは公開ページ（posts/[slug]）と同じにそろえる */}
+      <p className="mt-6 text-sm text-[#333]">{date}</p>
 
-      <h1 className="serif mt-0.5 text-lg font-medium leading-snug text-[#333]">
+      <h1 className="serif mt-0.5 text-[21px] font-bold leading-snug text-[#333]">
         {article.title || '（無題）'}
       </h1>
 

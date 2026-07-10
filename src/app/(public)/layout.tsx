@@ -46,7 +46,8 @@ export default async function PublicLayout({
           それぞれの枠内だけでスクロールさせる（下の lg:overflow-y-auto）。
           PC の上余白は grid でなく中央・右の各コラム側に持たせる＝左コラムのロゴを
           マイナス余白なしで画面上端に付けるため（マイナス余白はスクロールの箱では切れる）。 */}
-      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-1 gap-10 px-5 py-10 lg:min-h-0 lg:flex-1 lg:grid-cols-[1.1fr_1.8fr_1.1fr] lg:gap-12 lg:px-20 lg:pb-6 lg:pt-0">
+      {/* スマホの左右アキ(px-7=28px)は現行サイト（20px＋2%≒28px）に合わせた値（SAKIさん指定 2026-07-10） */}
+      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-1 gap-10 px-7 py-10 lg:min-h-0 lg:flex-1 lg:grid-cols-[1.1fr_1.8fr_1.1fr] lg:gap-12 lg:px-20 lg:pb-6 lg:pt-0">
         {/* 左コラム（ロゴが上端に付くので上余白なし） */}
         <aside className="no-scrollbar lg:min-h-0 lg:overflow-y-auto">
           <SidebarLeft leadText={leadText} recipients={recipients} />

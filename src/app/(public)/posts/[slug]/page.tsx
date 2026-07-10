@@ -161,11 +161,12 @@ export default async function PostPage({
         </div>
       )}
 
-      {/* 日付 */}
-      <p className="mt-6 text-xs text-[#333]">{date}</p>
+      {/* 日付（現行サイトは本文と同じ大きさ＝14px。SAKIさん指定 2026-07-10） */}
+      <p className="mt-6 text-sm text-[#333]">{date}</p>
 
-      {/* タイトル（日付に近づけるため上のアキを詰める） */}
-      <h1 className="serif mt-0.5 text-lg font-medium leading-snug text-[#333]">
+      {/* タイトル（日付に近づけるため上のアキを詰める）。
+          大きさ・太さは現行サイトの h3.title（21px・太字）に合わせる（SAKIさん指定 2026-07-10） */}
+      <h1 className="serif mt-0.5 text-[21px] font-bold leading-snug text-[#333]">
         {article.title}
       </h1>
 
