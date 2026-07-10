@@ -33,7 +33,8 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
         {article.categoryName ? `【${article.categoryName}】` : ''}
         {date}
       </p>
-      <h3 className="serif mt-0 line-clamp-2 pr-5 text-[0.8rem] font-medium leading-snug text-[#333]">
+      {/* タイトルの大きさは現行サイトに合わせる：スマホ15px／PC13px（SAKIさん指定 2026-07-10） */}
+      <h3 className="serif mt-0 line-clamp-2 pr-5 text-[15px] font-medium leading-snug text-[#333] md:text-[13px]">
         {article.title}
       </h3>
     </Link>
