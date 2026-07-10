@@ -24,8 +24,9 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
           className="object-cover transition-opacity duration-300 group-hover:opacity-80"
         />
       </div>
+      {/* 連載名・日付の行：スマホ12px＝見本比較でSAKIさん選択（2026-07-10）／PCは従来どおり0.65rem */}
       <p
-        className="mt-2 text-[0.65rem] text-[#333]"
+        className="mt-2 text-[12px] text-[#333] md:text-[0.65rem]"
         // 全角の開きカッコ「【」は字形が右寄りで左にアキがあるため、
         // カテゴリー名がある行だけ先頭を左へ寄せて写真の左端と縦ラインを揃える。
         style={article.categoryName ? { textIndent: '-0.68em' } : undefined}
