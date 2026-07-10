@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import {
   getCategoryById,
   getCategoryBySlug,
+  getChildCategories,
   getPublicAuthorsForCategory,
   type Category,
 } from '@/db/categories';
@@ -16,6 +17,8 @@ import {
   listPublishedArticles,
   countPublishedArticles,
 } from '@/db/articles';
+import Image from 'next/image';
+import Link from 'next/link';
 import { Breadcrumb } from '@/components/public/breadcrumb';
 import { CategoryBanner } from '@/components/public/category-banner';
 import { ArticleCard } from '@/components/public/article-card';
@@ -59,6 +62,9 @@ export default async function SeriesPage({
   const category = await findCategory(slug);
   if (!category) notFound();
 
+  // 子連載（例：「度々の旅」の下の「山陰編」）。あれば記事一覧の前にカバー画像で並べる。
+  const children = await getChildCategories(category.id);
+
   const sp = await searchParams;
   const page = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1);
 
@@ -94,20 +100,43 @@ export default async function SeriesPage({
         />
       </div>
 
-      {/* その連載の記事一覧（新しい順・2列・12件/ページ） */}
-      {articles.length === 0 ? (
-        <p className="text-sm text-[#808080]">この連載の記事はまだありません。</p>
-      ) : (
+      {/* 子連載を持つ親（例：「度々の旅」）は、子の「〇〇編」ロゴだけを並べて記事一覧は出さない
+          （SAKIさん指定 2026-07-10。現行サイトの親カテゴリーページも同じ作り）。
+          子連載が無い普通の連載は、従来どおり記事一覧＋ページ送り。 */}
+      {children.length > 0 ? (
         <ul className="grid grid-cols-1 gap-x-1 gap-y-8 lg:grid-cols-2">
-          {articles.map((article) => (
-            <li key={article.id}>
-              <ArticleCard article={article} />
+          {children.map((c) => (
+            <li key={c.id}>
+              <Link href={c.slug ? `/series/${c.slug}` : `/series/${c.id}`} className="group block">
+                {/* ロゴは切り抜かず元の縦横比のまま幅いっぱいに（記事カードと違い写真でないため） */}
+                <Image
+                  src={c.imagePath || '/line-up.png'}
+                  alt={c.name}
+                  width={640}
+                  height={360}
+                  className="h-auto w-full transition-opacity duration-300 group-hover:opacity-80"
+                />
+                <h3 className="serif mt-2 text-[17px] font-medium leading-snug text-[#333] md:text-[13px]">
+                  {c.name}
+                </h3>
+              </Link>
             </li>
           ))}
         </ul>
+      ) : articles.length === 0 ? (
+        <p className="text-sm text-[#808080]">この連載の記事はまだありません。</p>
+      ) : (
+        <>
+          <ul className="grid grid-cols-1 gap-x-1 gap-y-8 lg:grid-cols-2">
+            {articles.map((article) => (
+              <li key={article.id}>
+                <ArticleCard article={article} />
+              </li>
+            ))}
+          </ul>
+          <Pagination currentPage={page} totalPages={totalPages} basePath={basePath} />
+        </>
       )}
-
-      <Pagination currentPage={page} totalPages={totalPages} basePath={basePath} />
 
       {/* 書き手プロフィール（帯＋丸写真＋名前／居住地・年齢／SNS）。
           担当2名（CAL TATAU・エフェメラ！など）は帯1本の下に2人ぶん並ぶ。 */}

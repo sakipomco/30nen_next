@@ -39,6 +39,16 @@ export async function listCategories(): Promise<Category[]> {
     .orderBy(asc(categories.sortOrder), asc(categories.id));
 }
 
+// ── Read：ある連載の「子連載」一覧（親ページで子をカバー画像で並べる用）──
+// 例：「度々の旅」（親・記事なしの器）を開くと、子の「山陰編」などをカバーで見せる。
+export async function getChildCategories(parentId: number): Promise<Category[]> {
+  return db
+    .select()
+    .from(categories)
+    .where(eq(categories.parentId, parentId))
+    .orderBy(asc(categories.sortOrder), asc(categories.id));
+}
+
 // ── Read：1件（id で取得）────────────────────────────────────
 export async function getCategoryById(id: number): Promise<Category | null> {
   const rows = await db
