@@ -5,6 +5,22 @@ import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import type { EditorView } from '@tiptap/pm/view';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
+import Youtube from '@tiptap/extension-youtube';
+import { Video } from './video-node';
+
+// YouTube拡張は標準では「エディタ自身が作った形（div[data-youtube-video]で包まれたiframe）」
+// しか読み取れない。旧サイトから移行した記事は iframe が素のまま入っているため、
+// そのままだと編集画面を開いて保存しただけで埋め込みが消えてしまう。
+// → 素の YouTube iframe も読み取れるように解析ルールを広げる。
+const YoutubeWithPlainIframe = Youtube.extend({
+  parseHTML() {
+    return [
+      { tag: 'div[data-youtube-video] iframe' },
+      { tag: 'iframe[src*="youtube.com/embed/"]' },
+      { tag: 'iframe[src*="youtube-nocookie.com/embed/"]' },
+    ];
+  },
+});
 import { uploadImage } from './upload-image';
 import { ImagePickerModal } from '@/components/admin/image-picker-modal';
 import { t, type Locale } from '@/lib/i18n';
@@ -15,9 +31,24 @@ type Props = {
   locale?: Locale;
 };
 
-function getImageFiles(dt: DataTransfer | null): File[] {
+// 本文に入れられるファイル＝画像すべて＋動画はMP4のみ（/api/upload の許可リストと対応）
+function isInsertableMedia(f: File): boolean {
+  return f.type.startsWith('image/') || f.type === 'video/mp4';
+}
+
+function getMediaFiles(dt: DataTransfer | null): File[] {
   if (!dt) return [];
-  return Array.from(dt.files).filter((f) => f.type.startsWith('image/'));
+  return Array.from(dt.files).filter(isInsertableMedia);
+}
+
+function setYoutube(editor: Editor, locale: Locale) {
+  const input = window.prompt(t('editor.youtubePrompt', locale), 'https://');
+  if (input === null) return;
+  const url = input.trim();
+  if (url === '') return;
+  // URLがYouTubeとして読み取れない場合、setYoutubeVideo は false を返す
+  const ok = editor.chain().focus().setYoutubeVideo({ src: url }).run();
+  if (!ok) window.alert(t('editor.youtubeInvalid', locale));
 }
 
 function setLink(editor: Editor, locale: Locale) {
@@ -111,6 +142,11 @@ function Toolbar({ editor, locale }: { editor: Editor; locale: Locale }) {
         active={editor.isActive('link')}
         onClick={() => setLink(editor, locale)}
       />
+      <ToolbarButton
+        label={t('editor.youtube', locale)}
+        active={editor.isActive('youtube')}
+        onClick={() => setYoutube(editor, locale)}
+      />
     </div>
   );
 }
@@ -121,19 +157,26 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   async function uploadIntoView(view: EditorView, file: File, pos?: number) {
+    const isVideo = file.type.startsWith('video/');
     setError(null);
     setUploading(true);
     try {
       const url = await uploadImage(file);
-      const imageType = view.state.schema.nodes.image;
-      if (!imageType) return;
-      const node = imageType.create({ src: url });
+      // 画像は image ノード、動画(MP4)は video ノードとして本文に挿入する
+      const nodeType = view.state.schema.nodes[isVideo ? 'video' : 'image'];
+      if (!nodeType) return;
+      const node = nodeType.create({ src: url });
       const at = Math.min(pos ?? view.state.selection.from, view.state.doc.content.size);
       view.dispatch(view.state.tr.insert(at, node));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('editor.imageUploadFailed', locale));
+      setError(
+        err instanceof Error
+          ? err.message
+          : t(isVideo ? 'editor.videoUploadFailed' : 'editor.imageUploadFailed', locale),
+      );
     } finally {
       setUploading(false);
     }
@@ -149,6 +192,10 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
         },
       }),
       Image,
+      Video,
+      // YouTube埋め込み。nocookie＝再生するまでCookieを置かないYouTube公式ドメインを使う。
+      // ツールバーの「YouTube」ボタンのほか、本文へのURL貼り付けでも自動で埋め込みになる。
+      YoutubeWithPlainIframe.configure({ nocookie: true }),
     ],
     content: initialHTML ?? '',
     immediatelyRender: false,
@@ -160,7 +207,7 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
       },
       handleDrop(view, event) {
         const dragEvent = event as DragEvent;
-        const files = getImageFiles(dragEvent.dataTransfer);
+        const files = getMediaFiles(dragEvent.dataTransfer);
         if (files.length === 0) return false;
         event.preventDefault();
         const dropped = view.posAtCoords({ left: dragEvent.clientX, top: dragEvent.clientY });
@@ -168,7 +215,7 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
         return true;
       },
       handlePaste(view, event) {
-        const files = getImageFiles((event as ClipboardEvent).clipboardData);
+        const files = getMediaFiles((event as ClipboardEvent).clipboardData);
         if (files.length === 0) return false;
         event.preventDefault();
         for (const file of files) void uploadIntoView(view, file);
@@ -182,13 +229,19 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
     e.target.value = '';
     if (!file || !editor) return;
 
+    const isVideo = file.type.startsWith('video/');
     setError(null);
     setUploading(true);
     try {
       const url = await uploadImage(file);
-      editor.chain().focus().setImage({ src: url }).run();
+      if (isVideo) editor.chain().focus().setVideo({ src: url }).run();
+      else editor.chain().focus().setImage({ src: url }).run();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('editor.imageUploadFailed', locale));
+      setError(
+        err instanceof Error
+          ? err.message
+          : t(isVideo ? 'editor.videoUploadFailed' : 'editor.imageUploadFailed', locale),
+      );
     } finally {
       setUploading(false);
     }
@@ -214,6 +267,14 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
         >
           {t('editor.imageFromFolder', locale)}
         </button>
+        <button
+          type="button"
+          onClick={() => { if (!uploading) videoInputRef.current?.click(); }}
+          disabled={uploading}
+          className="rounded-md border border-zinc-400 bg-white px-4 py-1.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-100 disabled:opacity-50"
+        >
+          {uploading ? t('editor.imageUploading', locale) : t('editor.videoFromDevice', locale)}
+        </button>
       </div>
       <p className="mt-3 text-xs text-zinc-500">
         {t('editor.imageHint', locale)}
@@ -227,6 +288,13 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/gif,image/webp"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <input
+        ref={videoInputRef}
+        type="file"
+        accept="video/mp4"
         className="hidden"
         onChange={handleFileChange}
       />

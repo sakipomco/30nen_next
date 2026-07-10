@@ -15,16 +15,20 @@ import { getCurrentUser } from '@/auth/session';
 import { recordUpload } from '@/db/uploads';
 import { shrinkImage } from '@/lib/image';
 
-// 受け付ける画像の種類（MIMEタイプ → 保存時の拡張子）。
+// 受け付けるファイルの種類（MIMEタイプ → 保存時の拡張子）。
 const ALLOWED: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'image/gif': 'gif',
   'image/webp': 'webp',
+  // 動画は mp4 のみ（どのスマホ・パソコンのブラウザでも再生できる形式）。
+  'video/mp4': 'mp4',
 };
 
 // 安全弁：自動で軽くするので普段は引っかからないが、極端に巨大なファイルだけ防ぐ上限。
 const MAX_BYTES = 40 * 1024 * 1024; // 40MB
+// 動画は縮小できないぶん上限を別に持つ。旧サイトの実績は最大153MBだったので余裕をみて200MB。
+const MAX_VIDEO_BYTES = 200 * 1024 * 1024; // 200MB
 
 // 縮小・圧縮の本体は `@/lib/image` の shrinkImage を使う（移行スクリプトと同じ基準）。
 
@@ -46,21 +50,29 @@ export async function POST(request: Request) {
   const ext = ALLOWED[file.type];
   if (!ext) {
     return Response.json(
-      { error: '対応していない種類です（JPEG・PNG・GIF・WebP のみ）。' },
+      { error: '対応していない種類です（画像はJPEG・PNG・GIF・WebP、動画はMP4のみ）。' },
       { status: 400 },
     );
   }
-  if (file.size > MAX_BYTES) {
+  const isVideo = file.type.startsWith('video/');
+  const maxBytes = isVideo ? MAX_VIDEO_BYTES : MAX_BYTES;
+  if (file.size > maxBytes) {
     return Response.json(
-      { error: '画像が大きすぎます（40MBまで）。' },
+      {
+        error: isVideo
+          ? '動画が大きすぎます（200MBまで）。'
+          : '画像が大きすぎます（40MBまで）。',
+      },
       { status: 400 },
     );
   }
 
   // ④ 大きい写真は自動で軽くする（縮小＋圧縮）。壊れた画像などはここで失敗する。
+  //    動画は縮小できないのでそのまま保存する（上の40MB上限だけで守る）。
   let bytes: Buffer;
   try {
-    bytes = await shrinkImage(Buffer.from(await file.arrayBuffer()), file.type);
+    const raw = Buffer.from(await file.arrayBuffer());
+    bytes = isVideo ? raw : await shrinkImage(raw, file.type);
   } catch {
     return Response.json(
       { error: '画像を読み込めませんでした。別の画像でお試しください。' },

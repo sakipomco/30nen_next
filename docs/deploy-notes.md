@@ -117,7 +117,8 @@ server {
     listen [::]:80 default_server;
     server_name _;
 
-    client_max_body_size 40m;
+    # 動画アップロード（アプリ側の上限200MB）を通すため 210m（2026-07-10 動画対応で 40m から変更）
+    client_max_body_size 210m;
 
     # アップロード画像は Nginx が直接配信（root方式・aliasのtry_files問題を回避）
     location /uploads/ {
@@ -141,7 +142,9 @@ server {
 ```
 
 **ハマりどころ（重要）:**
-- `client_max_body_size 40m;` … これが無いと大きな画像アップロードが 413 で弾かれる。
+- `client_max_body_size 210m;` … これが無い（または小さい）と大きな画像・動画のアップロードが 413 で弾かれる。
+  アプリ側の上限（画像40MB・動画200MB）より少し大きくしておく。
+  変更したら `nginx -t` → `systemctl reload nginx` で反映（2026-07-10 の動画対応デプロイ時に本番も要変更）。
 - `/uploads/` は **`root` 方式**で直接配信する。`alias` + `try_files` だと動かない。
   理由: `next start` は起動後に `public/` へ書かれたファイル（投稿画像）を配信しないため、Nginxが肩代わりする必要がある。
   - `root /var/www/30nen_next/public;` + リクエスト `/uploads/2026/06/x.jpg`

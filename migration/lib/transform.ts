@@ -30,6 +30,94 @@ export function rewriteImageUrls(html: string): string {
   return out;
 }
 
+// ---- 動画まわりの変換 -------------------------------------------------------
+// 旧WordPressでは動画は2通りの書き方で本文に入っている：
+//  A. [video mp4="…"][/video] … WP独自の「ショートコード」。WPが表示時に<video>タグへ
+//     変換していたが、新システムは変換しないため文字のまま見えてしまう。
+//  B. YouTubeのURLを「それだけの行」で貼る … WPが自動で埋め込みプレーヤーにしていた（oEmbed）。
+// ここで A → <video>タグ、B → YouTube埋め込み(iframe) に変換して、新システムでも再生できるようにする。
+
+// YouTubeの視聴URLから動画ID・開始秒を取り出し、埋め込み用URLに組み立てる。
+// 対応形: youtube.com/watch?v=ID / youtu.be/ID / youtube.com/shorts|live|embed/ID
+// 判別できないURLは null（変換しない）。
+export function youtubeEmbedUrl(rawUrl: string): string | null {
+  let u: URL;
+  try {
+    u = new URL(rawUrl.replace(/&amp;/g, '&')); // HTML内の &amp; を & に戻してから解釈
+  } catch {
+    return null;
+  }
+  const host = u.hostname.replace(/^(?:www|m)\./, '');
+  let id = '';
+  if (host === 'youtu.be') {
+    id = u.pathname.slice(1).split('/')[0] ?? '';
+  } else if (host === 'youtube.com') {
+    if (u.pathname === '/watch') {
+      id = u.searchParams.get('v') ?? '';
+    } else {
+      const m = /^\/(?:shorts|live|embed)\/([^/]+)/.exec(u.pathname);
+      if (m) id = m[1];
+    }
+  }
+  if (!/^[A-Za-z0-9_-]{6,20}$/.test(id)) return null;
+  // 「途中から再生」の指定（t=1m30s など）を埋め込み用の start=秒 に引き継ぐ
+  const t = u.searchParams.get('t') ?? u.searchParams.get('start') ?? '';
+  const m = /^(?:(\d+)h)?(?:(\d+)m)?(\d+)s?$|^(\d+)$/.exec(t);
+  const sec = m
+    ? m[4]
+      ? Number(m[4])
+      : Number(m[1] ?? 0) * 3600 + Number(m[2] ?? 0) * 60 + Number(m[3] ?? 0)
+    : 0;
+  // youtube-nocookie.com ＝ YouTube公式の「プライバシー強化モード」用ドメイン（再生するまでCookieを置かない）
+  return `https://www.youtube-nocookie.com/embed/${id}${sec > 0 ? `?start=${sec}` : ''}`;
+}
+
+// YouTube埋め込みの iframe タグを組み立てる（サニタイズの許可リストと対応）。
+function youtubeIframe(embedUrl: string): string {
+  return (
+    `<iframe src="${embedUrl}" title="YouTube video" ` +
+    'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" ' +
+    'allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+  );
+}
+
+// [video …] ショートコード（終了タグ [/video] は有無どちらでも）
+const VIDEO_SHORTCODE_RE = /\[video\b([^\]]*)\]\s*(?:\[\/video\])?/gi;
+// [embed]URL[/embed] ショートコード
+const EMBED_SHORTCODE_RE = /\[embed[^\]]*\]\s*([^\s<>[\]]+)\s*\[\/embed\]/gi;
+// 「それだけの行（段落）」に貼られた YouTube URL。前が 行頭・改行・<p>・<br>、
+// 後ろが 行末・改行・</p>・<br> のものだけ対象（文章の途中やリンク内のURLは触らない）。
+const BARE_YOUTUBE_RE =
+  /(^|\n|<p>|<br \/>|<br\/>|<br>)(\s*)(https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\/[^\s<>"[\]]+)(?=\s*(?:$|\n|<\/p>|<br))/g;
+
+// 本文中の動画表現を、新システムで再生できるHTMLへ変換する。
+export function convertVideoEmbeds(html: string): string {
+  // A. [video mp4="…"] → <video>。幅・高さが書いてあれば引き継ぐ（縦横比の維持に使う）。
+  let out = html.replace(VIDEO_SHORTCODE_RE, (whole, attrs: string) => {
+    const src = /(?:mp4|m4v|webm|ogv|src)="([^"]+)"/i.exec(attrs)?.[1];
+    if (!src) return whole; // 動画URLが読み取れない場合は原文のまま残す（情報を消さない）
+    const w = /\bwidth="(\d+)"/i.exec(attrs)?.[1];
+    const h = /\bheight="(\d+)"/i.exec(attrs)?.[1];
+    return (
+      `<video src="${src}" controls playsinline preload="metadata"` +
+      (w ? ` width="${w}"` : '') +
+      (h ? ` height="${h}"` : '') +
+      '></video>'
+    );
+  });
+  // B-1. [embed]URL[/embed] → YouTubeなら埋め込み、それ以外は普通のリンクに。
+  out = out.replace(EMBED_SHORTCODE_RE, (whole, url: string) => {
+    const embed = youtubeEmbedUrl(url);
+    return embed ? youtubeIframe(embed) : `<a href="${url}">${url}</a>`;
+  });
+  // B-2. 行に単独で貼られた YouTube URL → 埋め込み（旧WPの自動埋め込みの再現）。
+  out = out.replace(BARE_YOUTUBE_RE, (whole, prefix: string, ws: string, url: string) => {
+    const embed = youtubeEmbedUrl(url);
+    return embed ? `${prefix}${ws}${youtubeIframe(embed)}` : whole;
+  });
+  return out;
+}
+
 // すでにブロック要素で始まる塊は <p> で包まない（包むと二重になる）。
 const BLOCK_START_RE =
   /^<\/?(?:p|div|ul|ol|li|blockquote|h[1-6]|hr|pre|table|thead|tbody|tr|td|th|figure|figcaption)[\s/>]/i;
@@ -60,9 +148,9 @@ export function wpautop(raw: string): string {
   return out.join('\n');
 }
 
-// 本文HTMLの総仕上げ: wpautop → 画像URL書き換え → サニタイズ。
+// 本文HTMLの総仕上げ: wpautop → 画像URL書き換え → 動画変換 → サニタイズ。
 export function transformContent(rawHtml: string): string {
-  return sanitizeArticleHtml(rewriteImageUrls(wpautop(rawHtml)));
+  return sanitizeArticleHtml(convertVideoEmbeds(rewriteImageUrls(wpautop(rawHtml))));
 }
 
 // WPの公開状態 'publish' → 新システムの 'published'。それ以外は 'draft' 扱い。

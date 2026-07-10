@@ -121,11 +121,16 @@ const dict = {
   'editor.orderedList': { ja: '番号付き', es: 'Lista numerada' },
   'editor.blockquote': { ja: '引用', es: 'Cita' },
   'editor.link': { ja: 'リンク', es: 'Enlace' },
+  'editor.youtube': { ja: 'YouTube', es: 'YouTube' },
+  'editor.youtubePrompt': { ja: 'YouTubeのURLを貼り付けてください（例: https://www.youtube.com/watch?v=…）', es: 'Pega la URL de YouTube (ej.: https://www.youtube.com/watch?v=…)' },
+  'editor.youtubeInvalid': { ja: 'YouTubeのURLとして読み取れませんでした。動画ページのURLをそのまま貼り付けてください。', es: 'No se pudo reconocer la URL de YouTube. Pega la URL de la página del video tal cual.' },
   'editor.imageFromDevice': { ja: '画像をデバイスから選ぶ', es: 'Elegir desde el dispositivo' },
+  'editor.videoFromDevice': { ja: '動画をデバイスから選ぶ', es: 'Elegir video desde el dispositivo' },
   'editor.imageFromFolder': { ja: '画像フォルダから選ぶ', es: 'Desde la carpeta de imágenes' },
   'editor.imageUploading': { ja: 'アップロード中…', es: 'Subiendo…' },
   'editor.imageUploadFailed': { ja: 'アップロードに失敗しました。', es: 'Error al subir la imagen.' },
-  'editor.imageHint': { ja: '写真は上のボタンから入れられます。パソコンでは本文へのドラッグ＆ドロップ・貼り付け（⌘/Ctrl+V）でもOKです。', es: 'Puedes añadir fotos con los botones de arriba. En la computadora también puedes arrastrarlas o pegarlas (⌘/Ctrl+V) en el contenido.' },
+  'editor.videoUploadFailed': { ja: '動画のアップロードに失敗しました。', es: 'Error al subir el video.' },
+  'editor.imageHint': { ja: '写真や動画（MP4・200MBまで）は上のボタンから入れられます。YouTubeは「YouTube」ボタンにURLを貼り付けます。パソコンでは本文へのドラッグ＆ドロップ・貼り付け（⌘/Ctrl+V）でもOKです。', es: 'Puedes añadir fotos y videos (MP4, hasta 200MB) con los botones de arriba. Para YouTube, pega la URL con el botón «YouTube». En la computadora también puedes arrastrarlos o pegarlos (⌘/Ctrl+V) en el contenido.' },
 
   // ── 共通 ────────────────────────────────────
   'common.error': { ja: 'エラーが発生しました。', es: 'Ocurrió un error.' },

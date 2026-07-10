@@ -100,6 +100,22 @@ body {
 .tiptap-editor :where(img.ProseMirror-selectednode) {
   outline: 2px solid #6366f1;
 }
+/* 本文に挿入した動画・YouTube埋め込みも編集枠に収める */
+.tiptap-editor :where(video) {
+  max-width: 100%;
+  height: auto;
+  margin: 0.5em 0;
+}
+.tiptap-editor :where(iframe) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  margin: 0.5em 0;
+}
+.tiptap-editor :where(video.ProseMirror-selectednode),
+.tiptap-editor :where(div[data-youtube-video].ProseMirror-selectednode iframe) {
+  outline: 2px solid #6366f1;
+}
 
 /* 公開ページの記事本文（投稿のHTMLを表示）。仕様書 §5-2 ②に沿った読みやすさ。
    Tailwind が見出し・箇条書きをリセットするので、本文エリア内だけ復活させる。 */
@@ -156,6 +172,19 @@ body {
 }
 .article-body :where(strong) {
   font-weight: 700;
+}
+/* 本文に貼った動画（アップロードしたmp4）。画像と同じく枠内に収める。 */
+.article-body :where(video) {
+  max-width: 100%;
+  height: auto;
+  margin: 1.2em 0;
+}
+/* YouTube埋め込み。幅いっぱい×16:9（スマホでもはみ出さない） */
+.article-body :where(iframe) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  margin: 1.2em 0;
 }
 
 /* コラムの独立スクロール用：スクロールできるがスクロールバーは隠す（SAKIさん指定 2026-06-30） */

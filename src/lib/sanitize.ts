@@ -18,20 +18,29 @@ const options: sanitizeHtml.IOptions = {
     'ul', 'ol', 'li',
     'blockquote',
     'a', 'img',
+    'video', 'iframe',
   ],
   allowedAttributes: {
     a: ['href', 'title', 'target', 'rel'],
     img: ['src', 'alt', 'title'],
+    // 動画（アップロードした mp4 の再生）。playsinline＝スマホで全画面にせずその場で再生。
+    video: ['src', 'controls', 'playsinline', 'preload', 'muted', 'loop', 'poster', 'width', 'height'],
+    // YouTube 埋め込み用。iframe 自体は下の allowedIframeHostnames で YouTube だけに限定する。
+    iframe: ['src', 'width', 'height', 'allow', 'allowfullscreen', 'frameborder', 'title', 'loading', 'referrerpolicy'],
   },
+  // iframe の埋め込み元は YouTube のドメインだけ許可（それ以外の iframe は丸ごと除去）。
+  allowedIframeHostnames: ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com'],
   // リンク・画像で許す URL の種類。javascript: などのスキームは弾く。
   allowedSchemes: ['http', 'https', 'mailto'],
-  allowedSchemesByTag: { img: ['http', 'https', 'data'] },
+  allowedSchemesByTag: { img: ['http', 'https', 'data'], video: ['http', 'https'] },
   // 外部リンクは新しいタブで開き、rel を補って参照元漏れ・タブ乗っ取りを防ぐ。
   transformTags: {
     a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer' }),
   },
   // script/style の中身ごと破棄する（タグだけ消して中身を残さない）。
   disallowedTagsMode: 'discard',
+  // src を失った iframe（許可外ドメインだったもの）は空の枠だけ残るので、丸ごと消す。
+  exclusiveFilter: (frame) => frame.tag === 'iframe' && !frame.attribs.src,
 };
 
 // 記事本文HTMLを無害化して返す。on* イベント属性・script・javascript: URL などは除去される。
