@@ -15,7 +15,8 @@ export function ArticleCard({ article }: { article: PublicArticle }) {
 
   return (
     <Link href={href} className="group block">
-      <div className="relative aspect-[4/2.5] w-full overflow-hidden bg-zinc-100">
+      {/* 写真の高さ：スマホは4:2.2（現行サイトのスマホと同じ）＝見本比較でSAKIさん選択（2026-07-10）／PCは従来どおり4:2.5 */}
+      <div className="relative aspect-[4/2.2] w-full overflow-hidden bg-zinc-100 md:aspect-[4/2.5]">
         <Image
           src={imageSrc}
           alt={article.title}
