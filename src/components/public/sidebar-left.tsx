@@ -40,8 +40,8 @@ export function SidebarLeft({
         {renderHiraTight(leadText)}
       </p>
 
-      {/* SNSリンク（instagram ｜ x） */}
-      <div className="serif mt-3 flex items-center gap-3 text-sm">
+      {/* SNSリンク（instagram ｜ x）。「｜」両脇のアキは半分に詰めた（gap-3→gap-1.5・SAKIさん指定 2026-07-13） */}
+      <div className="serif mt-3 flex items-center gap-1.5 text-sm">
         <a
           href={SOCIAL_LINKS.instagram}
           target="_blank"
