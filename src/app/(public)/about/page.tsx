@@ -161,10 +161,9 @@ export default function AboutPage() {
             <br />
             「でも記録を残したいことがある」という方に朗報
           </p>
-          {/* TODO(SAKIさん確認待ち): このリンク先は仮（現行サイトのお知らせ記事）。
-              飛び先をどの記事にするか追って確認し、記事移行後に新サイトのURLへ差し替える。 */}
+          {/* リンク先＝「店主からのおしらせ」の記事「POP UP 店舗募集！」（旧WP記事12729） */}
           <a
-            href="https://30nen.com/oshirase/2025/07/23/12729"
+            href="/posts/564"
             className="mt-2 block text-center text-[#2563eb] underline underline-offset-2 transition-opacity hover:opacity-60"
           >
             POP UP 店舗も募集しています!
