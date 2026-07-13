@@ -23,15 +23,30 @@ export function SidebarLeft({
           スマホは従来どおり -mt-10 でページ上部の余白を打ち消す。 */}
       <Link
         href="/"
+        aria-label="三十年商店"
         className="-mt-10 block w-full max-w-[260px] lg:mt-0 lg:max-w-[247px]"
       >
-        <Image
-          src="/30nen_logo_noren_plus.jpg"
-          alt="三十年商店"
-          width={474}
-          height={362}
-          priority
+        {/* 暖簾がはためく動画（音なし・自動再生・繰り返し）。
+            muted＋playsInline はスマホで自動再生させるための必須条件。 */}
+        <video
+          src="/30nen_logo_noren_video.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          width={1280}
+          height={720}
           className="h-auto w-full"
+        />
+        {/* 動画のすぐ下：ロゴの下部テキスト画像（「三十年商店」の文字部分）。
+            のれん動画とのあいだに mt-2（8px）のアキ（SAKIさん指定 2026-07-13） */}
+        <Image
+          src="/30nen_logo_moren_shitatext.png"
+          alt="三十年商店"
+          width={473}
+          height={76}
+          priority
+          className="mt-2 h-auto w-full"
         />
       </Link>
 
