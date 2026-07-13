@@ -71,7 +71,8 @@ export default async function PublicLayout({
 
       {/* コピーライト（控えめに） */}
       <footer className="px-5 pb-24 pt-4 text-center lg:pb-10">
-        <small className="text-[0.65rem] leading-relaxed text-[#808080]">
+        {/* フォントはパンくずと同じゴシック体（SAKIさん指定 2026-07-13） */}
+        <small className="gothic text-[0.65rem] leading-relaxed text-[#808080]">
           ©30YEARS ARCADE
         </small>
       </footer>
