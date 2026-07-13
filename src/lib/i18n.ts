@@ -40,6 +40,13 @@ const dict = {
   'admin.backToList': { ja: '← 一覧へ戻る', es: '← Volver a la lista' },
   'admin.backToAdmin': { ja: '← 投稿へ戻る', es: '← Volver a publicaciones' },
 
+  // ── 練習期間バナー（正式切替＝SITE_INDEXABLE=true で自動的に消える） ──
+  'admin.practiceTitle': { ja: 'ここは練習用です', es: 'Este sitio es para practicar' },
+  'admin.practiceBody': {
+    ja: '正式切替（7月29日）までは、本番の日記はいままでどおりWordPressに投稿してください。ここでのお試し投稿は自由です。',
+    es: 'Hasta el cambio oficial (29 de julio), sigue publicando tu diario real en WordPress como siempre. Aquí puedes practicar con toda libertad.',
+  },
+
   // ── 記事フォーム ────────────────────────────────
   'article.newTitle': { ja: '新しい日記をかく', es: 'Nueva entrada' },
   'article.editTitle': { ja: '記事を編集', es: 'Editar artículo' },
