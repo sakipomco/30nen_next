@@ -42,3 +42,40 @@ export async function listUploadedImageFiles(): Promise<UploadedImage[]> {
   images.sort((a, b) => b.mtimeMs - a.mtimeMs); // 新しい順
   return images;
 }
+
+// 画像URLから年・月フォルダを読み取る（例: /uploads/2025/07/a.jpg → {year:'2025', month:'07'}）。
+// 年月フォルダに入っていないもの（/uploads/logo/ など）は null。
+const YEAR_MONTH_RE = /^\/uploads\/(\d{4})\/(\d{2})\//;
+
+// 絞り込み用：写真がある年月の一覧を「新しい年から」まとめる（プルダウンの選択肢に使う）。
+export type YearMonths = { year: string; months: string[] };
+
+export function collectYearMonths(files: UploadedImage[]): YearMonths[] {
+  const map = new Map<string, Set<string>>();
+  for (const f of files) {
+    const m = YEAR_MONTH_RE.exec(f.url);
+    if (!m) continue;
+    if (!map.has(m[1])) map.set(m[1], new Set());
+    map.get(m[1])!.add(m[2]);
+  }
+  return [...map.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0])) // 年は新しい順
+    .map(([year, months]) => ({
+      year,
+      months: [...months].sort((a, b) => b.localeCompare(a)), // 月も新しい順
+    }));
+}
+
+// 年・月で絞り込む。年が無ければ全件のまま（月だけの指定は効かせない）。
+export function filterByYearMonth(
+  files: UploadedImage[],
+  year?: string,
+  month?: string,
+): UploadedImage[] {
+  if (!year || !/^\d{4}$/.test(year)) return files;
+  const prefix =
+    month && /^\d{2}$/.test(month)
+      ? `/uploads/${year}/${month}/`
+      : `/uploads/${year}/`;
+  return files.filter((f) => f.url.startsWith(prefix));
+}

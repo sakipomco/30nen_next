@@ -94,6 +94,10 @@ const dict = {
   'media.close': { ja: '閉じる', es: 'Cerrar' },
   'media.prev': { ja: '← 前へ', es: '← Anterior' },
   'media.next': { ja: '次へ →', es: 'Siguiente →' },
+  'media.filterYear': { ja: '年で絞り込み', es: 'Filtrar por año' },
+  'media.filterMonth': { ja: '月で絞り込み', es: 'Filtrar por mes' },
+  'media.allYears': { ja: '全ての年', es: 'Todos los años' },
+  'media.allMonths': { ja: '全ての月', es: 'Todos los meses' },
 
   // ── 画像ピッカーモーダル ───────────────────────────
   'picker.title': { ja: '画像フォルダから選ぶ', es: 'Seleccionar de la carpeta de imágenes' },

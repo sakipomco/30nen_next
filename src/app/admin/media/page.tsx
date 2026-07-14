@@ -1,8 +1,13 @@
 import Link from 'next/link';
 import { requireUser } from '@/auth/session';
-import { listUploadedImageFiles } from '@/lib/media';
+import {
+  listUploadedImageFiles,
+  collectYearMonths,
+  filterByYearMonth,
+} from '@/lib/media';
 import { getUploadOwners } from '@/db/uploads';
 import { MediaGrid } from './media-grid';
+import { MediaFilter } from './media-filter';
 import { UploadButton } from './upload-button';
 import { t, tReplace, type Locale } from '@/lib/i18n';
 
@@ -17,20 +22,29 @@ const PER_PAGE = 48;
 export default async function MediaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; y?: string; m?: string }>;
 }) {
   const me = await requireUser();
   const locale = (me.locale ?? 'ja') as Locale;
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, y, m } = await searchParams;
 
-  const files = await listUploadedImageFiles();
+  const allFiles = await listUploadedImageFiles();
   const owners = await getUploadOwners();
+
+  // 年・月の絞り込み（選択肢は写真が実際にある年月だけ）。
+  const yearMonths = collectYearMonths(allFiles);
+  const year = y && /^\d{4}$/.test(y) ? y : '';
+  const month = year && m && /^\d{2}$/.test(m) ? m : '';
+  const files = filterByYearMonth(allFiles, year, month);
 
   const total = files.length;
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
   const page = Math.min(Math.max(1, Number(pageParam) || 1), totalPages);
   const start = (page - 1) * PER_PAGE;
   const pageFiles = files.slice(start, start + PER_PAGE);
+
+  // ページ送りリンクに絞り込みを引き継ぐためのクエリ文字列。
+  const filterQs = (year ? `&y=${year}` : '') + (month ? `&m=${month}` : '');
 
   const isAdmin = me.role === 'admin';
   const items = pageFiles.map((f) => {
@@ -58,13 +72,23 @@ export default async function MediaPage({
           {'。'}
         </p>
 
+        {/* 年・月で絞り込み（写真がある年月だけが選択肢に出る） */}
+        <div className="mb-4">
+          <MediaFilter
+            yearMonths={yearMonths}
+            year={year}
+            month={month}
+            locale={locale}
+          />
+        </div>
+
         <MediaGrid items={items} locale={locale} />
 
         {totalPages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-4 text-sm">
             {page > 1 ? (
               <Link
-                href={`/admin/media?page=${page - 1}`}
+                href={`/admin/media?page=${page - 1}${filterQs}`}
                 className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 transition-colors hover:bg-zinc-100"
               >
                 {t('media.prev', locale)}
@@ -79,7 +103,7 @@ export default async function MediaPage({
             </span>
             {page < totalPages ? (
               <Link
-                href={`/admin/media?page=${page + 1}`}
+                href={`/admin/media?page=${page + 1}${filterQs}`}
                 className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 transition-colors hover:bg-zinc-100"
               >
                 {t('media.next', locale)}

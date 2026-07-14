@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { t, type Locale } from '@/lib/i18n';
+import { YearMonthSelects } from './year-month-selects';
+import type { YearMonths } from '@/lib/media';
 
 type Props = {
   onSelect: (url: string) => void;
@@ -13,21 +15,28 @@ type MediaResponse = {
   urls: string[];
   totalPages: number;
   page: number;
+  yearMonths: YearMonths[];
 };
 
 export function ImagePickerModal({ onSelect, onClose, locale = 'ja' }: Props) {
   const [page, setPage] = useState(1);
+  // 年・月の絞り込み（未選択は ''）。
+  const [year, setYear] = useState('');
+  const [month, setMonth] = useState('');
   const [data, setData] = useState<MediaResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // page が変わるたびに（初回=1ページ目も）その一覧を取得する。
+  // page・絞り込みが変わるたびに（初回=1ページ目も）その一覧を取得する。
   // cancelled は「モーダルを閉じた後に届いた応答」を捨てるための印。
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/media?page=${page}`);
+        const params = new URLSearchParams({ page: String(page) });
+        if (year) params.set('y', year);
+        if (year && month) params.set('m', month);
+        const res = await fetch(`/api/media?${params}`);
         if (!res.ok) throw new Error(t('picker.loadFailed', locale));
         const json = (await res.json()) as MediaResponse;
         if (!cancelled) setData(json);
@@ -41,13 +50,22 @@ export function ImagePickerModal({ onSelect, onClose, locale = 'ja' }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [page, locale]);
+  }, [page, year, month, locale]);
 
   // ページ送りボタン用。読み込み中表示に切り替えてからページを変える。
   function goToPage(p: number) {
     setLoading(true);
     setError(null);
     setPage(p);
+  }
+
+  // 絞り込みを変えたら1ページ目から取得し直す。
+  function changeFilter(y: string, m: string) {
+    setLoading(true);
+    setError(null);
+    setYear(y);
+    setMonth(m);
+    setPage(1);
   }
 
   useEffect(() => {
@@ -79,6 +97,19 @@ export function ImagePickerModal({ onSelect, onClose, locale = 'ja' }: Props) {
             ✕
           </button>
         </div>
+
+        {/* 年・月で絞り込み（写真がある年月だけが選択肢に出る） */}
+        {data && data.yearMonths.length > 0 && (
+          <div className="px-5 pt-3">
+            <YearMonthSelects
+              yearMonths={data.yearMonths}
+              year={year}
+              month={month}
+              locale={locale}
+              onChange={changeFilter}
+            />
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto p-4">
           {loading && (
