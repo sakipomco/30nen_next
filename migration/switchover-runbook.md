@@ -47,6 +47,7 @@
   curl -s -o /dev/null -w "%{http_code}\n" https://new.30nen.com/   # → 200
   ```
 - [ ] **テストデータの整理**: テスト管理者 `test@example.com` が本番に残っていないか確認→残っていれば削除。書き手の「試し書き」記事をどうするか（残す/消す）をSAKI・saicoさんで決めて整理。
+- [ ] **SAKI SUZUKI（sakipomco）アカウントの要否を判断**（招待フロー実証用に作ったもの。残せば「予備の管理者」になる。詳細は `remaining-tasks.md` F項）
 - [ ] **本文中に `new.30nen.com` の直URLが残っていないか確認**（練習中に貼った画像などは切替後も転送で表示されるが、きれいにしておくと安心）:
   ```bash
   ssh -i ~/.ssh/30nen_vps root@162.43.43.144 \
