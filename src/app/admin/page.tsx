@@ -3,10 +3,12 @@ import { requireUser } from '@/auth/session';
 import { logout } from '@/app/actions/auth';
 import { switchLocaleAction } from '@/app/actions/locale';
 import { deleteArticleAction } from '@/app/actions/articles';
-import { listArticles, countArticles } from '@/db/articles';
+import { listArticles, countArticles, listArticleYearMonths } from '@/db/articles';
+import { listUsers } from '@/db/users';
 import { formatJst } from '@/lib/datetime';
 import { t, tReplace, type Locale } from '@/lib/i18n';
 import { Pagination } from '@/components/public/pagination';
+import { ArticleFilter } from './article-filter';
 
 export const metadata = {
   title: '投稿｜30nen',
@@ -18,20 +20,31 @@ const PER_PAGE = 20;
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; y?: string; m?: string; author?: string }>;
 }) {
   const user = await requireUser();
   const locale = (user.locale ?? 'ja') as Locale;
 
-  // 投稿者は自分の記事だけ・管理者は全記事。
-  const scope = user.role === 'admin' ? undefined : { authorId: user.id };
+  const sp = await searchParams;
 
-  // 件数（「ぜんぶ◯件」表示とページ送りの計算に使う）。
+  // 年・月の絞り込み（選択肢は記事が実際にある年月だけ＝画像フォルダと同じ仕様）。
+  const year = sp.y && /^\d{4}$/.test(sp.y) ? sp.y : '';
+  const month = year && sp.m && /^\d{2}$/.test(sp.m) ? sp.m : '';
+
+  // 投稿者の絞り込み：管理者だけが使える。投稿者(author)は常に自分の記事だけ。
+  const filterAuthorId =
+    user.role === 'admin' && sp.author && /^\d+$/.test(sp.author)
+      ? Number(sp.author)
+      : undefined;
+  const authorId = user.role === 'admin' ? filterAuthorId : user.id;
+
+  const scope = { authorId, year, month };
+
+  // 件数（「ぜんぶ◯件」表示とページ送りの計算に使う）。絞り込み中はその範囲の数。
   const total = await countArticles(scope);
   const published = await countArticles({ ...scope, status: 'published' });
   const draft = total - published;
 
-  const sp = await searchParams;
   const page = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1);
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
@@ -40,6 +53,21 @@ export default async function AdminPage({
     limit: PER_PAGE,
     offset: (page - 1) * PER_PAGE,
   });
+
+  // 絞り込みプルダウンの選択肢（記事がある年月＋管理者には投稿者の一覧）。
+  const yearMonths = await listArticleYearMonths({ authorId });
+  const authors =
+    user.role === 'admin'
+      ? (await listUsers()).map((u) => ({ id: u.id, name: u.name }))
+      : null;
+
+  // ページ送りリンクに絞り込みを引き継ぐためのクエリ文字列。
+  const filterParams = new URLSearchParams();
+  if (filterAuthorId != null) filterParams.set('author', String(filterAuthorId));
+  if (year) filterParams.set('y', year);
+  if (month) filterParams.set('m', month);
+  const filterQs = filterParams.toString();
+
   const newArticleLabel = t('admin.newArticle', locale);
 
   return (
@@ -119,7 +147,7 @@ export default async function AdminPage({
           })}
         </p>
 
-        {/* 自分の投稿の件数（WPの「所有 (761)」にあたる表示）。 */}
+        {/* 自分の投稿の件数（WPの「所有 (761)」にあたる表示）。絞り込み中はその範囲の数。 */}
         <p className="mb-4 text-sm text-zinc-600">
           {tReplace('admin.countSummary', locale, {
             total: String(total),
@@ -127,6 +155,18 @@ export default async function AdminPage({
             draft: String(draft),
           })}
         </p>
+
+        {/* 絞り込み（記事がある年月だけが選択肢に出る。投稿者プルダウンは管理者のみ） */}
+        <div className="mb-4">
+          <ArticleFilter
+            yearMonths={yearMonths}
+            year={year}
+            month={month}
+            authors={authors}
+            authorId={filterAuthorId != null ? String(filterAuthorId) : ''}
+            locale={locale}
+          />
+        </div>
 
         {articles.length === 0 ? (
           <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-500">
@@ -196,8 +236,12 @@ export default async function AdminPage({
           </ul>
         )}
 
-        {/* ページ送り（20件ずつ）。公開ページと同じ部品を使う。 */}
-        <Pagination currentPage={page} totalPages={totalPages} basePath="/admin" />
+        {/* ページ送り（20件ずつ）。公開ページと同じ部品を使う。絞り込みはリンクに引き継ぐ。 */}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          basePath={filterQs ? `/admin?${filterQs}` : '/admin'}
+        />
       </div>
     </div>
   );

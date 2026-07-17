@@ -6,6 +6,7 @@ import { eq, ne, lt, gt, desc, asc, and, or, lte, sql, type SQL } from 'drizzle-
 import { db } from './index';
 import { articles, users, categories } from './schema';
 import type { PublicUser } from './users';
+import type { YearMonths } from '@/lib/media';
 
 // schema から型を自動生成（手書きしない＝設計とズレない）
 export type Article = typeof articles.$inferSelect; // DBから読んだ1件の形
@@ -42,16 +43,40 @@ const now = () => new Date().toISOString().slice(0, 19).replace('T', ' '); // 'Y
 //   公開記事＝公開日時(publishedAt)／下書き＝更新日時(updatedAt)。
 //   publishedAt が無い（下書き）ときは updatedAt を使う（COALESCE＝先に値がある方を採用）。
 //   同じ日時のときは id の新しい順で安定させる。
-export async function listArticles(options?: {
+
+// 管理一覧で使う「表示に使う日付」（公開日 or 更新日）を日本時間(JST)にしたもの。
+// 並び替え・年月の絞り込みの両方でこれを基準にする（画面に見えている日付と食い違わないように）。
+const displayDateJst = sql`datetime(COALESCE(${articles.publishedAt}, ${articles.updatedAt}), '+9 hours')`;
+
+// 管理一覧の絞り込み条件を組み立てる（listArticles と countArticles で共通）。
+function adminFilters(options?: {
   status?: 'draft' | 'published';
-  authorId?: number; // 指定すると、その投稿者の記事だけに絞る（投稿者の管理一覧用）
-  limit?: number;
-  offset?: number;
-}): Promise<Article[]> {
+  authorId?: number;
+  year?: string;
+  month?: string;
+}): SQL[] {
   const filters: SQL[] = [];
   if (options?.status) filters.push(eq(articles.status, options.status));
   if (options?.authorId != null)
     filters.push(eq(articles.authorId, options.authorId));
+  if (options?.year) {
+    filters.push(sql`strftime('%Y', ${displayDateJst}) = ${options.year}`);
+    // 月は年とセットのときだけ効かせる（「全ての年の7月」は出せない仕様＝画像フォルダと同じ）。
+    if (options.month)
+      filters.push(sql`strftime('%m', ${displayDateJst}) = ${options.month}`);
+  }
+  return filters;
+}
+
+export async function listArticles(options?: {
+  status?: 'draft' | 'published';
+  authorId?: number; // 指定すると、その投稿者の記事だけに絞る（投稿者の管理一覧用）
+  year?: string; // '2025' のような4桁（JST基準の年で絞る）
+  month?: string; // '07' のような2桁（year とセットで使う）
+  limit?: number;
+  offset?: number;
+}): Promise<Article[]> {
+  const filters = adminFilters(options);
 
   // 表示に使う日付（公開日 or 更新日）＝並び替えの基準
   const sortDate = sql`COALESCE(${articles.publishedAt}, ${articles.updatedAt})`;
@@ -70,17 +95,44 @@ export async function listArticles(options?: {
 export async function countArticles(options?: {
   status?: 'draft' | 'published';
   authorId?: number;
+  year?: string;
+  month?: string;
 }): Promise<number> {
-  const filters: SQL[] = [];
-  if (options?.status) filters.push(eq(articles.status, options.status));
-  if (options?.authorId != null)
-    filters.push(eq(articles.authorId, options.authorId));
+  const filters = adminFilters(options);
 
   const rows = await db
     .select({ n: sql<number>`count(*)` })
     .from(articles)
     .where(filters.length ? and(...filters) : undefined);
   return rows[0]?.n ?? 0;
+}
+
+// ── 管理一覧の絞り込み用：記事がある年月の一覧（JST基準・新しい順）──
+// プルダウンの選択肢に「記事が実際にある年月」だけを出すための集計。
+// 画像フォルダの絞り込みと同じ形（YearMonths）で返し、同じプルダウン部品を使い回す。
+export async function listArticleYearMonths(options?: {
+  authorId?: number;
+}): Promise<YearMonths[]> {
+  const ym = sql<string>`strftime('%Y-%m', ${displayDateJst})`;
+  const rows = await db
+    .select({ ym })
+    .from(articles)
+    .where(
+      options?.authorId != null
+        ? eq(articles.authorId, options.authorId)
+        : undefined,
+    )
+    .groupBy(ym)
+    .orderBy(desc(ym));
+  // '2025-07' の並びを {year:'2025', months:['07',…]} にまとめ直す（年も月も新しい順のまま）。
+  const result: YearMonths[] = [];
+  for (const row of rows) {
+    const [year, month] = row.ym.split('-');
+    const last = result[result.length - 1];
+    if (last && last.year === year) last.months.push(month);
+    else result.push({ year, months: [month] });
+  }
+  return result;
 }
 
 // ── Read：1件（id で取得）────────────────────────────────
