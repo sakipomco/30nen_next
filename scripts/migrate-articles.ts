@@ -178,7 +178,8 @@ async function migrateOne(idBase: string, report: Report): Promise<void> {
     return;
   }
 
-  // ④ 連載 term_id → categories.id（1記事1連載＝先頭を採用）
+  // ④ 連載 term_id → categories.id（1記事1連載。親子両方に付いている記事＝
+  //    例「度々の旅」+「欧州編」は、子（parent≠0）の連載を採用する）
   const catsPath = join(POSTS_DIR, `${idBase}.categories.json`);
   const cats = existsSync(catsPath)
     ? parseJsonLoose<WpCategory[]>(readFileSync(catsPath, 'utf8'))
@@ -187,7 +188,7 @@ async function migrateOne(idBase: string, report: Report): Promise<void> {
     report.articleErrors.push({ wpId, reason: '連載(カテゴリ)が無い' });
     return;
   }
-  const termId = cats[0].term_id;
+  const termId = (cats.find((c) => c.parent !== 0) ?? cats[0]).term_id;
   const category = db.select().from(categories).where(eq(categories.wpTermId, termId)).get();
   if (!category) {
     report.articleErrors.push({

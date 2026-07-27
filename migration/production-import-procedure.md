@@ -177,6 +177,12 @@ ssh -i ~/.ssh/30nen_vps root@162.43.43.144 '
 - スクリプトは `wp_id` で**重複を自動で飛ばす**ので、ステップ A→G をもう一度なぞるだけ（新記事だけ入る）。
 - 事前にもう一度 `migration/export-wp.sh` で最新を書き出し → `split-export.ts` → `derive-aux-files.ts`。
 - 画像も rsync（差分だけ転送）。
+- **⚠ 本移行①のあとに増えた連載がある場合**（例: 2026-07-26新設の「欧州編」）は、
+  `migration/series-map.csv` に行を足したうえで、**ステップ E（記事投入）の前に**連載同期を実行する:
+  ```bash
+  DATABASE_PATH=data/prod-import.db node --env-file=.env.local --import tsx scripts/migrate-categories.ts
+  ```
+  既存の連載は wp_term_id で自動スキップ（冪等）なので、何度実行しても増えた分だけ作られる。
 
 ---
 
