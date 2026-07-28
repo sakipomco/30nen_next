@@ -5,7 +5,8 @@
 
 - 予告アナウンス（日本語）: ✅ 確定（2026-07-06・SAKI作成）
 - 予告アナウンス（スペイン語）: 🟡 下書き（Luis・Vanessa宛。招待メール本体は日本語のみなので、この一文が「事前の一言」を兼ねる）
-- リマインド文: ❌ 作らない（SAKI判断 2026-07-06。必要になったらその場で送る）
+- 前日リマインド文: ✅ 作成（2026-07-28・SAKI依頼で方針変更。§3）
+- 切替完了アナウンス: 🟡 下書き（2026-07-28作成。§4。当日、状況に合わせて微調整して送る）
 
 ---
 
@@ -60,6 +61,91 @@ Sobre cómo usar el nuevo sitio, he preparado una guía en PDF (también en espa
 Si tenéis dudas o algo no funciona, escribidme aquí, al grupo de Messenger o por LINE cuando queráis.
 
 ¡Importante! La mudanza al nuevo sitio será el 29 de julio (miércoles). Hasta entonces, seguid publicando en WordPress como siempre.
+
+---
+
+## 3. 前日リマインド（2026-07-28 送信・日本語＋スペイン語）
+
+> 送るタイミング: **7/28の夜まで**に。日本語版はグループへ、スペイン語版はLuis・Vanessaへ。
+> スペインとの時差: 日本の7/29朝8時＝スペインでは7/29深夜1時。なので「28日の夜のうちに」と案内する。
+
+### 日本語版
+
+みなさんへ　いよいよ明日、新サイトへのお引越し日です！咲です
+
+あらためて、明日の流れだけお知らせさせてください。
+
+📌 **WordPressへの投稿は、明日7/29（水）の朝8時まで**にお願いします。
+（8時をすぎると、新サイトへ引き継げなくなってしまいます）
+
+朝8時からお昼ごろにかけてお引越し作業をします。
+終わったら、あらためて「切替完了しました」の連絡をこちらに送ります。
+
+**完了連絡が届いたあとは**、日記はすべて新サイトへ。
+ログインは **30nen.com/login** からです（練習で使っていた画面と同じものです）。
+
+わからないこと・うまくいかないことがあれば、いつでもここへ気軽にどうぞ。
+明日、どうぞよろしくお願いします！
+
+### スペイン語版（Luis・Vanessa宛）
+
+¡Hola! Soy Saki. ¡Mañana es el día de la mudanza al nuevo sitio!
+
+Os recuerdo cómo será:
+
+📌 **Podéis publicar en WordPress hasta la 1:00 de la madrugada del día 29 (hora de España)** — o sea, mejor terminar **dentro de la noche del día 28**. Después de esa hora, las entradas nuevas ya no se podrán trasladar al nuevo sitio.
+
+La mudanza se hará durante la mañana de Japón. Cuando termine, os enviaré un mensaje de «¡mudanza completada!» (os llegará por la mañana, hora de España).
+
+**A partir de ese mensaje**, escribid todos los diarios en el nuevo sitio.
+Se entra por **30nen.com/login** (es la misma pantalla que usasteis para practicar).
+
+✨ Una buena noticia: **el nuevo sitio no necesita VPN**. Podéis entrar directamente.
+
+Si tenéis dudas o algo no funciona, escribidme aquí cuando queráis. ¡Gracias y hasta mañana!
+
+---
+
+## 4. 切替完了アナウンス（下書き・7/29当日に微調整して送信）
+
+> 送るタイミング: Fableチェック②合格のあと（12:30〜13:00目安。スペインは朝6時頃）。
+
+### 日本語版
+
+みなさんへ　お引越しが完了しました！🎉 咲です
+
+今日からは、日記はすべて新サイトへお願いします。
+
+🔑 ログイン: **30nen.com/login**
+（ユーザー名とパスワードは、練習のときに設定したものがそのまま使えます）
+
+これまでの記事も全部、新サイトに引き継がれています。
+使い方は手引き書（PDF）にまとまっているので、迷ったらそちらを。
+
+それから、2つだけお願いがあります。
+- プロフィールの**誕生日**と**顔写真**がまだの方は、ログインしたついでに入力してもらえるとうれしいです
+- 海外から書いている方へ: **新サイトはVPNなしでそのまま入れます**
+
+わからないこと・変なところを見つけたら、いつでもここor店主とのメッセンジャーグループorLINEへ。
+これからも、どうぞよろしくお願いします！
+
+### スペイン語版（Luis・Vanessa宛）
+
+¡Hola! Soy Saki. **¡La mudanza está completada!** 🎉
+
+Desde hoy, escribid todos los diarios en el nuevo sitio.
+
+🔑 Para entrar: **30nen.com/login**
+(El usuario y la contraseña son los mismos que configurasteis al practicar)
+
+Todos los artículos anteriores ya están en el nuevo sitio.
+Si tenéis dudas sobre cómo usarlo, mirad la guía en PDF (también está en español).
+
+Dos pequeños favores:
+- Si aún no habéis puesto el **cumpleaños** y la **foto de perfil**, os agradecería que los añadierais al entrar
+- Recordad: **el nuevo sitio no necesita VPN** — podéis entrar directamente
+
+Si encontráis algo raro o algo no funciona, escribidme aquí cuando queráis. ¡Muchas gracias como siempre!
 
 ---
 
