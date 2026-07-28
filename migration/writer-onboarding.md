@@ -5,7 +5,7 @@
 
 - 予告アナウンス（日本語）: ✅ 確定（2026-07-06・SAKI作成）
 - 予告アナウンス（スペイン語）: 🟡 下書き（Luis・Vanessa宛。招待メール本体は日本語のみなので、この一文が「事前の一言」を兼ねる）
-- 前日リマインド文: ✅ 作成（2026-07-28・SAKI依頼で方針変更。§3）
+- 前日リマインド文: ✅ 確定（2026-07-28・日本語版はSAKI最終稿。§3）
 - 切替完了アナウンス: 🟡 下書き（2026-07-28作成。§4。当日、状況に合わせて微調整して送る）
 
 ---
@@ -71,38 +71,43 @@ Si tenéis dudas o algo no funciona, escribidme aquí, al grupo de Messenger o p
 
 ### 日本語版
 
-みなさんへ　いよいよ明日、新サイトへのお引越し日です！咲です
+いよいよ明日、07/29（水）サイトへの引越しです！あ、咲です。
 
-あらためて、明日の流れだけお知らせさせてください。
+あらためて、明日の流れをお知らせさせてください。
 
 📌 **WordPressへの投稿は、明日7/29（水）の朝8時まで**にお願いします。
-（8時をすぎると、新サイトへ引き継げなくなってしまいます）
+⚠️8時をすぎての投稿は、新サイトへ引き継げなくなってしまいます。
 
-朝8時からお昼ごろにかけてお引越し作業をします。
+朝8時からお昼ごろにかけて引越作業をします。
+**この間は、WordPressにも新サイトにも投稿しないでください**（作業時間中に書いた分が迷子になるのを防ぐためです）。
 終わったら、あらためて「切替完了しました」の連絡をこちらに送ります。
 
-**完了連絡が届いたあとは**、日記はすべて新サイトへ。
-ログインは **30nen.com/login** からです（練習で使っていた画面と同じものです）。
+完了連絡が届いたあとは、日記はすべて新サイトへ。
+ログインは **30nen.com/login** から。
+（練習のときは `new.30nen.com/login` でしたが、明日からは **`new.` の付かない** `30nen.com/login` に変わります。画面自体は同じです）
 
-わからないこと・うまくいかないことがあれば、いつでもここへ気軽にどうぞ。
-明日、どうぞよろしくお願いします！
+わからないこと・うまくいかないことがあれば、いつでもここor店主とのグループ/LINEへお気軽にどうぞ。明日、どうぞよろしくお願いします！
 
 ### スペイン語版（Luis・Vanessa宛）
 
-¡Hola! Soy Saki. ¡Mañana es el día de la mudanza al nuevo sitio!
+¡Mañana, 29/07 (miércoles), nos mudamos al nuevo sitio! Ah, soy Saki.
 
-Os recuerdo cómo será:
+Os cuento cómo será el día de mañana.
 
-📌 **Podéis publicar en WordPress hasta la 1:00 de la madrugada del día 29 (hora de España)** — o sea, mejor terminar **dentro de la noche del día 28**. Después de esa hora, las entradas nuevas ya no se podrán trasladar al nuevo sitio.
+📌 **Podéis publicar en WordPress hasta la 1:00 de la madrugada del día 29 (hora de España)** — o sea, mejor terminar **dentro de la noche del día 28**.
+⚠️ Lo que se publique después de esa hora ya no se podrá trasladar al nuevo sitio.
 
-La mudanza se hará durante la mañana de Japón. Cuando termine, os enviaré un mensaje de «¡mudanza completada!» (os llegará por la mañana, hora de España).
+La mudanza se hará durante la mañana de Japón (de la 1:00 a las 5:30 de la madrugada, hora de España, más o menos).
+**Durante ese rato, no publiquéis ni en WordPress ni en el nuevo sitio** (así no se pierde nada de lo que escribáis mientras trasladamos los artículos).
+Cuando termine, os enviaré un mensaje de «¡mudanza completada!» (os llegará a primera hora de la mañana, hora de España).
 
-**A partir de ese mensaje**, escribid todos los diarios en el nuevo sitio.
-Se entra por **30nen.com/login** (es la misma pantalla que usasteis para practicar).
+A partir de ese mensaje, escribid todos los diarios en el nuevo sitio.
+Se entra por **30nen.com/login**.
+(Durante las prácticas era `new.30nen.com/login`; a partir de mañana es **sin el `new.`**: `30nen.com/login`. La pantalla es exactamente la misma.)
 
 ✨ Una buena noticia: **el nuevo sitio no necesita VPN**. Podéis entrar directamente.
 
-Si tenéis dudas o algo no funciona, escribidme aquí cuando queráis. ¡Gracias y hasta mañana!
+Si tenéis dudas o algo no funciona, escribidme a mí (Saki) por LINE o por mensaje directo cuando queráis. ¡Hasta mañana y muchas gracias!
 
 ---
 
