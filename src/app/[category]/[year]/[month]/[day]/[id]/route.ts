@@ -13,7 +13,7 @@ import { getPublishedArticleRefByWpId } from '@/db/articles';
 import { postHref } from '@/lib/site';
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   {
     params,
   }: {
@@ -28,12 +28,19 @@ export async function GET(
 ) {
   const { id } = await params;
   const wpId = Number(id);
-  const origin = req.nextUrl.origin;
 
   if (Number.isInteger(wpId) && wpId > 0) {
     const ref = await getPublishedArticleRefByWpId(wpId);
     if (ref) {
-      return NextResponse.redirect(new URL(postHref(ref), origin), 301);
+      // 転送先は「/posts/123」の相対パスで返す。
+      // Nginxの裏側にいるため req.nextUrl.origin は内部アドレス（localhost:3000）になり、
+      // 絶対URLを組み立てると読者が到達できないURLへ飛ばしてしまう。
+      // 相対パスならブラウザがアクセス中のホストで解決するので、
+      // 切替前（new.30nen.com）でも切替後（30nen.com）でも設定なしで正しく動く。
+      return new NextResponse(null, {
+        status: 301,
+        headers: { Location: postHref(ref) },
+      });
     }
   }
 
