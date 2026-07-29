@@ -52,9 +52,11 @@ export function SidebarLeft({
       </Link>
 
       {/* リードテキスト（改行を活かす・少し太め・ひらがな部分だけ字間を詰める）
-          ロゴ下のキャッチとのアキは mt-12（48px）。mt-6（24px）では近すぎたため
-          広げた（SAKIさん指定 2026-07-29・切替当日） */}
-      <p className="serif mt-12 whitespace-pre-line text-sm font-medium leading-6 text-[#333]">
+          ロゴ下のキャッチとのアキ（いずれもSAKIさん指定 2026-07-29・切替当日）:
+          - PC は mt-12（48px）。24pxでは近すぎた
+          - スマホは mt-6（24px）＝その半分。のれんロゴを80%に縮めたぶん、
+            48pxだと離れすぎて見えるため */}
+      <p className="serif mt-6 whitespace-pre-line text-sm font-medium leading-6 text-[#333] lg:mt-12">
         {renderHiraTight(leadText)}
       </p>
 
