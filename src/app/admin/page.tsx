@@ -92,6 +92,13 @@ export default async function AdminPage({
                 >
                   {t('admin.users', locale)}
                 </Link>
+                {/* 旅の地図（地図の棚）。いまは日本語のみ＝スペイン語版は必要になったら i18n に足す。 */}
+                <Link
+                  href="/admin/maps"
+                  className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+                >
+                  旅の地図
+                </Link>
                 <Link
                   href="/admin/settings"
                   className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"

@@ -63,6 +63,18 @@ export const articles = sqliteTable('articles', {
   wpId: integer('wp_id').unique(), // 旧WordPressの記事ID（移行用の保険・二重取り込み防止の一意制約。新規記事は NULL＝SQLiteでは複数OK）
 });
 
+// ── 旅の行程マップ（地図の棚）─────────────────────────────────
+// 旅シリーズの記事に添える「旅全体の行程マップ」を、名札を付けて置いておく棚。
+// 記事本文に [MAP:2025欧州] と書くと、表示時にその名札の地図を折りたたみボタンで出す。
+// 画像を直接貼らず名札で呼ぶのが肝＝**棚の画像を1枚差し替えれば、その旅の全記事の
+// 地図が一斉に新しくなる**（地図が作り途中→完成版に変わることを想定）。
+export const maps = sqliteTable('maps', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull().unique(), // 名札（例: '2025欧州'）。本文の [MAP:…] と突き合わせる
+  imagePath: text('image_path').notNull(), // 地図画像のパス（例: /uploads/2026/07/xxx.jpg）
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+});
+
 // ── サイト設定（キーと値の組）─────────────────────────────────
 // トップページのリードテキストなど、管理画面から編集できる「自由テキスト」を保存する場所。
 // 1行＝1設定（key が名札・value が中身）。将来ほかの編集可能テキストもここに足せる。

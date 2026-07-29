@@ -12,6 +12,8 @@ import { getArticleForPreview } from '@/db/articles';
 import { getUserById, toPublicUser } from '@/db/users';
 import { formatJstDate } from '@/lib/datetime';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
+import { extractMapNames, renderMapTags } from '@/lib/map-tag';
+import { getMapPathsByNames } from '@/db/maps';
 import { Breadcrumb } from '@/components/public/breadcrumb';
 import { CategoryBanner } from '@/components/public/category-banner';
 import { WriterProfile } from '@/components/public/writer-profile';
@@ -41,6 +43,13 @@ export default async function PreviewPage({
   const seriesHref = article.categoryId
     ? `/series/${article.categorySlug ?? article.categoryId}`
     : undefined;
+
+  // 本文の [MAP:名札] を折りたたみの地図に置き換える（公開ページと同じ手順）。
+  // プレビューだけは forPreview: true ＝ 登録されていない名札に注意書きを出す。
+  // 書き手が公開前に打ち間違いへ気づけるようにするため（読者には何も出ない）。
+  const safeHtml = sanitizeArticleHtml(article.content);
+  const mapPaths = await getMapPathsByNames(extractMapNames(safeHtml));
+  const bodyHtml = renderMapTags(safeHtml, mapPaths, { forPreview: true });
 
   // 戻り先（編集ページか新規ページ）
   const editHref = `/admin/articles/${article.id}/edit`;
@@ -91,7 +100,7 @@ export default async function PreviewPage({
 
       <div
         className="article-body mt-8 text-[#333]"
-        dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(article.content) }}
+        dangerouslySetInnerHTML={{ __html: bodyHtml }}
       />
 
       {author && <WriterProfile author={author} />}

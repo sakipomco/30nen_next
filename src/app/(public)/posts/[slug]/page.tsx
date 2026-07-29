@@ -17,6 +17,8 @@ import {
 import { getUserById, toPublicUser } from '@/db/users';
 import { formatJstDate } from '@/lib/datetime';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
+import { extractMapNames, renderMapTags } from '@/lib/map-tag';
+import { getMapPathsByNames } from '@/db/maps';
 import { toMetaDescription, postHref } from '@/lib/site';
 import { Breadcrumb } from '@/components/public/breadcrumb';
 import { CategoryBanner } from '@/components/public/category-banner';
@@ -131,6 +133,14 @@ export default async function PostPage({
 
   const date = article.publishedAt ? formatJstDate(article.publishedAt) : '';
 
+  // 本文の [MAP:名札] を折りたたみの地図に置き換える。
+  // ① まず無害化（許可外タグを落とす）→ ② そのあとで地図ブロックを差し込む。
+  //    <details> は許可リストに無いので、この順番でないと消える。
+  // 名札が無い記事では DB を触らない（extractMapNames が空なら getMapPathsByNames は即返す）。
+  const safeHtml = sanitizeArticleHtml(article.content);
+  const mapPaths = await getMapPathsByNames(extractMapNames(safeHtml));
+  const bodyHtml = renderMapTags(safeHtml, mapPaths);
+
   // 連載ページへのリンク先（slug があれば slug・無ければ id）。
   const seriesHref = article.categoryId
     ? `/series/${article.categorySlug ?? article.categoryId}`
@@ -174,10 +184,11 @@ export default async function PostPage({
           一覧カード・関連記事・SNSシェアの代表写真としてだけ使う。
           本文の写真は本文内（下記）で表示されるので、写真の二重表示は起きない。 */}
 
-      {/* 本文（投稿のHTML）。表示直前にも無害化し、既存データもカバーする（R-02） */}
+      {/* 本文（投稿のHTML）。表示直前にも無害化し、既存データもカバーする（R-02）。
+          そのうえで [MAP:名札] を折りたたみの地図に置き換えている（上の bodyHtml）。 */}
       <div
         className="article-body mt-8 text-[#333]"
-        dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(article.content) }}
+        dangerouslySetInnerHTML={{ __html: bodyHtml }}
       />
 
       {/* 書き手プロフィール（帯＋丸写真＋名前／居住地・年齢／SNS） */}

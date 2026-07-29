@@ -193,6 +193,53 @@ body {
   margin: 1.2em 0;
 }
 
+/* ── 旅の全行程マップ（本文の [MAP:名札] が変換されたもの）───────────────
+   閉じているあいだ中身は表示されないので、img の loading="lazy" と合わせて
+   「押されるまで地図を読み込まない」＝記事は軽いまま。 */
+.article-body :where(.map-details) {
+  margin: 1.6em 0;
+}
+/* ボタンの見た目。左コラムの「書き手さん、募集中！」と同じスミケイ（細い黒枠）にそろえる。 */
+.article-body :where(.map-details > summary) {
+  display: inline-block;
+  cursor: pointer;
+  border: 0.5px solid #150c0c;
+  padding: 0.5em 1em;
+  font-size: 0.9em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  color: #333;
+  background: transparent;
+  transition: background-color 0.15s, color 0.15s;
+  /* 三角の既定マーカーは出さない（絵文字の🗺だけで示す） */
+  list-style: none;
+}
+.article-body :where(.map-details > summary)::-webkit-details-marker {
+  display: none;
+}
+.article-body :where(.map-details > summary):hover {
+  background-color: #150c0c;
+  color: #fff;
+}
+/* 開いたときの地図。本文の画像と同じ扱い（角丸なし・幅いっぱい） */
+.article-body :where(.map-details > img) {
+  margin: 1em 0 0;
+}
+/* 開いているあいだはボタンの文言を変える（閉じ方が分かるように） */
+.article-body :where(.map-details[open] > summary) {
+  background-color: #150c0c;
+  color: #fff;
+}
+
+/* 登録されていない名札のときの注意書き。書き手の下書きプレビューにだけ出る。 */
+.article-body :where(.map-missing) {
+  color: #dc2626;
+  font-size: 0.85em;
+  line-height: 1.7;
+  text-align: left;
+}
+
 /* コラムの独立スクロール用：スクロールできるがスクロールバーは隠す（SAKIさん指定 2026-06-30） */
 .no-scrollbar {
   scrollbar-width: none; /* Firefox */
