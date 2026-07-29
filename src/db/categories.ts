@@ -198,8 +198,14 @@ export async function deleteCategory(
 }
 
 // 投稿フォームで「その人が選べる連載」を返す（字下げ用の depth つき）。
-//  - 投稿者(author)で担当連載が登録済み → その担当連載だけ（範囲内だけで選べる）
+//  - 投稿者(author)で担当連載が登録済み → その担当連載と、その子連載（範囲内だけで選べる）
 //  - 管理者(admin)、または担当未設定の投稿者 → 全連載（親子を字下げ表示）
+//
+// ★ 担当が親連載なら、その子連載にも書ける ★
+//   「度々の旅」のような親は記事を入れない“器”で、実際の記事は子の「欧州編」などに入る。
+//   担当連載だけを返していたころは、親を担当する人が子を選べず**どこにも書けなかった**
+//   （2026-07-29 minowanaokoさんから「欧州編が選べない」と連絡があり判明）。
+//   子孫まで含めることで、新しい旅の編を作っても担当の付け替えなしで書けるようにする。
 export async function listSelectableCategories(user: {
   id: number;
   role: 'admin' | 'author';
@@ -207,8 +213,25 @@ export async function listSelectableCategories(user: {
   if (user.role === 'author') {
     const assigned = await getCategoriesForUser(user.id);
     if (assigned.length > 0) {
-      // 担当連載だけ（1人1連載なら1件。字下げは不要なので depth=0）
-      return assigned.map((c) => ({ id: c.id, name: c.name, depth: 0 }));
+      const all = await listCategories();
+      // 担当連載＋その子孫を集める。担当そのものが子孫にも含まれうるので
+      // **Set で重複を取り除く**（例: 度々の旅・山陰編・欧州編 を担当していると
+      // 「度々の旅の子孫」として山陰編・欧州編が二重に出てしまうため）。
+      const ids = new Set<number>();
+      for (const c of assigned) {
+        ids.add(c.id);
+        for (const d of getDescendantIds(all, c.id)) ids.add(d);
+      }
+      // 並びは連載の並び順（listCategories の順）に合わせる。
+      // 子は親の下に来るので、親を担当している場合だけ字下げして分かりやすくする。
+      return all
+        .filter((c) => ids.has(c.id))
+        .map((c) => ({
+          id: c.id,
+          name: c.name,
+          // 親も選べる場合のみ子を字下げ（担当が子だけなら字下げ不要）
+          depth: c.parentId != null && ids.has(c.parentId) ? 1 : 0,
+        }));
     }
   }
   const all = await listCategories();
