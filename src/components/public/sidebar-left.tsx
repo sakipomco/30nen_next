@@ -24,7 +24,8 @@ export function SidebarLeft({
       <Link
         href="/"
         aria-label="三十年商店"
-        className="-mt-10 block w-full max-w-[260px] lg:mt-0 lg:max-w-[247px]"
+        // スマホは 260px の 80%＝208px に縮小（SAKIさん指定 2026-07-29）。PCは 247px のまま。
+        className="-mt-10 block w-full max-w-[208px] lg:mt-0 lg:max-w-[247px]"
       >
         {/* 暖簾がはためく動画（音なし・自動再生・繰り返し）。
             muted＋playsInline はスマホで自動再生させるための必須条件。 */}
