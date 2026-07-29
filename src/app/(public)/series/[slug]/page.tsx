@@ -30,12 +30,17 @@ export const dynamic = 'force-dynamic';
 const PER_PAGE = 12;
 
 // slug もしくは id で連載を1件取得する（無ければ null）。
+// 数字だけのURLは番号(id)として先に探す＝記事ページと同じ考え方。
+// いまは数字だけの名前(slug)を持つ連載は無いが、あとで付けられたときに
+// 「番号のつもりで開いたら別の連載だった」が起きないようにしておく
+// （記事側では実際にこれが起き、46件が別記事に飛んでいた。2026-07-29）。
 async function findCategory(slugOrId: string): Promise<Category | null> {
+  if (/^\d+$/.test(slugOrId)) {
+    const byId = await getCategoryById(Number(slugOrId));
+    if (byId) return byId;
+  }
   const bySlug = await getCategoryBySlug(slugOrId);
   if (bySlug) return bySlug;
-  if (/^\d+$/.test(slugOrId)) {
-    return getCategoryById(Number(slugOrId));
-  }
   return null;
 }
 

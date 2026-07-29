@@ -41,11 +41,19 @@ async function findArticle(slugOrId: string): Promise<PublicArticle | null> {
   } catch {
     // 壊れた符号化はそのまま使う
   }
+  // ★ 数字だけのURLは「番号(id)」として先に探す ★
+  //   正式URLは /posts/<番号> の形。ところが旧WordPressから引き継いだ記事には
+  //   **名前(slug)が数字だけ**のものが231件あり、うち46件は他の記事の番号と一致する。
+  //   名前を先に照合していたころは /posts/8527 が「名前が8527の記事」（＝別の記事7966）を
+  //   開いてしまい、前後の日記リンクなどが**まったく違う記事に飛んでいた**
+  //   （2026-07-29 SAKIさんの「7/27の"まえの日記"が2025年6月2日になる」で判明）。
+  if (/^\d+$/.test(key)) {
+    const byId = await getPublishedArticleById(Number(key));
+    if (byId) return byId;
+    // 番号として見つからなければ、数字の名前を持つ記事として探す（旧URLの互換）
+  }
   const bySlug = await getPublishedArticleBySlug(key);
   if (bySlug) return bySlug;
-  if (/^\d+$/.test(key)) {
-    return getPublishedArticleById(Number(key));
-  }
   return null;
 }
 
