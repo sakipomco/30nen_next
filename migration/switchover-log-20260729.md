@@ -288,6 +288,86 @@ ssh -i ~/.ssh/30nen_vps root@162.43.43.144 '
 
 ---
 
+## §4 ドメイン切替の記録（10:30〜11:00・担当: SAKI画面操作 ＋ Opus）
+
+| 時刻 | できごと |
+|------|---------|
+| 10:35 | チェック①合格を受けて §4 開始。**「熊本は」に wp_id 47996 を付与**（後述①） |
+| 10:40 | SAKIが**サーバーパネル側**のDNSレコード設定で `30nen.com` と `www` のAレコードを `162.43.43.144` へ変更（2行のみ） |
+| 10:42 | 🚨 **MXレコードの巻き添えを発見**（後述②） |
+| 10:45 | Nginx設定をバックアップ → `30nen.com` / `www.30nen.com` の受け口を追加 → `nginx -t` OK → reload |
+| 10:47 | 権威DNS5台すべてで新IPを確認 |
+| 10:50 | **certbot で https証明書を取得成功**（`30nen.com` ＋ `www.30nen.com`・2026-10-27まで・自動更新設定あり） |
+| 10:52 | `www` → `30nen.com` の301転送を追加（旧サイトと同じ挙動に合わせた・後述③） |
+| 10:54 | 主要DNS3社すべてで反映完了を確認 |
+| 10:55 | `.env.local` を `SITE_URL=https://30nen.com` ＋ `SITE_INDEXABLE=true` に変更 → pm2 restart |
+| 10:57 | 🐛 **robots.txt と sitemap.xml が古いまま**＝ビルド時に作り置きされる仕組みのため（後述④）→ 再ビルド |
+| 11:00 | 再起動後、robots は Allow・sitemap は `30nen.com` の8,558件を確認 |
+| 11:02 | `new.30nen.com` → `https://30nen.com` の301転送に変更 |
+| 11:05 | **総点検すべて合格 ＝ §4 完了** |
+
+### ① 「熊本は」に wp_id 47996 を付与（SAKI決定）
+
+Fableのチェック①で、海秋紗さんが「熊本は」を**新サイトと旧WPの両方に投稿**していたことが判明
+（旧WP側は wp_id 47996・09:23公開）。旧URLからの転送が効くよう、記事8548に wp_id 47996 を付けた。
+
+```sql
+UPDATE articles SET wp_id=47996 WHERE id=8548;
+```
+→ 確認済み: `/kazehayasoushi/2026/07/29/47996/` → `/posts/8548` → 200 ✅
+
+### ② 🚨 MXレコードの巻き添え（メール受信・SAKI判断で後回し）
+
+**手順書は「MXを触らなければメールは無事」としていたが、これは誤り。**
+
+- MXの中身が **`30nen.com` 自身**を指していた（`30nen.com. 3600 IN MX 0 30nen.com.`）。
+- そのため **Aレコードを変えた時点で、メールの配達先も新VPSに移ってしまう**。
+- 新VPSには**メールサーバーが無い**（25/465/587 いずれも待ち受けなし）。
+  旧サーバー162.43.121.89 は `220 sv14288.xserver.jp ESMTP Postfix` を返す＝メール本体はそちら。
+- **SAKI判断＝`@30nen.com` のメールは使っていないので後回し**。切替を優先した。
+- **直すときは**: DNSレコード設定で MX の「内容」を `30nen.com` → **`the30nen.xsrv.jp`** に変更する
+  （`the30nen.xsrv.jp` は 162.43.121.89 を指す）。`send.send.30nen.com` のMXは別物なので触らない。
+- ⚠ `dns-before-switchover.md` の「MXは触らないのでメールは無事」という記述は**誤りなので要訂正**。
+
+### ③ www は 30nen.com へ転送（旧サイトと同じ挙動）
+
+旧サイトの挙動を実測して合わせた（`https://www.30nen.com` → 301 → `https://30nen.com`、
+canonical も `https://30nen.com`）。Nginxに www 専用の server ブロックを足して301転送にしている。
+
+### ④ 🐛 robots.txt / sitemap.xml は環境変数を変えただけでは切り替わらない
+
+`.env.local` を変えて `pm2 restart --update-env` しても、robots.txt と sitemap.xml は
+**古いまま（Disallow・`new.30nen.com`）**だった。この2つは Next.js が**ビルド時に作り置き**する
+静的ファイルのため（ビルド出力で `○ (Static)` と表示される）。canonical や og:url は
+実行時に作られるので、こちらは再起動だけで新URLに変わっていた＝**気づきにくい**。
+
+→ **手順書の §4-6 に追記すべき**: `.env.local` を変えたら **`npm run build` をやり直してから** pm2 restart する。
+　（今回はコードを変えていないので、VPS上で `npm run build` → `pm2 restart` のみ実施。
+　　`deploy-prod.sh` は git reset を伴うため、切替中は使わず最小限にした）
+
+### §4 完了時点の総点検（すべて✅）
+
+| 確認 | 結果 |
+|---|---|
+| 主要ページ（`/` `/about` `/history` `/howtouse` `/search` `/archive/2026-07` `/series/eu2025` `/posts/8548` `/login` `/robots.txt` `/sitemap.xml`） | **すべて200** |
+| `http://30nen.com` | → `https://30nen.com` (200) |
+| `http://www.30nen.com` | → `https://30nen.com` (200) |
+| `https://www.30nen.com` | → `https://30nen.com` (200) |
+| `https://new.30nen.com` | → `https://30nen.com` (200) ※パスも引き継ぐ |
+| 旧WP URL 3件 | すべて記事へ転送 → 200 |
+| 画像 | 200 |
+| robots.txt | **Allow**（`/admin` `/api` は除外・Host と Sitemap を明記） |
+| sitemap.xml | `30nen.com` のURL **8,558件**・`new.30nen.com` の残り **0件** |
+| 証明書 | `CN=30nen.com`・2026-10-27まで・自動更新設定済み |
+
+### 切り戻し（§4）
+
+DNSレコード設定で `30nen.com` と `www` のAレコードを **`162.43.121.89`** に戻せば旧サイトが復活する
+（控えは `dns-before-switchover.md`）。Nginx設定のバックアップは本番の
+`/etc/nginx/sites-available/30nen.bak-*` に複数世代ある。
+
+---
+
 ## 申し送り（§3 Fableチェック①へ）
 
 1. **記事数の照合は上の計算式のとおり**。単純に「旧WP 8,531 ＝ 新サイト公開 8,531」で
