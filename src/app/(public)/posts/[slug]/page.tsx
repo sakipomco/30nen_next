@@ -154,18 +154,19 @@ export default async function PostPage({
     ? `/series/${article.categorySlug ?? article.categoryId}`
     : undefined;
 
+  // 足跡（パンくず）の中身。本文の上と下の2か所で同じものを使う。
+  const crumbs = [
+    { label: '三十年商店', href: '/' },
+    ...(article.categoryName
+      ? [{ label: article.categoryName, href: seriesHref }]
+      : []),
+    { label: article.title },
+  ];
+
   return (
     <article className="mx-auto max-w-[720px]">
       {/* 足跡（現在地）。連載名はその連載の一覧ページへリンク。 */}
-      <Breadcrumb
-        items={[
-          { label: '三十年商店', href: '/' },
-          ...(article.categoryName
-            ? [{ label: article.categoryName, href: seriesHref }]
-            : []),
-          { label: article.title },
-        ]}
-      />
+      <Breadcrumb items={crumbs} />
 
       {/* カテゴリー帯（白窓＋連載画像＋連載名＋ヨミガナ）。連載ページへのリンク。 */}
       {article.categoryName && (
@@ -198,6 +199,12 @@ export default async function PostPage({
         className="article-body mt-8 text-[#333]"
         dangerouslySetInnerHTML={{ __html: bodyHtml }}
       />
+
+      {/* 本文の下にもう一度 足跡（読者の要望 2026-07-31）。
+          日記を最後まで読んだあと、上まで戻らずに連載の一覧へ帰れるようにする。 */}
+      <div className="mt-10">
+        <Breadcrumb items={crumbs} />
+      </div>
 
       {/* 書き手プロフィール（帯＋丸写真＋名前／居住地・年齢／SNS） */}
       {author && <WriterProfile author={author} />}
