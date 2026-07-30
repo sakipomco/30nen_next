@@ -70,8 +70,10 @@ export function HamburgerMenu({
             三十年商店とは？
           </Link>
 
-          {/* 小商店・検索・アーカイブ */}
-          <div onClick={close}>
+          {/* 小商店・検索・アーカイブ
+              リンク(a)を押したときだけ閉じる。ここで無条件に閉じると、
+              検索の入力欄に触れた瞬間にメニューごと消えて文字が打てない。 */}
+          <div onClick={(e) => { if ((e.target as HTMLElement).closest('a')) close(); }}>
             <SidebarContent series={series} archive={archive} />
           </div>
 
