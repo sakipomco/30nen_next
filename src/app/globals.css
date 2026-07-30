@@ -62,6 +62,11 @@ body {
 
 /* リッチエディタ(TipTap)の中身の見た目。
    Tailwind は見出し・箇条書きの装飾をリセットするので、編集エリア内だけ復活させる。 */
+/* 本文を書く欄は公開ページと同じ明朝体（Zen Old Mincho）にする。
+   書いている字と公開後の字を揃えるため（SAKIさん指定 2026-07-31）。 */
+.tiptap-editor {
+  font-family: 'Zen Old Mincho', serif;
+}
 .tiptap-editor :where(h2) {
   font-size: 1.4rem;
   font-weight: 700;
@@ -134,6 +139,14 @@ body {
 }
 .article-body :where(p) {
   margin: 1em 0;
+}
+/* 中身が空の段落＝書き手が投稿画面で入れた「一行空け」。
+   空のままだと高さ0になり、上下の余白も隣とくっついて（マージンの相殺）
+   ふつうの改行と同じ見た目になるので、1行ぶんの高さを持たせる。
+   末尾の空段落は本文の下に余分なアキを作るだけなので対象外。 */
+.article-body :where(p:empty:not(:last-child))::before {
+  content: '';
+  display: inline-block;
 }
 .article-body :where(h2) {
   font-size: 1.3rem;
