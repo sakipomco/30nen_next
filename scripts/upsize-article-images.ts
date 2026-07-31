@@ -28,6 +28,8 @@ import Database from 'better-sqlite3';
 const DB_PATH = process.env.DB_PATH ?? 'data/30nen.db';
 const PUBLIC_ROOT = process.env.PUBLIC_ROOT ?? 'public';
 const APPLY = process.argv.includes('--apply');
+// --list-missing … 大きい版が無くて直せない写真のパスだけを1行ずつ出す（旧サーバーからの取り寄せ用）
+const LIST_MISSING = process.argv.includes('--list-missing');
 
 // 本文中の <img src="/uploads/…"> を拾う
 const IMG_SRC_RE = /(<img\b[^>]*?\bsrc=")(\/uploads\/[^"]+?)(")/gi;
@@ -119,6 +121,7 @@ function main() {
   let replaced = 0;
   let leftSmall = 0;
   const leftSamples = new Set<string>();
+  const missing = new Set<string>();
 
   for (const row of rows) {
     let count = 0;
@@ -130,6 +133,7 @@ function main() {
         if (m && Number(m[2]) < 1024) {
           leftSmall++;
           if (leftSamples.size < 5) leftSamples.add(src);
+          missing.add(decodeURIComponent(src));
         }
         return whole;
       }
@@ -141,6 +145,13 @@ function main() {
       replaced += count;
       if (APPLY) update.run(html, row.id);
     }
+  }
+
+  if (LIST_MISSING) {
+    // 一覧だけを出す（他の文字は混ぜない＝そのままファイルに落として使えるように）
+    for (const p of [...missing].sort()) console.log(p);
+    db.close();
+    return;
   }
 
   console.log(`DB: ${DB_PATH} / 画像フォルダ: ${PUBLIC_ROOT}/uploads`);
