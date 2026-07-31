@@ -88,17 +88,23 @@ function findBigger(urlPath: string): string | null {
   }
 
   const toUrl = (file: string) => path.posix.join('/', path.dirname(baseNoExt), file);
+  // 選んだ先が今と同じなら「差し替え不要」とする
+  //（例: すでに横1024pxを使っている写真は①に自分自身が引っかかるため）
+  const unlessSame = (file: string) => {
+    const url = toUrl(file);
+    return url === decoded ? null : url;
+  };
 
   // ① 横1024px以上のうち、いちばん小さいもの
   const big = candidates.filter((c) => c.width >= 1024).sort((a, b) => a.width - b.width)[0];
-  if (big) return toUrl(big.file);
+  if (big) return unlessSame(big.file);
   // ② -scaled（WPの2560px版）
-  if (scaled) return toUrl(scaled);
+  if (scaled) return unlessSame(scaled);
   // ③ 元ファイル
-  if (plain) return toUrl(plain);
+  if (plain) return unlessSame(plain);
   // ④ 今より大きい版のうち最大のもの
   const larger = candidates.filter((c) => c.width > currentWidth).sort((a, b) => b.width - a.width)[0];
-  if (larger) return toUrl(larger.file);
+  if (larger) return unlessSame(larger.file);
   return null;
 }
 
@@ -119,7 +125,9 @@ function main() {
     const html = row.content.replace(IMG_SRC_RE, (whole, head: string, src: string, tail: string) => {
       const better = findBigger(src);
       if (!better) {
-        if (RESIZED_RE.test(decodeURIComponent(src))) {
+        // 差し替え先が無かったもののうち、まだ小さい（横1024px未満）ものだけ数える
+        const m = decodeURIComponent(src).match(RESIZED_RE);
+        if (m && Number(m[2]) < 1024) {
           leftSmall++;
           if (leftSamples.size < 5) leftSamples.add(src);
         }
