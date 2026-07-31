@@ -78,6 +78,14 @@ export default async function AdminPage({
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <h1 className="whitespace-nowrap text-xl font-semibold text-zinc-900">{t('admin.title', locale)}</h1>
           <div className="flex flex-wrap items-center gap-3 whitespace-nowrap sm:justify-end">
+            {/* サイトのトップページへ（書く前後にみんなの日記を読みに行く導線）。
+                いちばん左に置いて、管理者・投稿者のどちらにも出す。 */}
+            <Link
+              href="/"
+              className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+            >
+              {t('admin.viewSite', locale)}
+            </Link>
             {user.role === 'admin' && (
               <>
                 <Link
