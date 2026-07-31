@@ -212,7 +212,11 @@ body {
   max-width: 100%;
   height: auto;
   /* 角丸はつけない（現行サイトに合わせる・SAKIさん指定 2026-06-12） */
-  margin: 1.2em 0;
+  /* 枠より小さい写真は左端に寄らず中央に置く（SAKIさん指定 2026-07-31）。
+     旧サイトから引き継いだ写真には小さい縮小コピーが混じっており、
+     左寄りだと「ずれている」ように見えるため。 */
+  display: block;
+  margin: 1.2em auto;
 }
 .article-body :where(strong) {
   font-weight: 700;
