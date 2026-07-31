@@ -139,6 +139,8 @@ const dict = {
   'editor.youtube': { ja: 'YouTube', es: 'YouTube' },
   'editor.youtubePrompt': { ja: 'YouTubeのURLを貼り付けてください（例: https://www.youtube.com/watch?v=…）', es: 'Pega la URL de YouTube (ej.: https://www.youtube.com/watch?v=…)' },
   'editor.youtubeInvalid': { ja: 'YouTubeのURLとして読み取れませんでした。動画ページのURLをそのまま貼り付けてください。', es: 'No se pudo reconocer la URL de YouTube. Pega la URL de la página del video tal cual.' },
+  'editor.gray': { ja: 'グレー', es: 'Gris' },
+  'editor.horizontalRule': { ja: '罫線', es: 'Línea' },
   'editor.spotify': { ja: 'Spotify', es: 'Spotify' },
   'editor.spotifyPrompt': { ja: 'SpotifyのURLを貼り付けてください（曲・アルバム・プレイリスト・ポッドキャスト）', es: 'Pega la URL de Spotify (canción, álbum, lista o pódcast)' },
   'editor.spotifyInvalid': { ja: 'SpotifyのURLとして読み取れませんでした。Spotifyの「共有」から取れるURLをそのまま貼り付けてください。', es: 'No se pudo reconocer la URL de Spotify. Pega la URL que obtienes con «Compartir» en Spotify.' },

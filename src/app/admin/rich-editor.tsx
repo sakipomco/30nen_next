@@ -22,6 +22,7 @@ const YoutubeWithPlainIframe = Youtube.extend({
   },
 });
 import { Spotify } from './spotify-node';
+import { Gray } from './gray-mark';
 import { uploadImage } from './upload-image';
 import { ImagePickerModal } from '@/components/admin/image-picker-modal';
 import { t, type Locale } from '@/lib/i18n';
@@ -163,6 +164,16 @@ function Toolbar({ editor, locale }: { editor: Editor; locale: Locale }) {
         active={editor.isActive('spotify')}
         onClick={() => setSpotify(editor, locale)}
       />
+      <ToolbarButton
+        label={t('editor.gray', locale)}
+        active={editor.isActive('gray')}
+        onClick={() => editor.chain().focus().toggleGray().run()}
+      />
+      <ToolbarButton
+        label={t('editor.horizontalRule', locale)}
+        active={false}
+        onClick={() => editor.chain().focus().setHorizontalRule().run()}
+      />
     </div>
   );
 }
@@ -215,6 +226,8 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
       // Spotify埋め込み。ツールバーの「Spotify」ボタンのほか、
       // 本文へのURL貼り付けでも自動でプレイヤーになる（書き手の要望 2026-07-31）。
       Spotify,
+      // グレー文字（エフェメラの定型で使う。旧WPの色指定の代わり）。
+      Gray,
     ],
     content: initialHTML ?? '',
     immediatelyRender: false,

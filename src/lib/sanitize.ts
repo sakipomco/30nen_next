@@ -15,6 +15,8 @@ const options: sanitizeHtml.IOptions = {
     'p', 'br', 'hr',
     'h2', 'h3',
     'strong', 'em', 's', 'u', 'code', 'pre',
+    // グレー文字用。span は class="gray" のときだけ意味を持つ（下の allowedClasses 参照）。
+    'span',
     'ul', 'ol', 'li',
     'blockquote',
     'a', 'img',
@@ -27,7 +29,11 @@ const options: sanitizeHtml.IOptions = {
     video: ['src', 'controls', 'playsinline', 'preload', 'muted', 'loop', 'poster', 'width', 'height'],
     // YouTube 埋め込み用。iframe 自体は下の allowedIframeHostnames で YouTube だけに限定する。
     iframe: ['src', 'width', 'height', 'allow', 'allowfullscreen', 'frameborder', 'title', 'loading', 'referrerpolicy'],
+    // グレー文字。style は許さず（好きな見た目を差し込めると危ない）、決められた合図だけ通す。
+    span: ['class'],
   },
+  // span に付けてよい class は "gray" だけ。それ以外の class は取り除かれる。
+  allowedClasses: { span: ['gray'] },
   // iframe の埋め込み元は YouTube と Spotify だけ許可（それ以外の iframe は丸ごと除去）。
   // Spotify はさらに下の exclusiveFilter で「/embed/ で始まるプレイヤー専用の入口」に限定する。
   allowedIframeHostnames: [

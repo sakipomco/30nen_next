@@ -137,7 +137,10 @@ export function wpautop(raw: string): string {
     block = block.trim();
     if (!block) continue;
     const textOnly = block.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, '').trim();
-    const hasMedia = /<img\b/i.test(block);
+    // 🐛 修正(2026-07-31): 以前は <img> しか見ていなかったため、罫線だけの行
+    // （<hr />）が「中身なし」と判断されて捨てられ、193記事の罫線が消えていた。
+    // 文字を持たないが意味のある部品（画像・罫線・埋め込み・動画）は残す。
+    const hasMedia = /<(?:img|hr|iframe|video|embed)\b/i.test(block);
     if (!textOnly && !hasMedia) continue; // 空・スペーサー段落は捨てる
     if (BLOCK_START_RE.test(block)) {
       out.push(block); // すでにブロック要素
@@ -148,9 +151,24 @@ export function wpautop(raw: string): string {
   return out.join('\n');
 }
 
-// 本文HTMLの総仕上げ: wpautop → 画像URL書き換え → 動画変換 → サニタイズ。
+// WPのグレー文字 <span style="color: #999999"> を、新システムの <span class="gray"> に置き換える。
+// 新システムは style 属性を許していない（好きな見た目を差し込めると危ないため）ので、
+// そのままでは色の指定が落ちて黒文字になってしまう（🐛 2026-07-31 に判明・181記事が該当）。
+// 対象は「グレー系の色」だけ。本文と同じ #333 などは指定が無いのと同じなので、ただの span にする。
+const GRAY_SPAN_RE = /<span[^>]*\bstyle\s*=\s*"[^"]*color:\s*([^;"]+)[^"]*"[^>]*>/gi;
+export function convertGraySpans(html: string): string {
+  return html.replace(GRAY_SPAN_RE, (_whole, color: string) => {
+    const c = color.trim().toLowerCase();
+    const isGray = c === '#999999' || c === '#999' || c === 'gray' || c === 'grey';
+    return isGray ? '<span class="gray">' : '<span>';
+  });
+}
+
+// 本文HTMLの総仕上げ: wpautop → グレー文字 → 画像URL書き換え → 動画変換 → サニタイズ。
 export function transformContent(rawHtml: string): string {
-  return sanitizeArticleHtml(convertVideoEmbeds(rewriteImageUrls(wpautop(rawHtml))));
+  return sanitizeArticleHtml(
+    convertVideoEmbeds(rewriteImageUrls(convertGraySpans(wpautop(rawHtml)))),
+  );
 }
 
 // WPの公開状態 'publish' → 新システムの 'published'。それ以外は 'draft' 扱い。

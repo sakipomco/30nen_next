@@ -95,6 +95,19 @@ body {
 .tiptap-editor :where(p) {
   margin: 0.4em 0;
 }
+/* 編集中も、グレー文字と罫線を公開ページと同じ見た目で見せる。 */
+.tiptap-editor :where(span.gray) {
+  color: #999999;
+}
+.tiptap-editor :where(hr) {
+  border: 0;
+  border-top: 1px solid rgba(21, 12, 12, 0.2);
+  margin: 1.2em 0;
+}
+/* 選んでいる罫線が分かるように（罫線は細いので選択状態が見えにくい） */
+.tiptap-editor :where(hr.ProseMirror-selectednode) {
+  border-top-color: #6366f1;
+}
 /* 本文に挿入した画像。大きすぎる画像も編集枠に収める。選択中は枠線で分かるように。 */
 .tiptap-editor :where(img) {
   max-width: 100%;
@@ -203,6 +216,17 @@ body {
 }
 .article-body :where(strong) {
   font-weight: 700;
+}
+/* グレー文字（エフェメラの定型など）。旧サイトの #999999 をそのまま引き継ぐ。 */
+.article-body :where(span.gray) {
+  color: #999999;
+}
+/* 長い罫線。旧サイトはブラウザ標準の <hr> だったので、サイトの色に合わせた細い線にする。
+   前後のアキは広めにとって「区切り」として見えるようにする。 */
+.article-body :where(hr) {
+  border: 0;
+  border-top: 1px solid rgba(21, 12, 12, 0.2);
+  margin: 2.4em 0;
 }
 /* 本文に貼った動画（アップロードしたmp4）。画像と同じく枠内に収める。 */
 .article-body :where(video) {
