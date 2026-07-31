@@ -117,6 +117,18 @@ body {
   border: 0;
   margin: 0.5em 0;
 }
+/* 編集中のSpotifyプレイヤーも公開ページと同じ高さで見せる（書きながら仕上がりが分かる） */
+.tiptap-editor :where(iframe[src*="open.spotify.com/embed/"]) {
+  aspect-ratio: auto;
+  height: 152px;
+  border-radius: 12px;
+}
+.tiptap-editor :where(iframe[src*="open.spotify.com/embed/album/"]),
+.tiptap-editor :where(iframe[src*="open.spotify.com/embed/playlist/"]),
+.tiptap-editor :where(iframe[src*="open.spotify.com/embed/show/"]),
+.tiptap-editor :where(iframe[src*="open.spotify.com/embed/artist/"]) {
+  height: 352px;
+}
 .tiptap-editor :where(video.ProseMirror-selectednode),
 .tiptap-editor :where(div[data-youtube-video].ProseMirror-selectednode iframe) {
   outline: 2px solid #6366f1;
@@ -204,6 +216,19 @@ body {
   aspect-ratio: 16 / 9;
   border: 0;
   margin: 1.2em 0;
+}
+/* Spotifyのプレイヤーは動画と違って高さが決まっている（16:9だと間延びする）。
+   Spotify公式の推奨に合わせ、曲・エピソードは低く、アルバム等は高くする。 */
+.article-body :where(iframe[src*="open.spotify.com/embed/"]) {
+  aspect-ratio: auto;
+  height: 152px;
+  border-radius: 12px;
+}
+.article-body :where(iframe[src*="open.spotify.com/embed/album/"]),
+.article-body :where(iframe[src*="open.spotify.com/embed/playlist/"]),
+.article-body :where(iframe[src*="open.spotify.com/embed/show/"]),
+.article-body :where(iframe[src*="open.spotify.com/embed/artist/"]) {
+  height: 352px;
 }
 
 /* ── 旅の全行程マップ（本文の [MAP:名札] が変換されたもの）───────────────

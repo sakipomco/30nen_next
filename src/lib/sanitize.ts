@@ -28,8 +28,14 @@ const options: sanitizeHtml.IOptions = {
     // YouTube 埋め込み用。iframe 自体は下の allowedIframeHostnames で YouTube だけに限定する。
     iframe: ['src', 'width', 'height', 'allow', 'allowfullscreen', 'frameborder', 'title', 'loading', 'referrerpolicy'],
   },
-  // iframe の埋め込み元は YouTube のドメインだけ許可（それ以外の iframe は丸ごと除去）。
-  allowedIframeHostnames: ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com'],
+  // iframe の埋め込み元は YouTube と Spotify だけ許可（それ以外の iframe は丸ごと除去）。
+  // Spotify はさらに下の exclusiveFilter で「/embed/ で始まるプレイヤー専用の入口」に限定する。
+  allowedIframeHostnames: [
+    'www.youtube.com',
+    'youtube.com',
+    'www.youtube-nocookie.com',
+    'open.spotify.com',
+  ],
   // リンク・画像で許す URL の種類。javascript: などのスキームは弾く。
   allowedSchemes: ['http', 'https', 'mailto'],
   allowedSchemesByTag: { img: ['http', 'https', 'data'], video: ['http', 'https'] },
@@ -39,8 +45,20 @@ const options: sanitizeHtml.IOptions = {
   },
   // script/style の中身ごと破棄する（タグだけ消して中身を残さない）。
   disallowedTagsMode: 'discard',
-  // src を失った iframe（許可外ドメインだったもの）は空の枠だけ残るので、丸ごと消す。
-  exclusiveFilter: (frame) => frame.tag === 'iframe' && !frame.attribs.src,
+  // iframe の追加チェック:
+  //  ① src を失ったもの（許可外ドメインだった）は空の枠だけ残るので丸ごと消す。
+  //  ② Spotify は「プレイヤー専用の入口（/embed/…）」以外を消す。
+  //     ホスト名を許すだけだと Spotify の普通のページも埋め込めてしまうため、
+  //     通り道をプレイヤーだけに狭めておく。
+  exclusiveFilter: (frame) => {
+    if (frame.tag !== 'iframe') return false;
+    const src = frame.attribs.src;
+    if (!src) return true;
+    if (/^https?:\/\/open\.spotify\.com\//i.test(src)) {
+      return !/^https:\/\/open\.spotify\.com\/embed\//i.test(src);
+    }
+    return false;
+  },
 };
 
 // 記事本文HTMLを無害化して返す。on* イベント属性・script・javascript: URL などは除去される。

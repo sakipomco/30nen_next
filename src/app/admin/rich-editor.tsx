@@ -21,6 +21,7 @@ const YoutubeWithPlainIframe = Youtube.extend({
     ];
   },
 });
+import { Spotify } from './spotify-node';
 import { uploadImage } from './upload-image';
 import { ImagePickerModal } from '@/components/admin/image-picker-modal';
 import { t, type Locale } from '@/lib/i18n';
@@ -49,6 +50,16 @@ function setYoutube(editor: Editor, locale: Locale) {
   // URLがYouTubeとして読み取れない場合、setYoutubeVideo は false を返す
   const ok = editor.chain().focus().setYoutubeVideo({ src: url }).run();
   if (!ok) window.alert(t('editor.youtubeInvalid', locale));
+}
+
+function setSpotify(editor: Editor, locale: Locale) {
+  const input = window.prompt(t('editor.spotifyPrompt', locale), 'https://');
+  if (input === null) return;
+  const url = input.trim();
+  if (url === '') return;
+  // URLがSpotifyとして読み取れない場合、setSpotify は false を返す
+  const ok = editor.chain().focus().setSpotify({ src: url }).run();
+  if (!ok) window.alert(t('editor.spotifyInvalid', locale));
 }
 
 function setLink(editor: Editor, locale: Locale) {
@@ -147,6 +158,11 @@ function Toolbar({ editor, locale }: { editor: Editor; locale: Locale }) {
         active={editor.isActive('youtube')}
         onClick={() => setYoutube(editor, locale)}
       />
+      <ToolbarButton
+        label={t('editor.spotify', locale)}
+        active={editor.isActive('spotify')}
+        onClick={() => setSpotify(editor, locale)}
+      />
     </div>
   );
 }
@@ -196,6 +212,9 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
       // YouTube埋め込み。nocookie＝再生するまでCookieを置かないYouTube公式ドメインを使う。
       // ツールバーの「YouTube」ボタンのほか、本文へのURL貼り付けでも自動で埋め込みになる。
       YoutubeWithPlainIframe.configure({ nocookie: true }),
+      // Spotify埋め込み。ツールバーの「Spotify」ボタンのほか、
+      // 本文へのURL貼り付けでも自動でプレイヤーになる（書き手の要望 2026-07-31）。
+      Spotify,
     ],
     content: initialHTML ?? '',
     immediatelyRender: false,
