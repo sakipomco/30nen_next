@@ -72,8 +72,12 @@ export default async function PublicLayout({
         <SocialIcons size={22} />
       </div>
 
-      {/* コピーライト（控えめに） */}
-      <footer className="px-5 pb-24 pt-4 text-center lg:pb-10">
+      {/* コピーライト（控えめに）
+          PCは画面の高さを固定して中央コラムだけスクロールさせるため、この帯の高さが
+          そのまま「日記を読める窓」を狭くする。13インチ画面で窮屈だったので、
+          PCだけ上下のアキを半分にして帯を薄くした（80px→約40px・SAKIさん指定 2026-07-31）。
+          スマホは全体がスクロールするので従来どおり（pb-24＝右下の丸ボタンとの重なり避け）。 */}
+      <footer className="px-5 pb-24 pt-4 text-center lg:pb-3 lg:pt-3">
         {/* フォントはパンくずと同じゴシック体（SAKIさん指定 2026-07-13） */}
         <small className="gothic text-[0.65rem] leading-relaxed text-[#808080]">
           ©30YEARS ARCADE
