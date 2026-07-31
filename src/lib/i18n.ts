@@ -25,7 +25,7 @@ const dict = {
   'admin.media': { ja: '画像フォルダ', es: 'Imágenes' },
   'admin.profile': { ja: 'myPROFILE', es: 'myPROFILE' },
   // サイトのトップページ（みんなの日記）へ。書く前後に読みに行く導線（書き手の要望 2026-07-31）。
-  'admin.viewSite': { ja: 'サイトのTOPへ', es: 'Ver el sitio' },
+  'admin.viewSite': { ja: '三十年商店TOPへ', es: 'Ver el sitio' },
   'admin.newArticle': { ja: '新しい日記をかく', es: 'Nueva entrada' },
   'admin.logout': { ja: 'ログアウト', es: 'Cerrar sesión' },
   'admin.welcome': { ja: 'ようこそ、{name} さん（{role}）。', es: '¡Bienvenido/a, {name}! ({role})' },
