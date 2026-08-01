@@ -8,6 +8,7 @@ import {
   integer,
   text,
   primaryKey,
+  index,
   type AnySQLiteColumn,
 } from 'drizzle-orm/sqlite-core';
 
@@ -109,6 +110,22 @@ export const authTokens = sqliteTable('auth_tokens', {
   usedAt: text('used_at'), // null=未使用
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 });
+
+// ── 連打よけの記録（レートリミット）───────────────────────────
+// 「誰が・どの操作を・いつ」試したかの短期メモ。1回の試行につき1行入れて、
+// 「直近◯秒に何回あったか」を数えて上限を超えたら断る、という使い方をする。
+// bucket 例: 'contact:ip:1.2.3.4' / 'login:email:foo@example.com'
+// 古い行は src/lib/rate-limit.ts が自動で掃除するので、放っておいても増え続けない。
+export const rateEvents = sqliteTable(
+  'rate_events',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    bucket: text('bucket').notNull(), // 「操作＋相手」を表す名札
+    createdAt: text('created_at').notNull().default(sql`(datetime('now'))`), // UTC
+  },
+  // 「この名札で、この時刻より新しい行」を速く数えるための索引。
+  (table) => [index('rate_events_bucket_created_idx').on(table.bucket, table.createdAt)],
+);
 
 // ── 連載×投稿者の担当名簿（中間テーブル）─────────────────────
 // 1連載＝複数担当を表す。複合主キー（category_id, user_id）で同じ組合せの二重登録を防ぐ。

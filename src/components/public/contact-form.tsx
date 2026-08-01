@@ -58,6 +58,7 @@ export function ContactForm({
               type="text"
               name="name"
               required
+              maxLength={100} // サーバー側の上限と揃える（actions/contact.ts）
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={fieldCls}
@@ -70,6 +71,7 @@ export function ContactForm({
               type="email"
               name="email"
               required
+              maxLength={254}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={fieldCls}
@@ -99,6 +101,7 @@ export function ContactForm({
               name="message"
               rows={6}
               required
+              maxLength={5000}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className={fieldCls}
