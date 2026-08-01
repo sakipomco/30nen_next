@@ -61,6 +61,8 @@ const dict = {
   'article.categoryLabel': { ja: '連載', es: 'Serie' },
   'article.categoryEmpty': { ja: '連載がまだ登録されていません。管理者に連載の作成を依頼してください。', es: 'Aún no hay series registradas. Pide al administrador que cree una serie.' },
   'article.categoryPlaceholder': { ja: '連載を選んでください', es: 'Selecciona una serie' },
+  'article.saved': { ja: '保存しました（{time}）', es: 'Guardado ({time})' },
+  'article.viewPublished': { ja: '公開ページを見る ↗', es: 'Ver la página publicada ↗' },
   'article.saveDraft': { ja: '下書き保存', es: 'Guardar borrador' },
   'article.saving': { ja: '保存中…', es: 'Guardando…' },
   'article.publish': { ja: '投稿する', es: 'Publicar' },

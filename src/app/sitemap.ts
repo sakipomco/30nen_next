@@ -33,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const seriesEntries: MetadataRoute.Sitemap = cats
     .filter((c) => c.slug)
     .map((c) => ({
-      url: `${base}/series/${encodeURIComponent(c.slug!)}`,
+      url: `${base}/shop/${encodeURIComponent(c.slug!)}`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.6,

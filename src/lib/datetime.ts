@@ -20,6 +20,17 @@ export function formatJst(utc: string): string {
   });
 }
 
+// DBのUTC文字列 → 時刻だけの表示（日本時間。例: "14:32"）
+// 投稿フォームの「保存しました（14:32）」用。自動保存の表示と同じ形にそろえている。
+export function formatJstTime(utc: string): string {
+  const d = new Date(utc.replace(' ', 'T') + 'Z');
+  return d.toLocaleTimeString('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 // DBのUTC文字列 → 日時入力欄(datetime-local)の値（'YYYY-MM-DDTHH:MM'・日本時間）
 export function utcToJstInput(utc: string): string {
   const d = new Date(utc.replace(' ', 'T') + 'Z');

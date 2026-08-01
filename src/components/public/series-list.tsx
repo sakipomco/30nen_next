@@ -18,7 +18,7 @@ export function SeriesList({ items }: { items: SeriesItem[] }) {
   return (
     <ul className="grid grid-cols-3 gap-0">
       {items.map((cat) => {
-        const href = cat.slug ? `/series/${cat.slug}` : `/series/${cat.id}`;
+        const href = cat.slug ? `/shop/${cat.slug}` : `/shop/${cat.id}`;
         const img = cat.imagePath || '/line-up.png';
         return (
           <li key={cat.id}>

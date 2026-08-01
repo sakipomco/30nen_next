@@ -151,7 +151,7 @@ export default async function PostPage({
 
   // 連載ページへのリンク先（slug があれば slug・無ければ id）。
   const seriesHref = article.categoryId
-    ? `/series/${article.categorySlug ?? article.categoryId}`
+    ? `/shop/${article.categorySlug ?? article.categoryId}`
     : undefined;
 
   // 足跡（パンくず）の中身。本文の上と下の2か所で同じものを使う。

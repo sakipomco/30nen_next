@@ -41,7 +41,7 @@ export default async function PreviewPage({
   const date = article.publishedAt ? formatJstDate(article.publishedAt) : '（未公開）';
 
   const seriesHref = article.categoryId
-    ? `/series/${article.categorySlug ?? article.categoryId}`
+    ? `/shop/${article.categorySlug ?? article.categoryId}`
     : undefined;
 
   // 本文の [MAP:名札] を折りたたみの地図に置き換える（公開ページと同じ手順）。

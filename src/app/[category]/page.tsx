@@ -1,7 +1,7 @@
 // 旧WordPressの「連載トップ」URLを、新サイトの連載ページへ「301（恒久リダイレクト）」する。
 //
 // 旧URL: https://30nen.com/watashinoreshihen/   （連載スラッグが1つだけ）
-// 新URL: https://30nen.com/series/watashinoreshihen
+// 新URL: https://30nen.com/shop/watashinoreshihen
 //
 // 記事URL（5セグメント）の転送は [category]/[year]/[month]/[day]/[id]/route.ts が担当していたが、
 // 連載トップだけ抜けていて404になっていた（読み手からの指摘 2026-07-31）。
@@ -28,5 +28,5 @@ export default async function OldCategoryUrlRedirect({
 
   // 転送先は相対パスで返す（Nginxの裏側にいるため絶対URLを組み立てない。
   // 記事URLの転送 route.ts と同じ考え方）。
-  permanentRedirect(`/series/${category}`);
+  permanentRedirect(`/shop/${category}`);
 }

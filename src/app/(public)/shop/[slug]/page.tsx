@@ -1,4 +1,6 @@
-// 連載別一覧ページ（/series/[slug]）。連載名・カテゴリー帯・「小商店」画像のリンク先。
+// 連載別一覧ページ（/shop/[slug]）。連載名・カテゴリー帯・「小商店」画像のリンク先。
+//  - 正式なURLは /shop/○○（旧サイトと同じ形。書き手がSNSに貼っていたリンクをそのまま生かす）。
+//    移行直後だけ使っていた /series/○○ は src/app/series/[slug]/route.ts で /shop/○○ へ転送する。
 //  - [slug] には「slug」または「id（数字）」が入る（連載に slug が無ければ id でリンクするため）。
 //  - 構成: 足跡（三十年商店＞連載名）→ カテゴリー帯（白窓＋画像＋連載名＋ヨミガナ）
 //          → その連載の記事一覧（新しい順・2列・12件/ページ）→ ページ送り。
@@ -87,7 +89,7 @@ export default async function SeriesPage({
   const authors = await getPublicAuthorsForCategory(category.id);
 
   // ページ送りの土台URL（slug があれば slug・無ければ id）。
-  const basePath = `/series/${category.slug ?? category.id}`;
+  const basePath = `/shop/${category.slug ?? category.id}`;
 
   return (
     <div>
@@ -112,7 +114,7 @@ export default async function SeriesPage({
         <ul className="grid grid-cols-1 gap-x-1 gap-y-8 lg:grid-cols-2">
           {children.map((c) => (
             <li key={c.id}>
-              <Link href={c.slug ? `/series/${c.slug}` : `/series/${c.id}`} className="group block">
+              <Link href={c.slug ? `/shop/${c.slug}` : `/shop/${c.id}`} className="group block">
                 {/* ロゴは切り抜かず元の縦横比のまま幅いっぱいに（記事カードと違い写真でないため） */}
                 <Image
                   src={c.imagePath || '/line-up.png'}

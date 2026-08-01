@@ -3,7 +3,7 @@
 // 投稿フォームから呼ぶ。⚠ どれも先頭で requireUser() を呼び、ログイン中の人だけが実行できるようにする。
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 import { requireUser } from '@/auth/session';
 import type { PublicUser } from '@/db/users';
 import {
@@ -84,6 +84,14 @@ async function resolveCategory(
 // ── 保存（新規作成・更新の両方を兼ねる）─────────────────────
 // フォームに id があれば更新、無ければ新規作成（＝自動保存で作られた下書きの id を
 // 受け取れば、手動「投稿する」でも同じ記事を更新でき、重複記事ができない）。
+//
+// 保存が終わったら、一覧ではなく「その記事の編集ページ」にとどまる（書き手FB 2026-08-01）。
+//  ・投稿したあと、公開ページを見ながら細かく直したい、という要望のため。
+//  ・新規作成の画面にそのまま残さないのは、画面の見た目（見出し・ボタン・自動保存の可否）が
+//    「新規」のままになってしまい、公開済みなのに自動保存を試みるなどのズレが出るから。
+//    できたばかりの記事の編集ページへ移せば、すべて正しい状態で表示される。
+//  ・`?saved=1` は「保存しました（時刻）」を出すための合図。
+//  ・replace（履歴を置き換え）にして、保存のたびに「戻る」の履歴が積み上がらないようにする。
 export async function saveArticleAction(
   _prevState: ArticleFormState,
   formData: FormData,
@@ -104,6 +112,9 @@ export async function saveArticleAction(
   const category = await resolveCategory(user, formData);
   if ('error' in category) return { error: category.error };
 
+  // 保存後にとどまる先（＝この記事の編集ページ）。新規のときは作成後に決まる。
+  let savedId = rawId;
+
   if (hasId) {
     // 所有者チェック（R-01）：本人の記事か、管理者でなければ更新させない。
     const existing = await getArticleById(rawId);
@@ -122,7 +133,7 @@ export async function saveArticleAction(
       return { error: '記事が見つかりませんでした。' };
     }
   } else {
-    await createArticle({
+    const created = await createArticle({
       title,
       content,
       categoryId: category.categoryId,
@@ -131,11 +142,12 @@ export async function saveArticleAction(
       publishedAt: publishedAtFromForm(formData), // 未指定なら公開時に「今」を自動補完
       authorId: user.id, // 書いた人＝今ログイン中の人
     });
+    savedId = created.id;
   }
 
   revalidatePath('/admin'); // 一覧の表示を最新に
   revalidatePath('/'); // 公開トップページの表示も更新
-  redirect('/admin');
+  redirect(`/admin/articles/${savedId}/edit?saved=1`, RedirectType.replace);
 }
 
 // ── 自動保存（下書き）─────────────────────────────────────

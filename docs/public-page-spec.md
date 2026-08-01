@@ -38,7 +38,7 @@
 | ルートレイアウトの更新 | ✅ 完了 | フォント（Zen Old Mincho・Noto Serif JP）・メタデータ・`lang="ja"` を設定 |
 | ロゴ画像のコピー | ✅ 完了 | `30nen_logo_noren_plus.jpg` / `30nen_logo.png` を `public/` にコピー |
 | 旧 `page.tsx` の削除 | ✅ 完了 | 新しい `(public)/page.tsx` との衝突を防ぐために削除 |
-| フォルダ構造の作成 | ✅ 完了 | `src/app/(public)/posts/[slug]/` と `src/app/(public)/series/[slug]/` を作成 |
+| フォルダ構造の作成 | ✅ 完了 | `src/app/(public)/posts/[slug]/` と `src/app/(public)/series/[slug]/` を作成（連載ページは 2026-08-01 に `(public)/shop/[slug]/` へ改名） |
 
 ---
 
@@ -176,7 +176,8 @@ This site is protected by reCAPTCHA and the Google Privacy Policy and Terms of S
 - 各連載を画像リンクで表示（正方形サムネイル）
   - 連載に `imagePath` が設定されていれば、その画像を表示
   - 設定されていなければ、`public/line-up.png` を代替表示（`reference/…/common/jpg/line-up.png` をコピー）
-- リンク先: `/series/{slug}` または `/series/{id}`（後で記事詳細・連載ページを作るとき）
+- リンク先: `/shop/{slug}` または `/shop/{id}`（後で記事詳細・連載ページを作るとき）
+  - ※ 連載ページのURLは一時 `/series/…` だったが、2026-08-01 に旧サイトと同じ `/shop/…` へ戻した（旧 `/series/…` は301転送）
 
 #### 検索
 
@@ -314,9 +315,9 @@ src/
       posts/
         [slug]/
           page.tsx      ← 記事詳細（後回し）
-      series/
+      shop/
         [slug]/
-          page.tsx      ← 連載別一覧（後回し）
+          page.tsx      ← 連載別一覧（後回し。2026-08-01までは series/ という名前だった）
   components/           ← （新設）共通UIパーツ置き場
     article-card.tsx    ← 記事カード（再利用のため分離）
     hamburger-menu.tsx  ← ハンバーガーメニュー（Client Component）
@@ -388,7 +389,7 @@ npx eslint src/        # Lint チェック
 ## 13. 後回しにしたもの（フェーズ2以降）
 
 - 記事詳細ページ（`/posts/[slug]`）
-- 連載別一覧ページ（`/series/[slug]`）
+- 連載別一覧ページ（`/shop/[slug]`）
 - 著者別一覧ページ
 - 著者の顔写真アップロード機能
 - 月別アーカイブ機能
@@ -537,7 +538,7 @@ npx eslint src/        # Lint チェック
 - ラベル（オビ）: 「小商店」
 - **親連載（トップ階層・`parentId` が NULL のカテゴリー）の画像を3列で並べる**。並び順は管理画面の `sortOrder` 順（現状の term_order 相当）。「未分類」は除く。
 - 各画像 = 連載の `imagePath`。**未設定なら `line-up.png` で代替**。
-- 画像クリックで連載ページ `/series/{slug}`（または `/series/{id}`）へ。**連載ページ本体はこのフェーズでは作らない**（後回し）。
+- 画像クリックで連載ページ `/shop/{slug}`（または `/shop/{id}`）へ。**連載ページ本体はこのフェーズでは作らない**（後回し）。
 - **デザイン**: 新デザイン案では各画像のまわりに**トンボ（＋・L字の印刷見当マーク）風の飾り**を配し、活版印刷のような味わいを出している（装飾要素・実装時に再現を検討）。
 
 #### 検索
