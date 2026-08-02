@@ -10,11 +10,11 @@
 // トップへ戻る導線は、日記ページ上部のパンくず「三十年商店」が担う。
 
 import { usePathname } from 'next/navigation';
+import { isArticlePath } from './article-path';
 
 export function SidebarLeftSlot({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isArticlePage =
-    pathname.startsWith('/posts/') || pathname.startsWith('/preview/');
+  const isArticlePage = isArticlePath(pathname);
   return (
     <aside
       className={`no-scrollbar lg:min-h-0 lg:overflow-y-auto ${

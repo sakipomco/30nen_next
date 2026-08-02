@@ -4,7 +4,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { SOCIAL_LINKS } from './nav-links';
-import { renderHiraTight } from './hira-tight';
+import { LeadTextSlot } from './lead-text-slot';
 import { ContactFormSlot } from './contact-form-slot';
 import type { ContactRecipient } from './contact-form';
 
@@ -51,14 +51,9 @@ export function SidebarLeft({
         />
       </Link>
 
-      {/* リードテキスト（改行を活かす・少し太め・ひらがな部分だけ字間を詰める）
-          ロゴ下のキャッチとのアキ（いずれもSAKIさん指定 2026-07-29・切替当日）:
-          - PC は mt-12（48px）。24pxでは近すぎた
-          - スマホは mt-6（24px）＝その半分。のれんロゴを80%に縮めたぶん、
-            48pxだと離れすぎて見えるため */}
-      <p className="serif mt-6 whitespace-pre-line text-sm font-medium leading-6 text-[#333] lg:mt-12">
-        {renderHiraTight(leadText)}
-      </p>
+      {/* リードテキスト（日記1本を読むページでは出さない＝LeadTextSlot が出し分け。
+          そのページの左コラムはリードの代わりにお便りフォームを見せる） */}
+      <LeadTextSlot text={leadText} />
 
       {/* SNSリンク（instagram ｜ x）。「｜」両脇のアキは半分に詰めた（gap-3→gap-1.5・SAKIさん指定 2026-07-13） */}
       <div className="serif mt-3 flex items-center gap-1.5 text-sm">

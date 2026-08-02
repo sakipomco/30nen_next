@@ -31,7 +31,11 @@ export default async function PublicLayout({
   const leadText = await getLeadText();
   const archive = await listArchiveMonths();
   // お便りフォームの宛先プルダウン用＝小商店と同じ連載一覧（id と名前だけ）。
-  const recipients = series.map((s) => ({ id: s.id, name: s.name }));
+  // ただし「店主よりお知らせ」(slug: oshirase) は店主が書く連載なので宛先には出さない
+  //（宛先「店主」と重なるため・SAKIさん指定 2026-08-02）。
+  const recipients = series
+    .filter((s) => s.slug !== 'oshirase')
+    .map((s) => ({ id: s.id, name: s.name }));
 
   return (
     <div className="public-root flex-1 bg-white text-[#333] lg:flex lg:h-screen lg:flex-none lg:flex-col lg:overflow-hidden">
