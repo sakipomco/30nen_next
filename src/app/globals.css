@@ -63,28 +63,58 @@ body {
 /* リッチエディタ(TipTap)の中身の見た目。
    Tailwind は見出し・箇条書きの装飾をリセットするので、編集エリア内だけ復活させる。 */
 /* 本文を書く欄は公開ページと同じ明朝体（Zen Old Mincho）にする。
-   書いている字と公開後の字を揃えるため（SAKIさん指定 2026-07-31）。 */
+   書いている字と公開後の字を揃えるため（SAKIさん指定 2026-07-31）。
+   さらに、文字の大きさ・行間・段落のアキも公開ページ（下の .article-body）と
+   同じ値にそろえてある（SAKIさん指定 2026-08-05）。以前は編集画面だけ
+   行間1.75・段落のアキ0.4em と詰まっていたため、Enter1回とEnter2回の差が
+   編集中はほとんど見えず、公開して初めてアキの差に気づく状態だった。
+   ※この下の値を変えるときは .article-body 側も一緒に直すこと。 */
 .tiptap-editor {
   font-family: 'Zen Old Mincho', serif;
+  font-kerning: normal;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: justify;
+  line-height: 2;
+  letter-spacing: -0.02em;
+  color: #333;
+}
+/* スマホは公開ページと同じく1px大きく */
+@media (max-width: 767px) {
+  .tiptap-editor {
+    font-size: 15px;
+  }
 }
 .tiptap-editor :where(h2) {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  margin: 0.6em 0 0.3em;
+  line-height: 1.5;
+  margin: 1.6em 0 0.6em;
+}
+.tiptap-editor :where(h3) {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 1.4em 0 0.5em;
 }
 .tiptap-editor :where(ul) {
   list-style: disc;
   padding-left: 1.4em;
+  margin: 1em 0;
 }
 .tiptap-editor :where(ol) {
   list-style: decimal;
   padding-left: 1.4em;
+  margin: 1em 0;
+}
+.tiptap-editor :where(li) {
+  margin: 0.3em 0;
 }
 .tiptap-editor :where(blockquote) {
   border-left: 3px solid #d4d4d8;
-  padding-left: 0.8em;
+  padding-left: 1em;
   color: #52525b;
-  margin: 0.5em 0;
+  margin: 1.2em 0;
 }
 /* リンク：編集中も「リンクになっている」と分かるよう、公開ページと同じ青＋下線にする。 */
 .tiptap-editor :where(a) {
@@ -93,7 +123,16 @@ body {
   cursor: pointer;
 }
 .tiptap-editor :where(p) {
-  margin: 0.4em 0;
+  margin: 1em 0;
+}
+/* 「一行空け」（Enterを2回押してできる空の段落）。
+   編集中の空の段落には ProseMirror がカーソル用の <br> を入れるので、公開ページのように
+   高さを0にはできない（0にするとカーソルが見えず、その行をクリックできなくなる）。
+   そこで高さは1行ぶん残したまま、上下のアキを打ち消して、
+   公開ページと同じ「2em ぶんのアキ」に見えるようにする。 */
+.tiptap-editor :where(p:has(> br.ProseMirror-trailingBreak:only-child)) {
+  margin-top: -1em;
+  margin-bottom: -1em;
 }
 /* 編集中も、グレー文字と罫線を公開ページと同じ見た目で見せる。 */
 .tiptap-editor :where(span.gray) {
@@ -102,7 +141,7 @@ body {
 .tiptap-editor :where(hr) {
   border: 0;
   border-top: 1px solid rgba(21, 12, 12, 0.2);
-  margin: 1.2em 0;
+  margin: 2.4em 0;
 }
 /* 選んでいる罫線が分かるように（罫線は細いので選択状態が見えにくい） */
 .tiptap-editor :where(hr.ProseMirror-selectednode) {
@@ -113,7 +152,9 @@ body {
   max-width: 100%;
   height: auto;
   /* 角丸はつけない（公開ページの見た目と揃える） */
-  margin: 0.5em 0;
+  /* 枠より小さい写真は公開ページと同じく中央に置く */
+  display: block;
+  margin: 1.2em auto;
 }
 .tiptap-editor :where(img.ProseMirror-selectednode) {
   outline: 2px solid #6366f1;
@@ -122,13 +163,13 @@ body {
 .tiptap-editor :where(video) {
   max-width: 100%;
   height: auto;
-  margin: 0.5em 0;
+  margin: 1.2em 0;
 }
 .tiptap-editor :where(iframe) {
   width: 100%;
   aspect-ratio: 16 / 9;
   border: 0;
-  margin: 0.5em 0;
+  margin: 1.2em 0;
 }
 /* 編集中のSpotifyプレイヤーも公開ページと同じ高さで見せる（書きながら仕上がりが分かる） */
 .tiptap-editor :where(iframe[src*="open.spotify.com/embed/"]) {

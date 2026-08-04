@@ -234,8 +234,10 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
     onUpdate: ({ editor }) => setHtml(editor.getHTML()),
     editorProps: {
       attributes: {
+        // 文字の大きさ・行間はここでは指定しない（text-base / leading-7 は外した）。
+        // 公開ページと同じ値を globals.css の .tiptap-editor でまとめて当てている。
         class:
-          'tiptap-editor min-h-64 rounded-md border border-zinc-300 px-3 py-2 text-base leading-7 outline-none focus:border-zinc-500',
+          'tiptap-editor min-h-64 rounded-md border border-zinc-300 px-3 py-2 outline-none focus:border-zinc-500',
       },
       handleDrop(view, event) {
         const dragEvent = event as DragEvent;
