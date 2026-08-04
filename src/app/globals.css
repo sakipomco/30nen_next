@@ -167,11 +167,19 @@ body {
 }
 /* 中身が空の段落＝書き手が投稿画面で入れた「一行空け」。
    空のままだと高さ0になり、上下の余白も隣とくっついて（マージンの相殺）
-   ふつうの改行と同じ見た目になるので、1行ぶんの高さを持たせる。
+   ふつうの改行と同じ見た目になってしまう。そこで ::before で中身を持たせ、
+   上下のアキ（1em ずつ）が相殺されずに残るようにする＝アキは計2em。
+   空の行そのものの高さは 0（line-height: 0 と vertical-align: top で行の高さを消す）。
+   以前は1行ぶん（30px）持たせていたが合計60px＝ふつうの段落替えの4倍で
+   開きすぎだった（SAKIさん指定 2026-08-05）。
    末尾の空段落は本文の下に余分なアキを作るだけなので対象外。 */
+.article-body :where(p:empty:not(:last-child)) {
+  line-height: 0;
+}
 .article-body :where(p:empty:not(:last-child))::before {
   content: '';
   display: inline-block;
+  vertical-align: top;
 }
 .article-body :where(h2) {
   font-size: 1.3rem;
