@@ -78,6 +78,8 @@ body {
   line-height: 2;
   letter-spacing: -0.02em;
   color: #333;
+  /* 公開ページと同じく、長いURLなどを枠内で折り返す */
+  overflow-wrap: break-word;
 }
 /* スマホは公開ページと同じく1px大きく */
 @media (max-width: 767px) {
@@ -196,6 +198,10 @@ body {
   text-align: justify; /* 両端そろえ（現行サイトに合わせる） */
   line-height: 2;
   letter-spacing: -0.02em;
+  /* URLのような空白を含まない長い文字列は、そのままだと途中で折り返せず
+     枠からはみ出して画面の外に切れてしまう（特にスマホ）。
+     1行に収まらないときだけ途中で折り返させる。 */
+  overflow-wrap: break-word;
 }
 /* スマホは現行サイトと同じく1px大きく（現行CSS: p{font-size:1.5rem} @767px以下。SAKIさん指定 2026-07-10） */
 @media (max-width: 767px) {
