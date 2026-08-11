@@ -43,6 +43,31 @@ function getMediaFiles(dt: DataTransfer | null): File[] {
   return Array.from(dt.files).filter(isInsertableMedia);
 }
 
+// よそからコピーした文字を貼り付けたときに、太字・斜体の「飾り」を落とす。
+// （SAKIさん指定 2026-08-11）
+// Instagram・Google検索結果・note・メモアプリなどからコピーすると、見た目の飾りごと
+// 貼り付けられ、さらにその直後に打った文字まで太字を引き継いでしまう。書き手は太字ボタンを
+// 押していないのに本文が太くなる、という不具合の原因はこれ。
+// 貼り付けの瞬間に <b>/<strong>/<i>/<em> と style の font-weight/font-style を取り除く。
+// 中の文字・改行・リンクはそのまま残るので、文章が消えることはない。
+// 自分で太字にしたいときは、貼り付けたあとに「太字」ボタンを押せばよい。
+function stripBoldFromPastedHtml(html: string): string {
+  // 貼り付けはブラウザの中だけで起きるが、念のためサーバー側では何もしない
+  if (typeof window === 'undefined') return html;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  // タグだけほどいて中身（文字）は残す
+  for (const el of Array.from(doc.body.querySelectorAll('b, strong, i, em'))) {
+    el.replaceWith(...Array.from(el.childNodes));
+  }
+  // style="font-weight:700" のような書き方（Googleドキュメント等）も消す
+  for (const el of Array.from(doc.body.querySelectorAll<HTMLElement>('[style]'))) {
+    el.style.removeProperty('font-weight');
+    el.style.removeProperty('font-style');
+    if (el.getAttribute('style')?.trim() === '') el.removeAttribute('style');
+  }
+  return doc.body.innerHTML;
+}
+
 function setYoutube(editor: Editor, locale: Locale) {
   const input = window.prompt(t('editor.youtubePrompt', locale), 'https://');
   if (input === null) return;
@@ -128,6 +153,14 @@ function Toolbar({ editor, locale }: { editor: Editor; locale: Locale }) {
         label={t('editor.italic', locale)}
         active={editor.isActive('italic')}
         onClick={() => editor.chain().focus().toggleItalic().run()}
+      />
+      {/* 意図せず太字（斜体）になってしまった所を元に戻すボタン。
+          範囲を選んで押せばその範囲、選ばずに押せば「ここから先に打つ文字」の飾りが外れる。
+          リンクやグレー文字はそのまま残す（消したいのは太字・斜体だけ）。 */}
+      <ToolbarButton
+        label={t('editor.clearBold', locale)}
+        active={false}
+        onClick={() => editor.chain().focus().unsetBold().unsetItalic().run()}
       />
       <ToolbarButton
         label={t('editor.heading', locale)}
@@ -248,6 +281,8 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
         for (const file of files) void uploadIntoView(view, file, dropped?.pos);
         return true;
       },
+      // 貼り付けた文字から太字・斜体の飾りを落とす（上の stripBoldFromPastedHtml 参照）
+      transformPastedHTML: stripBoldFromPastedHtml,
       handlePaste(view, event) {
         const files = getMediaFiles((event as ClipboardEvent).clipboardData);
         if (files.length === 0) return false;

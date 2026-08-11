@@ -133,6 +133,7 @@ const dict = {
   'editor.linkPrompt': { ja: 'リンク先のURLを入力してください（空欄にすると解除します）', es: 'Ingresa la URL del enlace (déjalo vacío para eliminarlo)' },
   'editor.bold': { ja: '太字', es: 'Negrita' },
   'editor.italic': { ja: '斜体', es: 'Cursiva' },
+  'editor.clearBold': { ja: '太字・斜体を消す', es: 'Quitar negrita y cursiva' },
   'editor.heading': { ja: '見出し', es: 'Título' },
   'editor.bulletList': { ja: '箇条書き', es: 'Lista' },
   'editor.orderedList': { ja: '番号付き', es: 'Lista numerada' },
