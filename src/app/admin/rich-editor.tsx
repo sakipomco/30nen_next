@@ -154,14 +154,6 @@ function Toolbar({ editor, locale }: { editor: Editor; locale: Locale }) {
         active={editor.isActive('italic')}
         onClick={() => editor.chain().focus().toggleItalic().run()}
       />
-      {/* 意図せず太字（斜体）になってしまった所を元に戻すボタン。
-          範囲を選んで押せばその範囲、選ばずに押せば「ここから先に打つ文字」の飾りが外れる。
-          リンクやグレー文字はそのまま残す（消したいのは太字・斜体だけ）。 */}
-      <ToolbarButton
-        label={t('editor.clearBold', locale)}
-        active={false}
-        onClick={() => editor.chain().focus().unsetBold().unsetItalic().run()}
-      />
       <ToolbarButton
         label={t('editor.heading', locale)}
         active={editor.isActive('heading', { level: 2 })}
