@@ -68,10 +68,37 @@ function stripBoldFromPastedHtml(html: string): string {
   return doc.body.innerHTML;
 }
 
+// 入力箱に貼られたURLの「https:// の二重付き」を直す。
+//  例: "https://https://30nen.com/posts/2783" → "https://30nen.com/posts/2783"
+//  もとの原因は、入力箱にあらかじめ "https://" を入れていたこと。パソコンなら開いた瞬間に
+//  文字が選択されるので上書きされるが、**スマホ・タブレットではタップした位置にカーソルが
+//  立つだけ**なので、そこへURLを貼ると先入れの "https://" とつながってしまう。
+//  書き手の多くがスマホ・タブレットで書いているため、この壊れリンクが繰り返し生まれていた
+//  （2026-08-13 SAKIさん報告：かきぬまさんの8785から2783・7886へ飛べない）。
+//  先入れはやめたうえで、念のためここでも直す。
+function normalizeUrl(input: string): string {
+  let url = input.trim();
+  if (url === '') return '';
+  // 先頭に重なった "https://" を取り除く。ブラウザのアドレス欄から写すとコロンが落ちて
+  // "https://https//30nen.com/..." の形になるので、それも拾う。
+  let before = '';
+  while (before !== url) {
+    before = url;
+    url = url.replace(/^https?:\/\/(?=https?:?\/\/)/i, '');
+  }
+  // コロンが落ちた "https//30nen.com" を補う
+  url = url.replace(/^(https?)\/\//i, '$1://');
+  // サイト内リンク（/posts/123）・ページ内リンク・メール・電話はそのまま
+  if (/^(\/|#|mailto:|tel:)/i.test(url)) return url;
+  // http:// などの頭書きが無ければ https:// を補う
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) url = `https://${url}`;
+  return url;
+}
+
 function setYoutube(editor: Editor, locale: Locale) {
-  const input = window.prompt(t('editor.youtubePrompt', locale), 'https://');
+  const input = window.prompt(t('editor.youtubePrompt', locale), '');
   if (input === null) return;
-  const url = input.trim();
+  const url = normalizeUrl(input);
   if (url === '') return;
   // URLがYouTubeとして読み取れない場合、setYoutubeVideo は false を返す
   const ok = editor.chain().focus().setYoutubeVideo({ src: url }).run();
@@ -79,9 +106,9 @@ function setYoutube(editor: Editor, locale: Locale) {
 }
 
 function setSpotify(editor: Editor, locale: Locale) {
-  const input = window.prompt(t('editor.spotifyPrompt', locale), 'https://');
+  const input = window.prompt(t('editor.spotifyPrompt', locale), '');
   if (input === null) return;
-  const url = input.trim();
+  const url = normalizeUrl(input);
   if (url === '') return;
   // URLがSpotifyとして読み取れない場合、setSpotify は false を返す
   const ok = editor.chain().focus().setSpotify({ src: url }).run();
@@ -90,12 +117,9 @@ function setSpotify(editor: Editor, locale: Locale) {
 
 function setLink(editor: Editor, locale: Locale) {
   const prev = editor.getAttributes('link').href as string | undefined;
-  const input = window.prompt(
-    t('editor.linkPrompt', locale),
-    prev ?? 'https://',
-  );
+  const input = window.prompt(t('editor.linkPrompt', locale), prev ?? '');
   if (input === null) return;
-  const url = input.trim();
+  const url = normalizeUrl(input);
 
   if (url === '') {
     editor.chain().focus().extendMarkRange('link').unsetLink().run();
