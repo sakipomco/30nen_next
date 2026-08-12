@@ -2,7 +2,7 @@
 // 「連載」＝このサイトでの「カテゴリ」の呼び名。親子（入れ子）構造あり（parentId が親の id）。
 // 担当名簿＝「この書き手は、この連載の担当」を記録する表。1人＝1連載の運用。
 
-import { eq, asc, sql } from 'drizzle-orm';
+import { eq, asc, desc, sql } from 'drizzle-orm';
 import { db } from './index';
 import { categories, categoryAuthors, articles, users } from './schema';
 import { toPublicUser, type PublicUser } from './users';
@@ -41,12 +41,15 @@ export async function listCategories(): Promise<Category[]> {
 
 // ── Read：ある連載の「子連載」一覧（親ページで子をカバー画像で並べる用）──
 // 例：「度々の旅」（親・記事なしの器）を開くと、子の「山陰編」などをカバーで見せる。
+// 並びは「新しく作った子連載が先（左上）」＝id の大きい順（SAKIさん指定 2026-08-12）。
+// あとから作った子連載ほど id が大きくなるので、管理画面の「並び順」の数字を
+// 付け替えなくても、新しい「〇〇編」が自動で左上に入り、古いものが下に送られる。
 export async function getChildCategories(parentId: number): Promise<Category[]> {
   return db
     .select()
     .from(categories)
     .where(eq(categories.parentId, parentId))
-    .orderBy(asc(categories.sortOrder), asc(categories.id));
+    .orderBy(desc(categories.id));
 }
 
 // ── Read：1件（id で取得）────────────────────────────────────
