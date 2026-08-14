@@ -15,7 +15,7 @@ import {
 } from '@/db/articles';
 import {
   getCategoryById,
-  getCategoriesForUser,
+  getWritableCategoryIds,
   setUserCategory,
 } from '@/db/categories';
 import { jstInputToUtc } from '@/lib/datetime';
@@ -53,6 +53,8 @@ function resolveFeaturedImage(formData: FormData, content: string): string | nul
 //  - 連載は必須（未分類を作らない）。
 //  - 投稿者(author)で担当が未登録なら、選んだ連載を担当として記録（次回から自動）。
 //  - 投稿者で担当が登録済みなら、その範囲内からしか選べない。
+//    「範囲」＝担当連載＋その子連載（getWritableCategoryIds）。投稿フォームの
+//    プルダウンとまったく同じ判定を使う（片方だけ直すと食い違うため）。
 //  - 管理者(admin)は全連載から自由に選べる（担当としては記録しない）。
 // 成功なら { categoryId }、失敗なら { error } を返す。
 async function resolveCategory(
@@ -69,11 +71,11 @@ async function resolveCategory(
   }
 
   if (user.role === 'author') {
-    const assigned = await getCategoriesForUser(user.id);
-    if (assigned.length === 0) {
+    const writable = await getWritableCategoryIds(user.id);
+    if (writable.size === 0) {
       // 担当未登録 → 選んだ連載を担当として記録（A案：選んでからだけ投稿可）
       await setUserCategory(user.id, categoryId);
-    } else if (!assigned.some((c) => c.id === categoryId)) {
+    } else if (!writable.has(categoryId)) {
       return { error: '担当の連載の中から選んでください。' };
     }
   }

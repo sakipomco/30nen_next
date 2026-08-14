@@ -213,18 +213,10 @@ export async function listSelectableCategories(user: {
   id: number;
   role: 'admin' | 'author';
 }): Promise<{ id: number; name: string; depth: number }[]> {
+  const all = await listCategories();
   if (user.role === 'author') {
-    const assigned = await getCategoriesForUser(user.id);
-    if (assigned.length > 0) {
-      const all = await listCategories();
-      // 担当連載＋その子孫を集める。担当そのものが子孫にも含まれうるので
-      // **Set で重複を取り除く**（例: 度々の旅・山陰編・欧州編 を担当していると
-      // 「度々の旅の子孫」として山陰編・欧州編が二重に出てしまうため）。
-      const ids = new Set<number>();
-      for (const c of assigned) {
-        ids.add(c.id);
-        for (const d of getDescendantIds(all, c.id)) ids.add(d);
-      }
+    const ids = await getWritableCategoryIds(user.id, all);
+    if (ids.size > 0) {
       // 並びは連載の並び順（listCategories の順）に合わせる。
       // 子は親の下に来るので、親を担当している場合だけ字下げして分かりやすくする。
       return all
@@ -237,12 +229,36 @@ export async function listSelectableCategories(user: {
         }));
     }
   }
-  const all = await listCategories();
   return buildCategoryTree(all).map((c) => ({
     id: c.id,
     name: c.name,
     depth: c.depth,
   }));
+}
+
+// その書き手が「書いてよい」連載の id 一式（担当連載＋その子孫）。担当未登録なら空。
+//
+// ★ 投稿フォームの選択肢と、保存するときの合否判定は必ずこれを使う ★
+//   以前は「プルダウンを作る側」だけが子孫を含めていて、「保存する側」は
+//   担当そのものしか許していなかった。そのため、あとから作った子連載は
+//   **画面には出るのに、投稿を押すと「担当の連載の中から選んでください。」で
+//   はじかれる**という食い違いが起きていた
+//   （2026-08-15 minowanaokoさんから「瀬戸内海編が選べない」と連絡があり判明）。
+export async function getWritableCategoryIds(
+  userId: number,
+  cats?: Category[],
+): Promise<Set<number>> {
+  const all = cats ?? (await listCategories());
+  const assigned = await getCategoriesForUser(userId);
+  // 担当そのものが子孫にも含まれうるので **Set で重複を取り除く**
+  // （例: 度々の旅・山陰編・欧州編 を担当していると、「度々の旅の子孫」として
+  // 山陰編・欧州編が二重に出てしまうため）。
+  const ids = new Set<number>();
+  for (const c of assigned) {
+    ids.add(c.id);
+    for (const d of getDescendantIds(all, c.id)) ids.add(d);
+  }
+  return ids;
 }
 
 // ── 担当名簿（category_authors）──────────────────────────────
