@@ -3,16 +3,17 @@
 //
 // 流れ：ブラウザが画像ファイルを送る → ログイン確認 → 種類を検査
 //   → 大きい写真は自動で「軽く」する（長辺を縮小＋圧縮。スマホの向きも補正）
+//   → 同じ人が前に上げたのと中身が同じなら、保存せずそのときのURLを返す（二重保存を防ぐ）
 //   → public/uploads/YYYY/MM/ にユニークな名前で保存 → 公開URL（/uploads/...）を返す。
 //
 // ※ public/ に置いたファイルは、そのURL（先頭が "/"）でそのまま配信される（Next.jsの仕様）。
 //    保存したファイル自体はGit管理しない（.gitignore で /public/uploads を除外済み）。
 
-import { randomBytes } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { createHash, randomBytes } from 'node:crypto';
+import { access, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { getCurrentUser } from '@/auth/session';
-import { recordUpload } from '@/db/uploads';
+import { findOwnUploadByHash, recordUpload } from '@/db/uploads';
 import { shrinkImage } from '@/lib/image';
 
 // 受け付けるファイルの種類（MIMEタイプ → 保存時の拡張子）。
@@ -80,7 +81,24 @@ export async function POST(request: Request) {
     );
   }
 
-  // ⑤ 保存先を決める：/uploads/年/月/ ランダム名.拡張子
+  // ⑤ 「同じ写真をもう上げていないか」を指紋（SHA-256）で照合する。
+  //    軽くした後のバイト列から取るので、同じ写真なら必ず同じ指紋になる。
+  //    例）本文にドラッグ → アイキャッチでも端末から同じ写真を選ぶ、で2枚できるのを防ぐ。
+  //    ※ 他人の写真は使い回さない（持ち主が消すと別の人の記事から画像が消えるため）。
+  const contentHash = createHash('sha256').update(bytes).digest('hex');
+  const existing = await findOwnUploadByHash(contentHash, user.id);
+  if (existing) {
+    // 台帳に残っていても実ファイルが無い場合（サーバー側で直接消したなど）は
+    // 使い回さず、下でふつうに保存し直す＝リンク切れのURLを返さないための保険。
+    const existingFile = path.join(process.cwd(), 'public', existing);
+    const stillThere = await access(existingFile).then(
+      () => true,
+      () => false,
+    );
+    if (stillThere) return Response.json({ url: existing });
+  }
+
+  // ⑥ 保存先を決める：/uploads/年/月/ ランダム名.拡張子
   //    年月フォルダで分けると、枚数が増えても1フォルダに集中しない（旧WordPressと同じ考え方）。
   const now = new Date();
   const yyyy = String(now.getFullYear());
@@ -90,19 +108,19 @@ export async function POST(request: Request) {
   const relDir = path.posix.join('uploads', yyyy, mm); // URL用（/区切り）
   const publicDir = path.join(process.cwd(), 'public', 'uploads', yyyy, mm);
 
-  // ⑥ ファイルとして書き出す
+  // ⑦ ファイルとして書き出す
   await mkdir(publicDir, { recursive: true });
   await writeFile(path.join(publicDir, filename), bytes);
 
-  // ⑦ 「誰が上げたか」を台帳に記録する（画像フォルダ一覧で“自分の写真だけ削除”に使う）。
+  // ⑧ 「誰が上げたか」を台帳に記録する（画像フォルダ一覧で“自分の写真だけ削除”に使う）。
   //    記録に失敗しても画像保存自体は成功しているので、本処理は止めない（持ち主不明になるだけ）。
   const url = '/' + path.posix.join(relDir, filename);
   try {
-    await recordUpload({ path: url, uploadedBy: user.id });
+    await recordUpload({ path: url, uploadedBy: user.id, contentHash });
   } catch {
     // 台帳への記録失敗は致命的ではないため無視（次回以降の削除判定で持ち主不明になるだけ）。
   }
 
-  // ⑧ 表示に使う公開URLを返す
+  // ⑨ 表示に使う公開URLを返す
   return Response.json({ url });
 }

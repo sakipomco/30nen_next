@@ -90,12 +90,21 @@ export const siteSettings = sqliteTable('site_settings', {
 // 「自分の写真だけ削除できる」を実現するために使う（持ち主の判定）。
 // 実ファイルは public/uploads/ に保存（Git管理外）。ここはその“ふせん”。
 // 過去に上げた写真は記録が無い＝持ち主不明（その場合は管理者だけ削除可）。
-export const uploads = sqliteTable('uploads', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  path: text('path').notNull().unique(), // 公開URL（例: /uploads/2026/06/xxxx.jpg）。重複防止に一意。
-  uploadedBy: integer('uploaded_by').references(() => users.id), // 上げた人（users.id）
-  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
-});
+export const uploads = sqliteTable(
+  'uploads',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    path: text('path').notNull().unique(), // 公開URL（例: /uploads/2026/06/xxxx.jpg）。重複防止に一意。
+    uploadedBy: integer('uploaded_by').references(() => users.id), // 上げた人（users.id）
+    // 中身の「指紋」（SHA-256）。同じ写真を二度上げたときに気づくための印。
+    // 保存する直前（＝縮小・圧縮した後）のバイト列から計算するので、同じ写真なら必ず同じ値になる。
+    // 過去に上げた写真は NULL（＝指紋なし・照合の対象外）。
+    contentHash: text('content_hash'),
+    createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
+  },
+  // 「この人が、この指紋の写真を、すでに上げていないか」を素早く引くための索引。
+  (table) => [index('uploads_hash_owner_idx').on(table.contentHash, table.uploadedBy)],
+);
 
 // ── 招待・パスワードリセット用のトークン ──────────────────────
 // アカウント作成時の招待メール（type='invite'）と、

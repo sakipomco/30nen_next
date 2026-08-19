@@ -1,7 +1,7 @@
 // アップロード画像の台帳（uploads テーブル）のデータアクセス層。
 // 「どの写真を誰が上げたか」を記録・参照する窓口。実ファイルの読み書きはしない。
 
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from './index';
 import { uploads } from './schema';
 
@@ -10,11 +10,37 @@ import { uploads } from './schema';
 export async function recordUpload(input: {
   path: string;
   uploadedBy: number;
+  contentHash?: string;
 }): Promise<void> {
   await db
     .insert(uploads)
-    .values({ path: input.path, uploadedBy: input.uploadedBy })
+    .values({
+      path: input.path,
+      uploadedBy: input.uploadedBy,
+      contentHash: input.contentHash ?? null,
+    })
     .onConflictDoNothing({ target: uploads.path }); // 同じパスが既にあれば何もしない
+}
+
+// 「この人が、同じ中身の写真を前にも上げていないか」を指紋（SHA-256）で探す。
+// 見つかればその公開URLを返す＝同じファイルをもう一枚作らずに済む
+// （本文にドラッグ→アイキャッチでも同じ写真を指定、という操作で二重に増えるのを防ぐ）。
+//
+// ⚠ わざと「同じ人が上げたもの」に限定している。他人の写真まで使い回すと、
+//    持ち主が画像フォルダで削除したときに別の人の記事から画像が消えてしまうため
+//    （削除のルールは src/app/actions/media.ts）。
+export async function findOwnUploadByHash(
+  contentHash: string,
+  uploadedBy: number,
+): Promise<string | null> {
+  const rows = await db
+    .select({ path: uploads.path })
+    .from(uploads)
+    .where(
+      and(eq(uploads.contentHash, contentHash), eq(uploads.uploadedBy, uploadedBy)),
+    )
+    .limit(1);
+  return rows[0]?.path ?? null;
 }
 
 // 「公開URL → 上げた人のid」の対応表を作る（画像フォルダ一覧で持ち主判定に使う）。
