@@ -6,10 +6,15 @@
 # 前提:
 #   - rclone と remote「gdrive-crypt」を設定済み（backup-db.sh と同じ）
 #   - cron 例: 30 4 * * 0 /var/www/30nen_next/scripts/backup/backup-uploads.sh >> /var/log/30nen-backup.log 2>&1
+#   - 失敗したときはメールで知らせる（.env.local の BACKUP_ALERT_TO 宛）。しくみは _notify.sh
 set -euo pipefail
 
 APP="${APP:-/var/www/30nen_next}"
 REMOTE="${REMOTE:-gdrive-crypt:30nen-backup}"
+
+# 失敗したら店主あてにメールで知らせる（_notify.sh 参照）。
+BACKUP_JOB_NAME="画像バックアップ"
+source "$(dirname "$0")/_notify.sh"
 
 echo "[$(date)] 画像バックアップ開始"
 

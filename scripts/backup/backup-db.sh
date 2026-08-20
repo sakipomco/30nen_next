@@ -7,11 +7,16 @@
 #   - rclone をインストール済み
 #   - rclone remote「gdrive-crypt」（暗号化・中身はGoogle Driveの 30nen-backup）を設定済み
 #   - cron 例: 0 4 * * * /var/www/30nen_next/scripts/backup/backup-db.sh >> /var/log/30nen-backup.log 2>&1
+#   - 失敗したときはメールで知らせる（.env.local の BACKUP_ALERT_TO 宛）。しくみは _notify.sh
 set -euo pipefail
 
 APP="${APP:-/var/www/30nen_next}"
 REMOTE="${REMOTE:-gdrive-crypt:30nen-backup}"
 KEEP_DAYS="${KEEP_DAYS:-30}"   # 何日分残すか
+
+# 失敗したら店主あてにメールで知らせる（_notify.sh 参照）。
+BACKUP_JOB_NAME="DBバックアップ"
+source "$(dirname "$0")/_notify.sh"
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 TMP="$(mktemp -d)"
