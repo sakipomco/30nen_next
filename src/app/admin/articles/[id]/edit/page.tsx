@@ -94,6 +94,7 @@ export default async function EditArticlePage({
               publishedAtInput: article.publishedAt
                 ? utcToJstInput(article.publishedAt)
                 : '',
+              publishedAtUtc: article.publishedAt,
             }}
           />
         </div>

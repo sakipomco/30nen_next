@@ -18,7 +18,7 @@ import {
   getWritableCategoryIds,
   setUserCategory,
 } from '@/db/categories';
-import { jstInputToUtc } from '@/lib/datetime';
+import { localInputToUtc } from '@/lib/datetime';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
 import { firstContentImageSrc } from '@/lib/article-image';
 
@@ -31,12 +31,17 @@ function statusFromIntent(formData: FormData): 'draft' | 'published' {
   return formData.get('intent') === 'publish' ? 'published' : 'draft';
 }
 
+function timezoneOffsetFromForm(formData: FormData): number {
+  const value = Number(formData.get('publishedAtTimezoneOffset'));
+  return Number.isFinite(value) ? value : -9 * 60;
+}
+
 // フォームの「公開日時」欄を読む。
 //  - 空欄          → undefined（＝即時投稿。公開時はサーバー側で「今」を補う）
-//  - 日時を指定済み → その日時（日本時間）をUTCに直して返す（さかのぼり等）
+//  - 日時を指定済み → 投稿者のブラウザのローカル時刻としてUTCに直す（海外勢の時差対策）
 function publishedAtFromForm(formData: FormData): string | undefined {
   const input = String(formData.get('publishedAt') ?? '').trim();
-  return input ? jstInputToUtc(input) : undefined;
+  return input ? localInputToUtc(input, timezoneOffsetFromForm(formData)) : undefined;
 }
 
 // アイキャッチ画像のパスを決める。
@@ -168,7 +173,8 @@ export async function autosaveArticleAction(payload: {
   content?: string;
   categoryId?: number | null;
   featuredImage?: string | null;
-  publishedAt?: string | null; // 入力欄の値（日本時間 'YYYY-MM-DDTHH:MM'）。空なら据え置き。
+  publishedAt?: string | null; // 入力欄の値（ブラウザのローカル時刻 'YYYY-MM-DDTHH:MM'）。空なら据え置き。
+  publishedAtTimezoneOffset?: number;
 }): Promise<AutosaveResult> {
   const user = await requireUser();
 
@@ -183,7 +189,14 @@ export async function autosaveArticleAction(payload: {
     ? payload.featuredImage.trim()
     : firstContentImageSrc(content);
   const publishedAtInput = (payload.publishedAt ?? '').trim();
-  const publishedAt = publishedAtInput ? jstInputToUtc(publishedAtInput) : undefined;
+  const timezoneOffset =
+    typeof payload.publishedAtTimezoneOffset === 'number' &&
+    Number.isFinite(payload.publishedAtTimezoneOffset)
+      ? payload.publishedAtTimezoneOffset
+      : -9 * 60;
+  const publishedAt = publishedAtInput
+    ? localInputToUtc(publishedAtInput, timezoneOffset)
+    : undefined;
 
   const rawId = Number(payload.id);
   const hasId = Number.isInteger(rawId) && rawId > 0;

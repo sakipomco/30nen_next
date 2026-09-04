@@ -41,11 +41,39 @@ export function utcToJstInput(utc: string): string {
   );
 }
 
+function utcStamp(date: Date): string {
+  return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+// 日時入力欄の値（ブラウザのローカル時刻 'YYYY-MM-DDTHH:MM'）→ DB保存用のUTC 'YYYY-MM-DD HH:MM:SS'
+export function localInputToUtc(
+  input: string,
+  timezoneOffsetMinutes: number,
+): string {
+  const withSeconds = input.length === 16 ? input + ':00' : input; // 秒が無ければ補う
+  const m =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(
+      withSeconds,
+    );
+  if (!m) return utcStamp(new Date(withSeconds));
+
+  const [, year, month, day, hour, minute, second = '00'] = m;
+  const utcMs =
+    Date.UTC(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second),
+    ) +
+    timezoneOffsetMinutes * 60 * 1000;
+  return utcStamp(new Date(utcMs));
+}
+
 // 日時入力欄の値（日本時間扱い 'YYYY-MM-DDTHH:MM'）→ DB保存用のUTC 'YYYY-MM-DD HH:MM:SS'
 export function jstInputToUtc(input: string): string {
-  const withSeconds = input.length === 16 ? input + ':00' : input; // 秒が無ければ補う
-  const d = new Date(withSeconds + '+09:00'); // 日本時間として明示的に解釈
-  return d.toISOString().slice(0, 19).replace('T', ' ');
+  return localInputToUtc(input, -9 * 60);
 }
 
 // DBのUTC文字列 → 公開ページ向け日付表示（日本時間・時刻なし。例: "2026年6月3日"）

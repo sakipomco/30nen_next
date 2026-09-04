@@ -26,6 +26,7 @@ type Props = {
     featuredImagePath?: string | null;
     categoryId?: number | null;
     publishedAtInput?: string;
+    publishedAtUtc?: string | null;
   };
 };
 
@@ -34,6 +35,18 @@ function nowHm(): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+// DBのUTC文字列 → 日時入力欄の値（書き手のブラウザのローカル時刻）
+// 海外の書き手には「自分の時計の時刻」で見せる方針（2026-09-04 SAKI判断）。
+// ⚠ 投稿一覧や公開ページの日付表示は日本時間のままなので、海外では数字が食い違って見える。
+function utcToBrowserInput(utc: string): string {
+  const d = new Date(utc.replace(' ', 'T') + 'Z');
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+    `T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
 }
 
 export function ArticleForm({ action, categories, initial, locale = 'ja' }: Props) {
@@ -52,12 +65,28 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
 
   const formRef = useRef<HTMLFormElement>(null);
   const idRef = useRef(initial?.id ? String(initial.id) : '');
+  const publishedAtRef = useRef<HTMLInputElement>(null);
+  const timezoneOffsetInputRef = useRef<HTMLInputElement>(null);
+  const timezoneOffsetRef = useRef(-9 * 60);
   const lastSavedRef = useRef<string | null>(null);
   const savingRef = useRef(false);
   const pendingRef = useRef(false);
   useEffect(() => {
     pendingRef.current = pending;
   }, [pending]);
+
+  useEffect(() => {
+    const offset = new Date().getTimezoneOffset();
+    timezoneOffsetRef.current = offset;
+    if (timezoneOffsetInputRef.current) {
+      timezoneOffsetInputRef.current.value = String(offset);
+    }
+    if (initial?.publishedAtUtc) {
+      if (publishedAtRef.current) {
+        publishedAtRef.current.value = utcToBrowserInput(initial.publishedAtUtc);
+      }
+    }
+  }, [initial?.publishedAtUtc]);
 
   const defaultCategoryId =
     initial?.categoryId != null
@@ -105,6 +134,7 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
         categoryId: snap.categoryId ? Number(snap.categoryId) : null,
         featuredImage: snap.featuredImage || null,
         publishedAt: snap.publishedAt || null,
+        publishedAtTimezoneOffset: timezoneOffsetRef.current,
       });
       if (res.ok) {
         idRef.current = String(res.id);
@@ -182,6 +212,12 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="id" value={articleId} readOnly />
+      <input
+        ref={timezoneOffsetInputRef}
+        type="hidden"
+        name="publishedAtTimezoneOffset"
+        defaultValue="-540"
+      />
 
       <label className="flex flex-col gap-1 text-sm">
         {t('article.titleLabel', locale)}
@@ -207,6 +243,7 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
       <label className="flex flex-col gap-1 text-sm">
         {t('article.publishedAtLabel', locale)}
         <input
+          ref={publishedAtRef}
           type="datetime-local"
           name="publishedAt"
           defaultValue={initial?.publishedAtInput ?? ''}
