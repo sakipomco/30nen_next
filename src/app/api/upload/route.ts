@@ -33,6 +33,26 @@ const MAX_VIDEO_BYTES = 200 * 1024 * 1024; // 200MB
 
 // 縮小・圧縮の本体は `@/lib/image` の shrinkImage を使う（移行スクリプトと同じ基準）。
 
+// iPad・iPhone のブラウザは、写真アプリで編集した動画などを送るとき、中身がMP4でも
+// 種類の名札を "video/quicktime"（MOV）にしたり空欄にしたりする。名札だけで判定すると
+// 「対応していない種類です」と弾いてしまうので（書き手の報告 2026-09-25）、
+// 動画らしい名札・拡張子のときは中身の先頭を見て判定し直す。
+// MP4もMOVも先頭付近に "ftyp" という目印を持つ同じ系統の入れ物で、iPhone/iPadの動画は
+// そのままブラウザで再生できるため、拡張子 .mp4 として保存する。
+const VIDEO_LIKE_TYPES = new Set(['', 'video/quicktime', 'video/x-m4v', 'application/octet-stream']);
+// HEIC・AVIF などの写真も "ftyp" を持つので、写真の目印は動画扱いしない。
+const IMAGE_BRANDS = new Set(['heic', 'heix', 'heim', 'heis', 'hevc', 'hevx', 'mif1', 'msf1', 'avif', 'avis']);
+
+function looksLikeVideo(file: File, head: Buffer): boolean {
+  const nameIsVideo = /\.(mp4|mov|m4v)$/i.test(file.name);
+  if (!VIDEO_LIKE_TYPES.has(file.type) && !file.type.startsWith('video/') && !nameIsVideo) {
+    return false;
+  }
+  if (head.length < 12 || head.toString('latin1', 4, 8) !== 'ftyp') return false;
+  const brand = head.toString('latin1', 8, 12).trim().toLowerCase();
+  return !IMAGE_BRANDS.has(brand);
+}
+
 export async function POST(request: Request) {
   // ① ログイン必須（未ログインは弾く）
   const user = await getCurrentUser();
@@ -48,14 +68,20 @@ export async function POST(request: Request) {
   }
 
   // ③ 種類とサイズ（安全弁）を検査
-  const ext = ALLOWED[file.type];
+  //    名札（file.type）で分からないときは、中身の先頭を見て動画(MP4/MOV)かを判定し直す。
+  let mime = file.type;
+  if (!ALLOWED[mime]) {
+    const head = Buffer.from(await file.slice(0, 12).arrayBuffer());
+    if (looksLikeVideo(file, head)) mime = 'video/mp4';
+  }
+  const ext = ALLOWED[mime];
   if (!ext) {
     return Response.json(
       { error: '対応していない種類です（画像はJPEG・PNG・GIF・WebP、動画はMP4のみ）。' },
       { status: 400 },
     );
   }
-  const isVideo = file.type.startsWith('video/');
+  const isVideo = mime.startsWith('video/');
   const maxBytes = isVideo ? MAX_VIDEO_BYTES : MAX_BYTES;
   if (file.size > maxBytes) {
     return Response.json(
@@ -73,7 +99,7 @@ export async function POST(request: Request) {
   let bytes: Buffer;
   try {
     const raw = Buffer.from(await file.arrayBuffer());
-    bytes = isVideo ? raw : await shrinkImage(raw, file.type);
+    bytes = isVideo ? raw : await shrinkImage(raw, mime);
   } catch {
     return Response.json(
       { error: '画像を読み込めませんでした。別の画像でお試しください。' },

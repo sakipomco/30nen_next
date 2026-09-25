@@ -34,8 +34,15 @@ type Props = {
 };
 
 // 本文に入れられるファイル＝画像すべて＋動画はMP4のみ（/api/upload の許可リストと対応）
+// iPad・iPhone は動画の種類を "video/quicktime" や空欄で渡すことがあるので、拡張子でも見る
+// （中身の最終判定はサーバー側 /api/upload が行う）。
 function isInsertableMedia(f: File): boolean {
-  return f.type.startsWith('image/') || f.type === 'video/mp4';
+  return f.type.startsWith('image/') || f.type.startsWith('video/') || /\.(mp4|mov|m4v)$/i.test(f.name);
+}
+
+// サーバーは動画を必ず .mp4 で保存するので、返ってきたURLで動画か画像かを見分ける。
+function isVideoUrl(url: string): boolean {
+  return url.toLowerCase().endsWith('.mp4');
 }
 
 function getMediaFiles(dt: DataTransfer | null): File[] {
@@ -236,13 +243,13 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   async function uploadIntoView(view: EditorView, file: File, pos?: number) {
-    const isVideo = file.type.startsWith('video/');
+    const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|m4v)$/i.test(file.name);
     setError(null);
     setUploading(true);
     try {
       const url = await uploadImage(file);
       // 画像は image ノード、動画(MP4)は video ノードとして本文に挿入する
-      const nodeType = view.state.schema.nodes[isVideo ? 'video' : 'image'];
+      const nodeType = view.state.schema.nodes[isVideoUrl(url) ? 'video' : 'image'];
       if (!nodeType) return;
       const node = nodeType.create({ src: url });
       const at = Math.min(pos ?? view.state.selection.from, view.state.doc.content.size);
@@ -314,12 +321,12 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
     e.target.value = '';
     if (!file || !editor) return;
 
-    const isVideo = file.type.startsWith('video/');
+    const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|m4v)$/i.test(file.name);
     setError(null);
     setUploading(true);
     try {
       const url = await uploadImage(file);
-      if (isVideo) editor.chain().focus().setVideo({ src: url }).run();
+      if (isVideoUrl(url)) editor.chain().focus().setVideo({ src: url }).run();
       else editor.chain().focus().setImage({ src: url }).run();
     } catch (err) {
       setError(
@@ -379,7 +386,7 @@ export function RichEditor({ name, initialHTML, locale = 'ja' }: Props) {
       <input
         ref={videoInputRef}
         type="file"
-        accept="video/mp4"
+        accept="video/mp4,video/quicktime,video/x-m4v,.mp4,.mov,.m4v"
         className="hidden"
         onChange={handleFileChange}
       />
