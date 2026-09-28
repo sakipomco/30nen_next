@@ -18,7 +18,7 @@ function NavCard({
   side: 'left' | 'right';
 }) {
   const imageSrc = article.featuredImagePath || '/dammy.jpg';
-  const datetime = article.publishedAt ? formatJstDatetime(article.publishedAt) : '';
+  const datetime = article.publishedAt ? formatJstDatetime(article.publishedAt, article.timeZone) : '';
   const isLeft = side === 'left';
 
   return (

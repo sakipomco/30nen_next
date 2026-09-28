@@ -224,7 +224,7 @@ export default async function AdminPage({
                   </div>
                   <p className="mt-1 text-xs text-zinc-400">
                     {article.status === 'published' && article.publishedAt
-                      ? tReplace('admin.publishedAt', locale, { date: formatJst(article.publishedAt) })
+                      ? tReplace('admin.publishedAt', locale, { date: formatJst(article.publishedAt, article.timeZone) })
                       : tReplace('admin.updatedAt', locale, { date: formatJst(article.updatedAt) })}
                   </p>
                 </div>

@@ -68,6 +68,8 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
   const publishedAtRef = useRef<HTMLInputElement>(null);
   const timezoneOffsetInputRef = useRef<HTMLInputElement>(null);
   const timezoneOffsetRef = useRef(-9 * 60);
+  const timeZoneInputRef = useRef<HTMLInputElement>(null);
+  const timeZoneRef = useRef('');
   const lastSavedRef = useRef<string | null>(null);
   const savingRef = useRef(false);
   const pendingRef = useRef(false);
@@ -78,6 +80,15 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
   useEffect(() => {
     const offset = new Date().getTimezoneOffset();
     timezoneOffsetRef.current = offset;
+    // 端末の時間帯の名前（例: 'America/Mexico_City'）。公開日時をこの時間帯の時計で表示するために送る。
+    let tz = '';
+    try {
+      tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? '';
+    } catch {
+      // 取れない古いブラウザは空＝日本時間扱い
+    }
+    timeZoneRef.current = tz;
+    if (timeZoneInputRef.current) timeZoneInputRef.current.value = tz;
     if (timezoneOffsetInputRef.current) {
       timezoneOffsetInputRef.current.value = String(offset);
     }
@@ -135,6 +146,7 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
         featuredImage: snap.featuredImage || null,
         publishedAt: snap.publishedAt || null,
         publishedAtTimezoneOffset: timezoneOffsetRef.current,
+        timeZone: timeZoneRef.current || null,
       });
       if (res.ok) {
         idRef.current = String(res.id);
@@ -218,6 +230,7 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
         name="publishedAtTimezoneOffset"
         defaultValue="-540"
       />
+      <input ref={timeZoneInputRef} type="hidden" name="timeZone" defaultValue="" />
 
       <label className="flex flex-col gap-1 text-sm">
         {t('article.titleLabel', locale)}

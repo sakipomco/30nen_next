@@ -7,11 +7,33 @@
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-// DBのUTC文字列 → 一覧などの表示用（日本時間の読みやすい形）
-export function formatJst(utc: string): string {
+const JST = 'Asia/Tokyo';
+
+// 記事ごとの「投稿した場所の時間帯」（例: 'America/Mexico_City'）を安全な値にする。
+// 空・壊れた値は日本時間。表示の関数はこれを通してから使う。
+export function safeTimeZone(tz: string | null | undefined): string {
+  if (!tz || tz.length > 64) return JST;
+  try {
+    new Intl.DateTimeFormat('ja-JP', { timeZone: tz });
+    return tz;
+  } catch {
+    return JST;
+  }
+}
+
+// ブラウザから送られた時間帯を、保存してよい値にする（おかしければ null＝日本時間扱い）。
+export function normalizeTimeZone(tz: unknown): string | null {
+  if (typeof tz !== 'string' || !tz.trim()) return null;
+  const v = tz.trim();
+  return safeTimeZone(v) === v ? v : null;
+}
+
+// DBのUTC文字列 → 一覧などの表示用（読みやすい形）
+// timeZone を渡すとその時間帯で、省くと日本時間で出す（以下の format 系はみな同じ）。
+export function formatJst(utc: string, timeZone?: string | null): string {
   const d = new Date(utc.replace(' ', 'T') + 'Z'); // 末尾Zを付けてUTCとして解釈
   return d.toLocaleString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
+    timeZone: safeTimeZone(timeZone),
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -77,10 +99,10 @@ export function jstInputToUtc(input: string): string {
 }
 
 // DBのUTC文字列 → 公開ページ向け日付表示（日本時間・時刻なし。例: "2026年6月3日"）
-export function formatJstDate(utc: string): string {
+export function formatJstDate(utc: string, timeZone?: string | null): string {
   const d = new Date(utc.replace(' ', 'T') + 'Z');
   return d.toLocaleDateString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
+    timeZone: safeTimeZone(timeZone),
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -111,13 +133,18 @@ export function calcAge(birthday: string | null | undefined): number | null {
   return age;
 }
 
-// DBのUTC文字列 → 公開トップ「最新」用の日時表示（日本時間。例: "6月3日 15時26分"）
-export function formatJstDatetime(utc: string): string {
+// DBのUTC文字列 → 公開トップ「最新」用の日時表示（例: "6月3日 15時26分"）
+export function formatJstDatetime(utc: string, timeZone?: string | null): string {
   const d = new Date(utc.replace(' ', 'T') + 'Z');
-  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000); // 日本時間の「壁掛け時計」にする
-  const month = jst.getUTCMonth() + 1;
-  const day = jst.getUTCDate();
-  const hour = jst.getUTCHours();
-  const minute = jst.getUTCMinutes();
-  return `${month}月${day}日 ${hour}時${pad(minute)}分`;
+  // その時間帯の「壁掛け時計」の数字を取り出す
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: safeTimeZone(timeZone),
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h23',
+  }).formatToParts(d);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  return `${get('month')}月${get('day')}日 ${get('hour')}時${pad(get('minute'))}分`;
 }

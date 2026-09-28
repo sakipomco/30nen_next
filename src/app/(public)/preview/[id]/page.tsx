@@ -38,7 +38,7 @@ export default async function PreviewPage({
   const author = authorRaw ? toPublicUser(authorRaw) : null;
 
   // 公開日時が未設定なら「（未公開）」を表示。日時指定があるならその日付。
-  const date = article.publishedAt ? formatJstDate(article.publishedAt) : '（未公開）';
+  const date = article.publishedAt ? formatJstDate(article.publishedAt, article.timeZone) : '（未公開）';
 
   const seriesHref = article.categoryId
     ? `/shop/${article.categorySlug ?? article.categoryId}`

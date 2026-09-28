@@ -59,6 +59,10 @@ export const articles = sqliteTable('articles', {
   authorId: integer('author_id').references(() => users.id), // 著者 → users.id
   categoryId: integer('category_id').references(() => categories.id), // カテゴリ → categories.id
   publishedAt: text('published_at'), // 公開日時
+  // 投稿した場所の時間帯（例: 'America/Mexico_City'）。公開日時はこの時間帯の時計で表示する
+  // （海外の書き手の要望 2026-09-28「23時に投稿したら23時と出してほしい」）。
+  // NULL＝日本時間（過去の記事・日本から投稿した記事と同じ扱い）。
+  timeZone: text('time_zone'),
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
   updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
   wpId: integer('wp_id').unique(), // 旧WordPressの記事ID（移行用の保険・二重取り込み防止の一意制約。新規記事は NULL＝SQLiteでは複数OK）

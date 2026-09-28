@@ -32,6 +32,8 @@ export type NewArticleInput = {
   categoryId?: number | null;
   publishedAt?: string | null;
   featuredImagePath?: string | null;
+  // 投稿者の端末の時間帯。公開日時が決まる・変わるときだけ記録する（下の create/update 参照）。
+  timeZone?: string | null;
 };
 export type UpdateArticleInput = Partial<NewArticleInput>;
 
@@ -151,6 +153,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 // status が 'published' のときは公開日時を自動で入れる（未指定なら今）。
 export async function createArticle(input: NewArticleInput): Promise<Article> {
   const status = input.status ?? 'draft';
+  const publishedAt = input.publishedAt ?? (status === 'published' ? now() : null);
   const [row] = await db
     .insert(articles)
     .values({
@@ -162,8 +165,8 @@ export async function createArticle(input: NewArticleInput): Promise<Article> {
       status,
       authorId: input.authorId ?? null,
       categoryId: input.categoryId ?? null,
-      publishedAt:
-        input.publishedAt ?? (status === 'published' ? now() : null),
+      publishedAt,
+      timeZone: publishedAt ? (input.timeZone ?? null) : null,
     })
     .returning();
   return row;
@@ -185,12 +188,22 @@ export async function updateArticle(
     patch.featuredImagePath = input.featuredImagePath;
   if (input.authorId !== undefined) patch.authorId = input.authorId;
   if (input.categoryId !== undefined) patch.categoryId = input.categoryId;
-  if (input.publishedAt !== undefined) patch.publishedAt = input.publishedAt;
-  if (input.status !== undefined) {
-    patch.status = input.status;
-    if (input.status === 'published' && input.publishedAt === undefined) {
-      const current = await getArticleById(id);
-      if (current && !current.publishedAt) patch.publishedAt = now();
+  if (input.status !== undefined) patch.status = input.status;
+
+  // 公開日時と時間帯。時間帯を書き換えるのは「公開日時が新しく決まった・変わった」ときだけ。
+  // 公開後に旅先から記事を直しても（日時はそのまま）表示の時間帯は変わらない。
+  if (input.publishedAt !== undefined || input.status === 'published') {
+    const current = await getArticleById(id);
+    let nextPublishedAt = input.publishedAt;
+    // 下書き→公開へ変えたとき、公開日時が空なら今を入れる
+    if (nextPublishedAt === undefined && input.status === 'published' && current && !current.publishedAt) {
+      nextPublishedAt = now();
+    }
+    if (nextPublishedAt !== undefined) {
+      patch.publishedAt = nextPublishedAt;
+      if (input.timeZone !== undefined && nextPublishedAt !== current?.publishedAt) {
+        patch.timeZone = nextPublishedAt ? input.timeZone : null;
+      }
     }
   }
 
@@ -221,6 +234,7 @@ export type PublicArticle = {
   excerpt: string | null;
   featuredImagePath: string | null;
   publishedAt: string | null;
+  timeZone: string | null;
   authorId: number | null;
   authorName: string | null;
   authorAvatarPath: string | null;
@@ -250,6 +264,7 @@ const publicColumns = {
   excerpt: articles.excerpt,
   featuredImagePath: articles.featuredImagePath,
   publishedAt: articles.publishedAt,
+  timeZone: articles.timeZone,
   authorId: articles.authorId,
   authorName: users.name,
   authorAvatarPath: users.avatarPath,

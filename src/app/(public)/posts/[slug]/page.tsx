@@ -139,7 +139,7 @@ export default async function PostPage({
       })
     : { prev: null, next: null };
 
-  const date = article.publishedAt ? formatJstDate(article.publishedAt) : '';
+  const date = article.publishedAt ? formatJstDate(article.publishedAt, article.timeZone) : '';
 
   // 本文の [MAP:名札] を折りたたみの地図に置き換える。
   // ① まず無害化（許可外タグを落とす）→ ② そのあとで地図ブロックを差し込む。

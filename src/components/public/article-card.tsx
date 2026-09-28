@@ -11,7 +11,7 @@ import { postHref } from '@/lib/site';
 export function ArticleCard({ article }: { article: PublicArticle }) {
   const href = postHref(article);
   const imageSrc = article.featuredImagePath || '/dammy.jpg';
-  const date = article.publishedAt ? formatJstDate(article.publishedAt) : '';
+  const date = article.publishedAt ? formatJstDate(article.publishedAt, article.timeZone) : '';
 
   return (
     <Link href={href} className="group block">

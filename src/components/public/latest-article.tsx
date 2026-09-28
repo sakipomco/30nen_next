@@ -13,7 +13,7 @@ export function LatestArticle({ article }: { article: PublicArticle }) {
   const imageSrc = article.featuredImagePath || '/dammy.jpg';
   const categoryImg = article.categoryImagePath || '/line-up.png';
   const datetime = article.publishedAt
-    ? formatJstDatetime(article.publishedAt)
+    ? formatJstDatetime(article.publishedAt, article.timeZone)
     : '';
 
   return (

@@ -18,7 +18,7 @@ import {
   getWritableCategoryIds,
   setUserCategory,
 } from '@/db/categories';
-import { localInputToUtc } from '@/lib/datetime';
+import { localInputToUtc, normalizeTimeZone } from '@/lib/datetime';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
 import { firstContentImageSrc } from '@/lib/article-image';
 
@@ -135,6 +135,7 @@ export async function saveArticleAction(
       featuredImagePath,
       status: statusFromIntent(formData),
       publishedAt: publishedAtFromForm(formData), // 未指定なら既存の公開日時を維持
+      timeZone: normalizeTimeZone(formData.get('timeZone')), // 公開日時が変わるときだけ記録される
     });
     if (!updated) {
       return { error: '記事が見つかりませんでした。' };
@@ -147,6 +148,7 @@ export async function saveArticleAction(
       featuredImagePath,
       status: statusFromIntent(formData),
       publishedAt: publishedAtFromForm(formData), // 未指定なら公開時に「今」を自動補完
+      timeZone: normalizeTimeZone(formData.get('timeZone')), // 投稿した場所の時間帯
       authorId: user.id, // 書いた人＝今ログイン中の人
     });
     savedId = created.id;
@@ -175,6 +177,7 @@ export async function autosaveArticleAction(payload: {
   featuredImage?: string | null;
   publishedAt?: string | null; // 入力欄の値（ブラウザのローカル時刻 'YYYY-MM-DDTHH:MM'）。空なら据え置き。
   publishedAtTimezoneOffset?: number;
+  timeZone?: string | null; // 投稿者の端末の時間帯（例: 'America/Mexico_City'）
 }): Promise<AutosaveResult> {
   const user = await requireUser();
 
@@ -198,6 +201,8 @@ export async function autosaveArticleAction(payload: {
     ? localInputToUtc(publishedAtInput, timezoneOffset)
     : undefined;
 
+  const timeZone = normalizeTimeZone(payload.timeZone);
+
   const rawId = Number(payload.id);
   const hasId = Number.isInteger(rawId) && rawId > 0;
 
@@ -217,7 +222,7 @@ export async function autosaveArticleAction(payload: {
         categoryId,
         featuredImagePath,
         // status は触らない（下書きのまま）。日時欄に入力があるときだけ反映。
-        ...(publishedAt !== undefined ? { publishedAt } : {}),
+        ...(publishedAt !== undefined ? { publishedAt, timeZone } : {}),
       });
       revalidatePath('/admin');
       return { ok: true, id: rawId };
@@ -231,6 +236,7 @@ export async function autosaveArticleAction(payload: {
       featuredImagePath,
       status: 'draft',
       publishedAt: publishedAt ?? null,
+      timeZone,
       authorId: user.id,
     });
     revalidatePath('/admin');
