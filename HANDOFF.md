@@ -911,7 +911,10 @@
     - **元に戻すとき**＝上の追加ファイルを消して `systemctl reload ssh`。**鍵をなくしたとき**＝Xサーバー管理画面の「コンソール」から入れる。
 
     **(2) 残りの宿題（報告書の「次にやるとよい順番」）**
-    - 🔴 **部品（ライブラリ）の更新**：`npm audit` で37件（重大1・高7）。next の重大3件は使っていない機能が対象で直接は当たらないことを確認したが、sanitize-html・エディタ（prosemirror-view）・sharp などは当てはまりうる。
+    - 🔴 **部品（ライブラリ）の更新**：`npm audit` で37件（重大1・高7）。next の重大3件は使っていない機能が対象で直接は当たらないことを確認したが、sanitize-html・エディタ（prosemirror-view）・sharp などは当てはまりうる。3段階に分けて進める：
+      - **段階1（小さな更新）＝手元で完了・本番反映はこれから**：`npm audit fix`（`package-lock.json` のみ変更）。sanitize-html 2.17.4→2.18.1・prosemirror-view 1.41.8→1.42.7・nodemailer 8.0.10→8.0.11 など。確認済み：①移行データ8,540本の本文で新旧の無害化結果が**完全一致**②危ない書き方（onerror・javascript:・script・許可外iframe）は引き続き除去③型チェック・ビルド成功④本番と同じ形（`next start`）で、ログイン・貼り付け・太字/見出しボタン・下書き保存・プレビュー・画像アップロード・トップ表示が正常。
+      - 段階2＝next を16系の最新版へ。段階3＝sharp 0.35系・nodemailer 10系（番号の大きな更新なので別の日に）。
+      - メモ：手元の `npm run dev` が「Next.js package not found」で止まる（フォルダを `forClaude/` へ移した前の古い作業控え `.next/dev` が原因とみられる）。**`.next/dev` フォルダを手で消せば直る見込み**（自動で作り直される）。プレビュー設定 `.claude/launch.json` の古いパスは直し、本番と同じ形で確かめる `prod-local`（ポート3100）を足した。
     - 🟡 Nginxに「守りのヘッダー」（X-Frame-Options・nosniff・HSTS など）を足す。
     - 🟡 サイトを root ではなく専用ユーザーで動かす（`docs/deploy-notes.md` §8 の残TODO）。
     - 🟢 招待待ち4人の仮パスワードが推測可能な形（`src/app/actions/users.ts` の `invite-pending-<時刻>`）→ランダムに。ほか小さな改善は報告書の §6。
