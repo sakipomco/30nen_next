@@ -39,10 +39,13 @@ export async function login(
   //   同じメールアドレスに対して: 10分に10回まで（1人を狙う攻撃よけ）
   // ※ メール側はレビューの提案（5回）より少しゆるめにした。書き手はスマホで打つ方が多く、
   //   打ち間違いが続くと本人が締め出されてしまうため。10分に10回でも総当たりには遅すぎる。
+  //   同じメールアドレスに対して: 1日に30回まで（10分待っては試す、をくり返す総当たりよけ）
+  //   ※ 1日の上限を先に置く。両方超えたとき、待ち時間を「24時間」と正しく案内するため。
   const ip = await clientIp();
   const ipBucket = `login:ip:${ip}`;
   const emailBucket = `login:email:${email.toLowerCase()}`;
   const limited = await checkRateLimit([
+    { bucket: emailBucket, limit: 30, windowSec: 24 * 60 * 60 },
     { bucket: ipBucket, limit: 20, windowSec: 10 * 60 },
     { bucket: emailBucket, limit: 10, windowSec: 10 * 60 },
   ]);

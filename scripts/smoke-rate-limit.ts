@@ -56,7 +56,30 @@ async function main() {
   const dCount = await checkRateLimit([{ bucket: D, limit: 2, windowSec: 60 }]);
   console.log('   → まだ上限2に達していない?（trueなら正解＝1回ぶん）:', dCount.ok);
 
-  console.log('7) 後片付け（お試しの記録を削除）');
+  console.log('7) ログインの1日上限: 10分ルールに触れないよう1日に散らして30回失敗すると止まる');
+  const E = `${TAG}:e`;
+  // auth.ts と同じ並び（1日の上限が先）。
+  const loginRules = [
+    { bucket: E, limit: 30, windowSec: 24 * 60 * 60 },
+    { bucket: E, limit: 10, windowSec: 10 * 60 },
+  ];
+  // 30分おきに失敗した、という記録を作る（直近10分には1件も入らない）。
+  const stamp = (minAgo: number) =>
+    new Date(Date.now() - minAgo * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19);
+  const spread = Array.from({ length: 29 }, (_, i) => ({ bucket: E, createdAt: stamp(30 * (i + 1)) }));
+  await db.insert(rateEvents).values(spread);
+  const at29 = await checkRateLimit(loginRules);
+  console.log('   29回失敗 → まだ通る?（trueなら正解）:', at29.ok);
+  await db.insert(rateEvents).values({ bucket: E, createdAt: stamp(15) });
+  const at30 = await checkRateLimit(loginRules);
+  console.log(
+    '   30回失敗 → 止まった?（falseなら正解）:',
+    at30.ok,
+    '/ 案内する待ち時間:',
+    at30.ok ? '-' : waitLabel(at30.retryAfterSec),
+  );
+
+  console.log('8) 後片付け（お試しの記録を削除）');
   await db.delete(rateEvents).where(like(rateEvents.bucket, `${TAG}%`));
   const left = await db
     .select()
