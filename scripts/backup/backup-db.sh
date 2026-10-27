@@ -36,6 +36,9 @@ fi
 rclone copy "$TMP/" "$REMOTE/db/"
 
 # ④ 古い世代を整理（KEEP_DAYS より古いものを削除）
-rclone delete "$REMOTE/db/" --min-age "${KEEP_DAYS}d" || true
+#    --drive-use-trash=false ＝ゴミ箱に入れずに直接消す。
+#    Google Driveは「ゴミ箱の中身も容量に数える」ため、既定（ゴミ箱に入れる）のままだと
+#    消したつもりの古い控えが30日間ずっと容量を食う（2026-10-27に実測で789MB＝無料15GBの5%）。
+rclone delete "$REMOTE/db/" --min-age "${KEEP_DAYS}d" --drive-use-trash=false || true
 
 echo "[$(date)] DBバックアップ完了: $STAMP"
