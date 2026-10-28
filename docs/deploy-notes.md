@@ -91,7 +91,7 @@ npm run build   # 本番用に組み立て（package.json: "build": "next build"
   ```
   - PM2 から見た実体: script=`/usr/local/bin/npm` / args=`start` / interpreter=`/usr/local/bin/node` / cwd=`/var/www/30nen_next` / mode=fork
   - ログ: `/root/.pm2/logs/30nen-out.log`・`/root/.pm2/logs/30nen-error.log`
-  - `npm start` = `next start`（ポート3000で起動）
+  - `npm start` = `next start -H 127.0.0.1`（ポート3000で起動。サーバー自身＝Nginxからしか受け付けない。2026-10-28〜）
 - **再起動後も自動で立ち上がるように**:
   ```
   pm2 startup systemd   # 表示されたコマンドを実行（systemdサービス pm2-root を有効化）
