@@ -44,6 +44,10 @@ function publishedAtFromForm(formData: FormData): string | undefined {
   return input ? localInputToUtc(input, timezoneOffsetFromForm(formData)) : undefined;
 }
 
+// アイキャッチ画像が無い記事は公開できない（画面の確認をすり抜けても、ここで必ず止める）。
+const NO_FEATURED_IMAGE_ERROR =
+  'アイキャッチ画像を設定してください。画像がないと公開できません。';
+
 // アイキャッチ画像のパスを決める。
 //  - 手動で設定済みなら、それを使う（本文と別の写真にしたいケースもOK）。
 //  - 空欄なら、本文の「一番上の写真」を自動でアイキャッチに流用する（書き手の手間を減らす）。
@@ -128,6 +132,14 @@ export async function saveArticleAction(
     if (!existing || !canManageArticle(user, existing)) {
       return { error: '記事が見つかりませんでした。' };
     }
+    // すでに公開中の記事は対象外（写真のない古い記事でも、誤字直しなどの更新はできるように）。
+    if (
+      statusFromIntent(formData) === 'published' &&
+      existing.status !== 'published' &&
+      !featuredImagePath
+    ) {
+      return { error: NO_FEATURED_IMAGE_ERROR };
+    }
     const updated = await updateArticle(rawId, {
       title,
       content,
@@ -141,6 +153,9 @@ export async function saveArticleAction(
       return { error: '記事が見つかりませんでした。' };
     }
   } else {
+    if (statusFromIntent(formData) === 'published' && !featuredImagePath) {
+      return { error: NO_FEATURED_IMAGE_ERROR };
+    }
     const created = await createArticle({
       title,
       content,

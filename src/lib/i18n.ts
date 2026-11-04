@@ -76,7 +76,8 @@ const dict = {
   'article.autosaveFailed': { ja: '自動保存できませんでした（手動で保存してください）', es: 'No se pudo guardar automáticamente (guarda manualmente)' },
   'article.autosaveDisabled': { ja: '公開中の記事は自動保存されません。編集後は「更新する」で保存してください。', es: 'Los artículos publicados no se guardan automáticamente. Después de editar, guarda con "Actualizar".' },
   'article.confirmNoImage': { ja: 'アイキャッチ画像が未設定です。このまま公開しますか？', es: 'No se ha establecido una imagen destacada. ¿Publicar de todas formas?' },
-  'article.featuredHint': { ja: 'アイキャッチ画像を設定しない場合、記事一覧やSNSに出る表示には、自動的に本文一番上の画像が使われます。別の画像にしたいときだけ設定してください。', es: 'Si no estableces una imagen destacada, en los listados de artículos y en redes sociales se usará automáticamente la primera imagen del cuerpo. Configúrala solo si quieres usar una imagen distinta.' },
+  'article.publishNeedsImage': { ja: 'アイキャッチ画像がないと公開できません。アイキャッチ画像を設定するか、本文に写真を入れてください。', es: 'No se puede publicar sin una imagen destacada. Establece una imagen destacada o añade una foto al cuerpo.' },
+  'article.featuredHint': { ja: '公開するにはアイキャッチ画像が必要です。本文に写真があれば、一番上の写真が自動で使われます。本文に写真がないときや、別の画像にしたいときは、ここで設定してください。', es: 'Para publicar se necesita una imagen destacada. Si el cuerpo tiene fotos, se usará automáticamente la primera. Si no tiene fotos o quieres usar otra imagen, establécela aquí.' },
   'article.previewEmpty': { ja: 'プレビューする内容（タイトルか本文）を入力してください。', es: 'Ingresa un título o contenido para la vista previa.' },
   'article.previewFailed': { ja: '保存に失敗したためプレビューを開けません。少し書いてから再度お試しください。', es: 'No se pudo abrir la vista previa porque falló el guardado. Escribe algo e inténtalo de nuevo.' },
 

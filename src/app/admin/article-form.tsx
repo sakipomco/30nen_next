@@ -188,11 +188,16 @@ export function ArticleForm({ action, categories, initial, locale = 'ja' }: Prop
     const bodyHasImage =
       (content instanceof HTMLInputElement || content instanceof HTMLTextAreaElement) &&
       /<img\b/i.test(content.value);
-    // アイキャッチも本文の写真も無いときだけ「未設定です」と確認する。
-    if (!featuredSet && !bodyHasImage) {
+    if (featuredSet || bodyHasImage) return;
+    // すでに公開中の記事は、写真のない古い記事でも更新できるように確認だけにする。
+    if (initial?.status === 'published') {
       const ok = window.confirm(t('article.confirmNoImage', locale));
       if (!ok) e.preventDefault();
+      return;
     }
+    // これから公開する記事は、アイキャッチが無ければ公開させない（下書き保存はできる）。
+    e.preventDefault();
+    window.alert(t('article.publishNeedsImage', locale));
   }
 
   const [previewBusy, setPreviewBusy] = useState(false);
