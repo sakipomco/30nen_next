@@ -17,20 +17,27 @@ export function SearchForm({
   return (
     <form action="/search" className="space-y-3">
       {/* 連載の絞り込み（検索窓の上・少し小さめ・幅は検索窓の60%でセンター／SAKIさん指定 2026-11-11） */}
+      {/* 囲まず下線だけのあしらい。ブラウザ標準の矢印は消し、細い「く」の字を右端に置く。 */}
       {categories.length > 0 && (
-        <select
-          name="cat"
-          defaultValue={defaultCategory}
-          aria-label="連載で絞り込む"
-          className="serif mx-auto block h-[22px] w-[60%] border border-[#150c0c]/25 bg-white px-1 py-0 text-xs text-[#333] outline-none focus:border-[#150c0c]"
-        >
-          <option value="">すべての連載から</option>
-          {categories.map((c) => (
-            <option key={c.slug} value={c.slug}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative mx-auto w-[60%]">
+          <select
+            name="cat"
+            defaultValue={defaultCategory}
+            aria-label="連載で絞り込む"
+            className="serif block h-[22px] w-full appearance-none rounded-none border-0 border-b border-[#150c0c]/40 bg-transparent py-0 pl-1 pr-5 text-center text-xs text-[#333] outline-none focus:border-[#150c0c]"
+          >
+            <option value="">すべての連載から</option>
+            {categories.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <span
+            aria-hidden
+            className="pointer-events-none absolute right-1.5 top-[7px] h-[5px] w-[5px] rotate-45 border-b border-r border-[#150c0c]/60"
+          />
+        </div>
       )}
       <div className="flex items-stretch">
         <input
