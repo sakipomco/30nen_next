@@ -17,10 +17,10 @@ export function SearchForm({
   return (
     <form action="/search" className="space-y-3">
       {/* 連載の絞り込み（検索窓の上・少し小さめ・幅は検索窓の60%でセンター／SAKIさん指定 2026-11-11） */}
-      {/* 囲まず、左右を［ ］で挟むあしらい。ブラウザ標準の矢印は消し、細い「く」の字を ］ の手前に置く。 */}
+      {/* 囲まず、左右を［ ］で挟むあしらい。ブラウザ標準の矢印は消し、細い「く」の字を ］ の手前に置く。［ ］の内側はスマホだけ8pxずつ空ける（PCは今までどおり／2026-11-11）。 */}
       {categories.length > 0 && (
         <div className="serif relative mx-auto flex w-[60%] items-center text-xs text-[#150c0c]/60">
-          <span aria-hidden className="pointer-events-none select-none">［</span>
+          <span aria-hidden className="pointer-events-none mr-2 select-none lg:mr-0">［</span>
           <select
             name="cat"
             defaultValue={defaultCategory}
@@ -36,9 +36,9 @@ export function SearchForm({
           </select>
           <span
             aria-hidden
-            className="pointer-events-none absolute right-[1.6em] top-[7px] h-[5px] w-[5px] rotate-45 border-b border-r border-[#150c0c]/60"
+            className="pointer-events-none absolute right-[calc(1.6em+0.5rem)] top-[7px] lg:right-[1.6em] h-[5px] w-[5px] rotate-45 border-b border-r border-[#150c0c]/60"
           />
-          <span aria-hidden className="pointer-events-none select-none">］</span>
+          <span aria-hidden className="pointer-events-none ml-2 select-none lg:ml-0">］</span>
         </div>
       )}
       <div className="flex items-stretch">
