@@ -15,7 +15,7 @@ export function SearchForm({
   defaultCategory?: string;
 }) {
   return (
-    <form action="/search" className="space-y-1.5">
+    <form action="/search" className="space-y-3">
       <div className="flex items-stretch">
         <input
           type="search"
@@ -32,13 +32,13 @@ export function SearchForm({
           検索
         </button>
       </div>
-      {/* 連載の絞り込み（検索窓の下・少し小さめ・幅は検索窓の60%で左寄せ／SAKIさん指定 2026-11-11） */}
+      {/* 連載の絞り込み（検索窓の下・少し小さめ・幅は検索窓の60%でセンター／SAKIさん指定 2026-11-11） */}
       {categories.length > 0 && (
         <select
           name="cat"
           defaultValue={defaultCategory}
           aria-label="連載で絞り込む"
-          className="serif block h-[22px] w-[60%] border border-[#150c0c]/25 bg-white px-1 py-0 text-xs text-[#333] outline-none focus:border-[#150c0c]"
+          className="serif mx-auto block h-[22px] w-[60%] border border-[#150c0c]/25 bg-white px-1 py-0 text-xs text-[#333] outline-none focus:border-[#150c0c]"
         >
           <option value="">すべての連載から</option>
           {categories.map((c) => (
