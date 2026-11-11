@@ -2,7 +2,7 @@
 // 「DBとのやり取り役」をここに集約する。公開ページの表示も、投稿画面の保存も、ここの関数を呼ぶ。
 // CRUD = Create(作る) / Read(読む) / Update(直す) / Delete(消す)。
 
-import { eq, ne, lt, gt, desc, asc, and, or, lte, sql, type SQL } from 'drizzle-orm';
+import { eq, ne, lt, gt, desc, asc, and, or, lte, inArray, sql, type SQL } from 'drizzle-orm';
 import { db } from './index';
 import { articles, users, categories } from './schema';
 import type { PublicUser } from './users';
@@ -474,8 +474,13 @@ function likePattern(word: string): string {
   return '%' + word.replace(/[\\%_]/g, (c) => '\\' + c) + '%';
 }
 
-function searchFilters(query: string): SQL[] {
+// categoryIds を渡すと、その連載（子連載を含めて呼び出し側で集めた id）の記事だけに絞る。
+// 「自分の連載の中で過去記事を探したい」という書き手の要望（2026-11-11）。
+function searchFilters(query: string, categoryIds?: number[]): SQL[] {
   const filters = publicFilters();
+  if (categoryIds && categoryIds.length > 0) {
+    filters.push(inArray(articles.categoryId, categoryIds));
+  }
   const words = query.split(/\s+/).filter(Boolean);
   for (const word of words) {
     const p = likePattern(word);
@@ -488,25 +493,28 @@ function searchFilters(query: string): SQL[] {
 
 export async function searchPublishedArticles(
   query: string,
-  options?: { limit?: number; offset?: number },
+  options?: { limit?: number; offset?: number; categoryIds?: number[] },
 ): Promise<PublicArticle[]> {
   return db
     .select(publicColumns)
     .from(articles)
     .leftJoin(users, eq(articles.authorId, users.id))
     .leftJoin(categories, eq(articles.categoryId, categories.id))
-    .where(and(...searchFilters(query)))
+    .where(and(...searchFilters(query, options?.categoryIds)))
     .orderBy(desc(articles.publishedAt))
     .limit(options?.limit ?? 20)
     .offset(options?.offset ?? 0);
 }
 
 // 検索に当てはまる件数（ページ数の計算用）
-export async function countSearchedArticles(query: string): Promise<number> {
+export async function countSearchedArticles(
+  query: string,
+  categoryIds?: number[],
+): Promise<number> {
   const rows = await db
     .select({ n: sql<number>`count(*)` })
     .from(articles)
-    .where(and(...searchFilters(query)));
+    .where(and(...searchFilters(query, categoryIds)));
   return rows[0]?.n ?? 0;
 }
 

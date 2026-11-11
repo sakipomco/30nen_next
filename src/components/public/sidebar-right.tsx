@@ -28,7 +28,11 @@ export function SidebarContent({
       <section>
         <SectionHeading>ワード検索</SectionHeading>
         <div className="mx-auto w-[95%]">
-          <SearchForm />
+          <SearchForm
+            categories={series.flatMap((s) =>
+              s.slug ? [{ slug: s.slug, name: s.name }] : [],
+            )}
+          />
         </div>
       </section>
 
