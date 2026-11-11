@@ -27,7 +27,7 @@ export function SidebarContent({
       {/* ワード検索（ボックスは帯の95%幅・左右センター揃え） */}
       <section>
         {/* 帯の下のアキは少し広め（プルダウンを窓の上に置いたため／2026-11-11） */}
-        <SectionHeading gapClass="mb-5">ワード検索</SectionHeading>
+        <SectionHeading gapClass="mb-4">ワード検索</SectionHeading>
         <div className="mx-auto w-[95%]">
           <SearchForm
             categories={series.flatMap((s) =>
