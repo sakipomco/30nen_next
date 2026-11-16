@@ -99,6 +99,8 @@ const dict = {
   'media.confirmDelete': { ja: 'この写真を削除しますか？元に戻せません。\n（記事で使っている写真を消すと、その記事から写真が消えます）', es: '¿Eliminar esta foto? No se puede deshacer.\n(Si eliminas una foto que se usa en un artículo, desaparecerá del artículo)' },
   'media.uploadingProgress': { ja: 'アップロード中… {done} / {total}', es: 'Subiendo… {done} / {total}' },
   'media.close': { ja: '閉じる', es: 'Cerrar' },
+  'media.dropHere': { ja: 'ここに写真をドロップして追加', es: 'Suelta las fotos aquí para añadirlas' },
+  'media.dropHint': { ja: '（ドラッグ＆ドロップでも追加できます）', es: '(también puedes arrastrar y soltar)' },
   'media.prev': { ja: '← 前へ', es: '← Anterior' },
   'media.next': { ja: '次へ →', es: 'Siguiente →' },
   'media.filterYear': { ja: '年で絞り込み', es: 'Filtrar por año' },

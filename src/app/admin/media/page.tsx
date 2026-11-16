@@ -70,6 +70,7 @@ export default async function MediaPage({
           {tReplace('media.description', locale, { count: String(total) })}
           {isAdmin && t('media.adminNote', locale)}
           {'。'}
+          {t('media.dropHint', locale)}
         </p>
 
         {/* 年・月で絞り込み（写真がある年月だけが選択肢に出る） */}
