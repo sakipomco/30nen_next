@@ -10,7 +10,7 @@
 //    連続POSTされても、店主・書き手・メールサーバーに大量のメールが届かないようにする。
 
 import { getCategoryAuthorEmails } from '@/db/categories';
-import { sendMail } from '@/lib/mailer';
+import { sendContactEmail } from '@/lib/email';
 import {
   checkRateLimit,
   clientIp,
@@ -107,16 +107,28 @@ export async function sendContact(
   // ── 宛先メールを決める ──
   // 店主（運営の受信箱）。本番化のとき .env に CONTACT_TO_EMAIL を設定する。
   // ローカルで受信箱が未設定でも、mailer 側のフォールバックで内容は確認できる。
-  const ownerEmail =
-    process.env.CONTACT_TO_EMAIL ?? process.env.SMTP_USER ?? 'owner@example.com';
+  // ⚠ 届け先が無いときは「送信しました」と返さない（2026-11-18の不具合の教訓）。
+  //    以前は 'owner@example.com' という仮アドレスに落ちる作りで、送信者には成功と表示されるのに
+  //    どこにも届かない状態が3か月半続いた。届け先が無いなら、はっきり失敗にする。
+  const ownerEmail = process.env.CONTACT_TO_EMAIL ?? '';
+  if (!ownerEmail) {
+    console.error(
+      '[contact] CONTACT_TO_EMAIL が未設定のため送信できません。.env.local を確認してください。',
+    );
+    return {
+      ok: false,
+      error:
+        '申し訳ありません。ただいまお便りをお預かりできません。時間をおいてお試しください。',
+    };
+  }
 
-  let recipient: string;
+  let recipient: string[];
   let recipientLabel: string;
   // 書き手宛のお便りは、店主にも控え(BCC)を届ける（店主が全お便りを把握できるように）。
   // 店主が直接の宛先になるとき（店主宛・担当未登録のフォールバック）は控え不要。
   let bcc: string | undefined;
   if (to === 'owner' || to === '') {
-    recipient = ownerEmail;
+    recipient = [ownerEmail];
     recipientLabel = '店主';
   } else {
     // 連載（カテゴリー）宛て。その連載の担当書き手のメールへ届ける。
@@ -130,13 +142,13 @@ export async function sendContact(
       return { ok: false, error: '宛先が正しくありません。選び直してください。' };
     }
     if (emails.length > 0) {
-      // 1人1連載が基本だが、複数担当なら全員へ（カンマ区切りで指定）。
-      recipient = emails.join(', ');
+      // 1人1連載が基本だが、複数担当なら全員へ。
+      recipient = emails;
       recipientLabel = `${categoryName}の書き手`;
       bcc = ownerEmail; // 店主にも控えを送る。
     } else {
       // この連載にまだ担当書き手が居ない → お便りが迷子にならないよう店主へ。
-      recipient = ownerEmail;
+      recipient = [ownerEmail];
       recipientLabel = `${categoryName}（担当未登録のため店主へ）`;
     }
   }
@@ -153,7 +165,7 @@ export async function sendContact(
     `--------------------\n`;
 
   try {
-    await sendMail({ to: recipient, subject, text, replyTo: email, bcc });
+    await sendContactEmail({ to: recipient, subject, text, replyTo: email, bcc });
   } catch (err) {
     console.error('[contact] メール送信に失敗:', err);
     return {

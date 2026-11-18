@@ -16,6 +16,31 @@ function getResend() {
 const FROM = process.env.EMAIL_FROM ?? '三十年商店 <noreply@30nen.com>';
 const SITE_URL = (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
 
+// お便りフォームからのメール。
+// ⚠ 以前は src/lib/mailer.ts（Xサーバーのメール＝SMTP）を使っていたが、本番にSMTPの設定が
+//    入っておらず、2026-07-29の公開以降「送ったつもりで1通も届かない」状態が続いていた
+//    （詳細は HANDOFF.md 項目105）。招待メールと同じ Resend に統一して再発を防ぐ。
+// 本文はプレーンテキスト（読者が書いた改行をそのまま残すため）。
+export async function sendContactEmail(input: {
+  to: string[]; // 届け先（連載宛なら担当書き手が複数のこともある）
+  subject: string;
+  text: string;
+  replyTo?: string; // 送ってくれた人のアドレス。そのまま「返信」で返せるようにする。
+  bcc?: string; // 店主への控え
+}) {
+  const resend = getResend();
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: input.to,
+    subject: input.subject,
+    text: input.text,
+    replyTo: input.replyTo,
+    bcc: input.bcc,
+  });
+  // 送れなかったら必ず例外にする＝呼び出し元が「送れた」と誤解しないように。
+  if (error) throw new Error(`Resendで送信できませんでした: ${error.message}`);
+}
+
 // 招待メール（初回パスワード設定）
 export async function sendInviteEmail(to: string, name: string, rawToken: string) {
   const resend = getResend();
