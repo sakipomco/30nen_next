@@ -42,3 +42,7 @@ rclone copy "$TMP/" "$REMOTE/db/"
 rclone delete "$REMOTE/db/" --min-age "${KEEP_DAYS}d" --drive-use-trash=false || true
 
 echo "[$(date)] DBバックアップ完了: $STAMP"
+
+# ⑤ Driveの空きの見張り（少なくなったらメールで知らせる）。
+#    ここで何が起きてもバックアップは成功のまま（|| true）＝見張りの不調で本体を止めない。
+bash "$(dirname "$0")/check-free-space.sh" || true

@@ -83,7 +83,10 @@ VPSの cron に2本を登録（時刻は負荷の少ない深夜・日本時間�
 - [x] バックアップが**毎日できているか** → **失敗したらメールで知らせる仕組みを導入済み（2026-08-20）**。
   失敗した瞬間に `BACKUP_ALERT_TO` 宛へメールが飛ぶ（`scripts/backup/_notify.sh` ＋ `notify-backup-failure.ts`）。
   ⚠ ただし **cron ごと止まった場合・サーバーが落ちた場合は誰にも届かない**（動いてこその通知）。念のため時々 `/var/log/30nen-backup.log` を見る。
-- [ ] Google Drive の**残量**（無料15GBで足りるか／不足なら100GBプラン等）。確認は `rclone about gdrive:` の `Free`。
+- [x] Google Drive の**残量** → **2026-11-18に自動の見張りを導入**（`scripts/backup/check-free-space.sh`）。
+  毎日のDBバックアップのあとに空きを調べ、**1.5GBを切ったらメールで知らせる**（同じ知らせは7日に1回まで）。
+  → **「何月にプランを上げるか」をカレンダーで決める必要はなくなった。知らせが来てから動けばよい。**
+  手で確認したいときは `rclone about gdrive:` の `Free`。
   - ⚠ **Googleはゴミ箱の中身も容量に数える**。古い控えの削除がゴミ箱経由だと、消したつもりのものが
     30日間ずっと容量を食う（2026-10-27に実測で789MB＝無料15GBの5%）。→ `backup-db.sh` の削除に
     `--drive-use-trash=false` を付けて直接消すようにした（2026-10-27）。`rclone about` の `Trashed` が

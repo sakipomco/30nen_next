@@ -8,6 +8,7 @@
 // 誰が呼ぶか:
 //   backup-db.sh / backup-uploads.sh が失敗した瞬間に呼ぶ（_notify.sh のしかけ）。
 //   手で動作確認したいときは:  npx tsx scripts/backup/notify-backup-failure.ts --test
+//   空き容量が減ったときは check-free-space.sh が --lowspace を付けて呼ぶ。
 //
 // 必要な設定（本番の .env.local）:
 //   RESEND_API_KEY    … メール送信サービスのキー（招待メールと同じものを使う）
@@ -33,6 +34,10 @@ try {
 }
 
 const isTest = process.argv.includes('--test');
+// 空き容量が少なくなったときの知らせ（check-free-space.sh から呼ばれる）
+const isLowSpace = process.argv.includes('--lowspace');
+const freeGb = process.env.BACKUP_ALERT_FREE_GB ?? '不明';
+const minGb = process.env.BACKUP_ALERT_MIN_GB ?? '不明';
 
 const to = process.env.BACKUP_ALERT_TO ?? '';
 if (!to) {
@@ -56,11 +61,37 @@ const line = process.env.BACKUP_ALERT_LINE ?? '不明';
 const logTail = process.env.BACKUP_ALERT_LOG ?? '(ログを取得できませんでした)';
 const now = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
 
-const subject = isTest
-  ? '【三十年商店】バックアップ通知のテストです'
-  : `【三十年商店】⚠ ${job}に失敗しました`;
+const subject = isLowSpace
+  ? `【三十年商店】Google Drive の空きが残り ${freeGb}GB です`
+  : isTest
+    ? '【三十年商店】バックアップ通知のテストです'
+    : `【三十年商店】⚠ ${job}に失敗しました`;
 
-const body = isTest
+const lowSpaceBody = `バックアップを預けている Google Drive の空きが少なくなってきました。
+まだ止まってはいません。あふれる前のお知らせです。
+
+  残り　　: ${freeGb} GB
+  知らせる目安: ${minGb} GB を下回ったら
+
+■ どうすればよいか
+  Google One の 100GB プラン（月250円）に上げれば解決します。
+  Google Drive の画面から数分で変更でき、作業はそれだけです。
+  （増えるペースは月 約0.4GB。この知らせが届いた時点で、
+    満杯まで2〜3か月ほどの余裕がある計算です。慌てなくて大丈夫です）
+
+■ 何もしないとどうなるか
+  いずれ空きがなくなり、その日からバックアップが取れなくなります。
+  そのときは別途「失敗しました」という知らせが届きます。
+
+■ いま使っている量を自分で確かめるには
+  サーバーにログインして: rclone about gdrive:
+
+（このメールは自動で送られています。返信は不要です。
+  同じ知らせは7日に1回までしか送りません）`;
+
+const body = isLowSpace
+  ? lowSpaceBody
+  : isTest
   ? `これはテストです。この文面が届いていれば、バックアップが失敗したときの知らせも届きます。
 
 送信日時: ${now}
@@ -100,7 +131,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`[notify] ${isTest ? 'テスト' : '失敗'}の知らせを ${to} に送りました。`);
+  console.log(`[notify] ${isLowSpace ? '空き容量' : isTest ? 'テスト' : '失敗'}の知らせを ${to} に送りました。`);
 }
 
 main().catch((err) => {
