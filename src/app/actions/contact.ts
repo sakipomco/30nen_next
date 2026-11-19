@@ -11,6 +11,7 @@
 
 import { getCategoryAuthorEmails } from '@/db/categories';
 import { sendContactEmail } from '@/lib/email';
+import { looksLikeSalesPitch } from '@/lib/sales-pitch';
 import {
   checkRateLimit,
   clientIp,
@@ -122,6 +123,10 @@ export async function sendContact(
     };
   }
 
+  // 営業メール（相互リンクの売り込み）の疑い。捨てずに件名へ目印をつけ、店主だけに届ける
+  // （書き手を営業で煩わせない）。送信者の画面はふつうに「送信しました」。
+  const salesPitch = looksLikeSalesPitch({ name, email, message });
+
   let recipient: string[];
   let recipientLabel: string;
   // 書き手宛のお便りは、店主にも控え(BCC)を届ける（店主が全お便りを把握できるように）。
@@ -153,8 +158,17 @@ export async function sendContact(
     }
   }
 
+  // 営業の疑いがあれば、書き手には送らず店主だけに届ける。
+  if (salesPitch && recipient[0] !== ownerEmail) {
+    recipient = [ownerEmail];
+    bcc = undefined;
+    recipientLabel = `${recipientLabel}（営業の疑いのため店主へ）`;
+  }
+
   // ── メール送信 ──
-  const subject = `【三十年商店】お便り（${recipientLabel}宛）: ${name} さんより`;
+  const subject =
+    (salesPitch ? '【営業の疑い】' : '') +
+    `【三十年商店】お便り（${recipientLabel}宛）: ${name} さんより`;
   const text =
     `三十年商店のお便りフォームにメッセージが届きました。\n\n` +
     `宛先: ${recipientLabel}\n` +
