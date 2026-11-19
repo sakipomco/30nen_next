@@ -162,12 +162,12 @@ export async function sendContact(
   if (salesPitch && recipient[0] !== ownerEmail) {
     recipient = [ownerEmail];
     bcc = undefined;
-    recipientLabel = `${recipientLabel}（営業の疑いのため店主へ）`;
+    recipientLabel = `${recipientLabel}（営業かもしれないため店主へ）`;
   }
 
   // ── メール送信 ──
   const subject =
-    (salesPitch ? '【営業の疑い】' : '') +
+    (salesPitch ? '【営業かも？】' : '') +
     `【三十年商店】お便り（${recipientLabel}宛）: ${name} さんより`;
   const text =
     `三十年商店のお便りフォームにメッセージが届きました。\n\n` +
